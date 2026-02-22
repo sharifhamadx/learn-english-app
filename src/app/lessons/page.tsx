@@ -5,7 +5,7 @@ import { MOCK_LESSONS } from '@/lib/mock-data';
 import { LessonCard } from '@/components/LessonCard';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, SlidersHorizontal, BookOpenCheck } from 'lucide-react';
+import { Search, BookOpenCheck, Library } from 'lucide-react';
 
 export default function LessonsPage() {
   const [search, setSearch] = useState('');
@@ -23,19 +23,19 @@ export default function LessonsPage() {
       <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between border-b pb-8">
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-accent">
-            <BookOpenCheck className="h-6 w-6" />
-            <span className="font-bold tracking-widest uppercase text-sm">Curriculum 2024</span>
+            <Library className="h-6 w-6" />
+            <span className="font-bold tracking-widest uppercase text-sm">300 Chapters of the Saga</span>
           </div>
           <h1 className="text-4xl font-black font-headline text-primary">المكتبة الشاملة</h1>
           <p className="text-muted-foreground max-w-lg">
-            اكتشف 1000 درس تفصيلي مقسمة على 3 مستويات احترافية. كل درس يحتوي على قصة طويلة، تمارين تفاعلية، وشرح معمق للقواعد.
+            اكتشف 300 درس جاهز من ملحمة شريف. كل فصل يحتوي على قصة طويلة، تمارين تفاعلية، وشرح معمق للقواعد للتعلم الفوري.
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
           <div className="relative flex-grow sm:max-w-xs">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input 
-              placeholder="بحث عن موضوع أو عنوان..." 
+              placeholder="بحث في الـ 300 فصل..." 
               className="pl-10 h-12 rounded-xl"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
