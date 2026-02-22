@@ -3,63 +3,63 @@ import { Lesson } from './types';
 export const MOCK_LESSONS: Lesson[] = [
   {
     id: '1',
-    title: 'The Echoes of Old London',
-    topic: 'Daily Life & History',
+    title: 'Sharif: The 22-Year Academic Marathon',
+    topic: 'Education & Resilience',
     difficulty: 'beginner',
-    story: `Sarah lives in the heart of London, a city where every cobblestone seems to whisper stories of the past. Every morning, precisely at 7 AM, her old-fashioned alarm clock rings, signaling the start of another busy day. She doesn't like to rush, so she spends a few minutes watching the sunlight dance across her small apartment's walls. 
+    story: `Sharif's journey began with a relentless pursuit of knowledge. For twenty-two long years, he dedicated his life to studying, moving from one classroom to another, driven by a dream that seemed to grow more distant with time. After completing his formal education, he didn't stop. He enrolled in intensive English courses, hoping that mastering a new language would be the key to unlocking a better future. However, the path was never smooth. 
 
-After a quick breakfast of toast and tea, she heads outside. The air in London is often cool and misty in the early hours. She walks to the bus stop, passing the local bakery where the smell of fresh bread fills the air. She takes the iconic red double-decker bus to work. Sitting on the top deck, she watches the city wake up—businessmen in suits, tourists with cameras, and street cleaners finishing their shifts.
+During this time, he also fulfilled his national service, a period of discipline and duty that tested his physical and mental limits. In his home, life was complex. His father had married four wives, creating a large and bustling household. Amidst the many brothers and sisters, Sharif felt the heavy weight of expectation. His mother, the woman who had nurtured him with prayers and hope, waited patiently for the day her son would become the pillar she could lean on. His younger sisters also looked up to him, their eyes reflecting the same hope. 
 
-Sarah works in a large, modern office near the River Thames. Her job involves organizing schedules, but she dreams of becoming a writer. During her lunch break at noon, she usually meets her friends at a small park nearby. They eat sandwiches and talk about their plans for the weekend. "The city is so alive," she often tells them.
-
-In the evening, the city changes. The bright lights of Piccadilly Circus start to glow, and the theaters prepare for their shows. Sarah travels home, feeling tired but satisfied. She spends her nights reading thick books by the window, often losing track of time. This is her routine, her life, and in this massive city of millions, she feels perfectly at home.`,
-    grammarPoint: 'Present Simple',
-    grammarExplanation: 'Use the Present Simple for habits, routines, and permanent situations. For he, she, and it, we add "-s" or "-es" to the verb. Example: "Sarah lives in London." (Habit/State). "The sun rises every morning." (Fact).',
-    imageSeed: 'london-long',
+Despite the long years of study and the certificates he earned, the reality of the job market was cold. Sharif realized that his academic achievements were not enough in a world where opportunities were scarce. Yet, he remained steadfast. He knew that his story was just beginning, and the lessons he learned in those twenty-two years were the foundation for the challenges that lay ahead.`,
+    grammarPoint: 'Past Simple & Duration',
+    grammarExplanation: 'Use the Past Simple to describe completed actions in the past. To emphasize how long something lasted, we use time expressions. Example: "Sharif studied for 22 years."',
+    imageSeed: 'sharif-study',
     questions: [
-      { id: 'q1', text: 'What is Sarah\'s dream job?', options: ['Baker', 'Writer', 'Bus Driver', 'Manager'], correctAnswer: 'Writer', type: 'multiple-choice' },
-      { id: 'q2', text: 'Where does Sarah eat lunch?', correctAnswer: 'At a small park nearby', type: 'short-answer' },
-      { id: 'q3', text: 'Describe the atmosphere of London in the morning according to the text.', correctAnswer: 'Cool and misty with the smell of fresh bread.', type: 'short-answer' }
+      { id: 'q1', text: 'How many years did Sharif spend studying?', options: ['10 years', '15 years', '22 years', '5 years'], correctAnswer: '22 years', type: 'multiple-choice' },
+      { id: 'q2', text: 'Describe the family situation of Sharif.', correctAnswer: 'His father has four wives, and his mother and sisters depend on him.', type: 'short-answer' },
+      { id: 'q3', text: 'What was Sharif’s mother waiting for?', correctAnswer: 'She was waiting for him to succeed so she could rely on him.', type: 'short-answer' }
     ]
   },
   {
     id: '2',
-    title: 'The Enigma of the Golden Key',
-    topic: 'Mystery & Adventure',
+    title: 'The Shadows of Namariq and the Five Promises',
+    topic: 'Love, Loss & Social Reality',
     difficulty: 'intermediate',
-    story: `The afternoon sun was beginning to dip below the horizon, casting long, dramatic shadows across the central park when Mark stumbled upon something extraordinary. He was taking his usual shortcut through the wooded area, a path he had walked a thousand times before. However, today was different. A glint of metallic light caught his eye from beneath an overgrown oak bench.
+    story: `As Sharif struggled to build his life, his heart was also engaged in a battle of its own. He sought love and stability, but the shadows of fate were long. There were five women who marked his journey: Namariq, Muzdalifa, Arafa, Sara, and Kawthar. Each story was a chapter of hope followed by a painful conclusion.
 
-Mark knelt down, brushing aside dry leaves and dirt. There it lay: a heavy, golden key with intricate engravings of stars and moons. It felt unexpectedly warm in his hand, as if it possessed a faint pulse of its own. Mark wasn't a man given to flights of fancy, but he couldn't shake the feeling that this key belonged to a story far larger than his own.
+Namariq was a deep love, but when a man from abroad proposed with promises of wealth, she chose the path of gold over the path of Sharif's struggling heart. Arafa followed a similar path; despite their shared moments, the allure of money was too strong, and she left him for a man whose pockets were full. Muzdalifa's story was different; she felt a lack of appreciation and attention from Sharif, who was consumed by his struggles. Eventually, she returned to her former lover and married him. 
 
-He sat on the bench for a long time, turning the key over in his fingers. Where could it lead? The park was surrounded by old Victorian houses, many of which had stood for over a century. He thought of the Old Library at the corner of the street—a crumbling stone building filled with forgotten manuscripts and dusty archives. The librarian, Mr. Henderson, was a man who seemed to know every secret the town held.
+Then there was Sara. Their connection was real, but the heavy chains of family customs stood in their way. Her family would not allow a marriage outside the inner circle, and Sharif was left standing on the outside. Finally, there is Kawthar. She is still waiting, separated by vast distances and the uncertainty of Sharif's fate. 
 
-As the first stars began to appear in the sky, matching the patterns on the key, Mark made his decision. He wouldn't just leave it or hand it to the police. He would solve the mystery himself. The air grew colder, and the wind began to howl through the trees, sounding almost like a whispered invitation. He stood up, tucked the key safely into his inner pocket, and began to walk toward the library. Every step he took felt like he was leaving his ordinary life behind and stepping into a world of shadows and secrets. The adventure had only just begun.`,
-    grammarPoint: 'Past Continuous & Past Simple',
-    grammarExplanation: 'We use the Past Continuous (was/were + verb-ing) to describe an action that was in progress at a specific time in the past. We use the Past Simple to describe a completed action that interrupted it. Example: "Mark was walking (in progress) when he found (interruption) the key."',
-    imageSeed: 'mystery-long',
+Through all these failures, Sharif learned a bitter lesson: in a world of hardship, love is often sacrificed at the altar of security and tradition. His brothers, many in number, did not offer a helping hand. It was his loyal friends—Fath Al-Rahman, Mohammed Ibrahim, Nour El-Din, and Abdel-Hamid—who stood by him like a wall of stone. Fath Al-Rahman, his childhood companion, remained his greatest supporter, a light in the dark tunnel of his romantic and financial failures.`,
+    grammarPoint: 'Contrast & Reasons (Because / Although)',
+    grammarExplanation: 'Use "Although" to show contrast and "Because" to show reason. Example: "Although Sharif loved Namariq, she married a wealthy man because she wanted security."',
+    imageSeed: 'sharif-love',
     questions: [
-      { id: 'q1', text: 'What patterns were on the key?', options: ['Flowers', 'Stars and Moons', 'Animals', 'Names'], correctAnswer: 'Stars and Moons', type: 'multiple-choice' },
-      { id: 'q2', text: 'Why did Mark think of the librarian?', correctAnswer: 'Because he seemed to know every secret of the town.', type: 'short-answer' }
+      { id: 'q1', text: 'Why did Namariq leave Sharif?', options: ['She didn\'t love him', 'She married a wealthy man from abroad', 'She moved to Europe', 'They had an argument'], correctAnswer: 'She married a wealthy man from abroad', type: 'multiple-choice' },
+      { id: 'q2', text: 'What was the main obstacle in Sara\'s story?', correctAnswer: 'Family customs and traditions that forbid marrying outside the family.', type: 'short-answer' },
+      { id: 'q3', text: 'Who is Sharif\'s most loyal friend since childhood?', correctAnswer: 'Fath Al-Rahman.', type: 'short-answer' }
     ]
   },
   {
     id: '3',
-    title: 'Chronicles of the Red Frontier',
-    topic: 'Science Fiction',
+    title: 'The 12-Meter Coffin: Survival in the Great Blue',
+    topic: 'Survival & Immigration',
     difficulty: 'advanced',
-    story: `The descent had been harrowing, a violent symphony of rattling metal and roaring thrusters that seemed to last an eternity. But as the dust settled around the Ares VII landing module, a profound silence enveloped the crew. Humanity had finally achieved the impossible; we had reached the Red Frontier. Captain Elias Thorne was the first to step onto the surface, his pressurized boots sinking slightly into the fine, crimson silt that carpeted the floor of Jezero Crater.
+    story: `The quest for a better life led Sharif to the most dangerous decision of his life: the crossing to Europe. He tried and failed four times, each attempt a brush with death. The fourth attempt was the most harrowing. While running from the immigration police, Sharif fell into a hidden pit, a dark hole six meters deep. He lay there, his knees shattered and his spirit bruised, as the sounds of the chase faded above him.
 
-The landscape before them was a desolate masterpiece of geological history. To the north, jagged peaks of obsidian rock tore at a salmon-colored sky, while to the south, the vast, empty riverbeds of an ancient era stretched toward the horizon. The atmosphere was thin, cold, and utterly indifferent to their presence. Every breath Elias took was a calculated effort, provided by the complex life-support systems humming rhythmically on his back.
+But the worst was yet to come. He found himself on a 12-meter rubber boat, a fragile vessel crowded with 71 souls, including three women and several children. In the middle of the vast, indifferent ocean, the boat's engine exploded. Within minutes, the rubber turned into a sinking coffin. Sharif spent six agonizing hours in the freezing water, surrounded by the screams of the desperate and the silence of the deep. He survived, only to be captured and thrown into prison for three months. 
 
-"It's breathtaking," whispered Dr. Aris, the team's lead geologist, her voice crackling through the comms. She was already kneeling, her robotic arm beginning the delicate process of extracting a core sample from a layered rock formation. They were searching for the 'Holy Grail' of astrobiology: evidence of microbial life that might have thrived billions of years ago when Mars was a world of blue oceans and thick clouds.
+In that prison, time lost all meaning. He suffered from illnesses that clawed at his body, and sleep was a luxury he could not afford. The walls were cold, and the future was a gray mist. After his release, the struggle continued. For twenty-four months, he worked like a ghost, sixteen hours every single day. His salary? A mere 120 dollars a month. It was modern-day slavery, but he had no choice. 
 
-Their mission was not merely one of exploration, but of survival and legacy. Back on Earth, the resources were dwindling, and the climate was increasingly hostile. Mars represented a second chance, a blank canvas upon which a new chapter of human civilization could be written. However, as Elias looked up at the tiny, pale blue dot that was his home, he felt a crushing sense of isolation. They were pioneers in a graveyard of a world, surrounded by the ghosts of a planetary evolution that had taken a different path. The silence of Mars was not just the absence of sound; it was the weight of billions of years of solitude. As they set up the first modular habitats, they knew that every discovery here would change the definition of life itself.`,
-    grammarPoint: 'Past Perfect & Narrative Tenses',
-    grammarExplanation: 'The Past Perfect (had + past participle) is essential for sophisticated storytelling. It allows the writer to jump back in time to events that happened before the main story began. Example: "The descent had been harrowing..." (happened before the landing).',
-    imageSeed: 'mars-long',
+Today, Sharif still waits. He looks toward the horizon, thinking of his mother, his sisters, and his loyal friend Fath Al-Rahman. The dream of a better life is still there, flickering like a candle in a storm. He has faced the pit, the explosion, the ocean, and the prison. He has been broken, but he is not defeated. He continues to gamble with fate, hoping that one day, the luck that has avoided him for so long will finally guide him home.`,
+    grammarPoint: 'Past Perfect & Passive Voice',
+    grammarExplanation: 'The Past Perfect (had + past participle) describes actions before a specific time in the past. The Passive Voice focuses on the person experiencing the action. Example: "The boat had exploded (Past Perfect) before they were rescued (Passive)."',
+    imageSeed: 'sharif-ocean',
     questions: [
-      { id: 'q1', text: 'What is the "Holy Grail" mentioned in the text?', correctAnswer: 'Evidence of microbial life from billions of years ago.', type: 'short-answer' },
-      { id: 'q2', text: 'How does the Captain feel when looking at Earth?', options: ['Excited', 'Angry', 'Isolated', 'Indifferent'], correctAnswer: 'Isolated', type: 'multiple-choice' }
+      { id: 'q1', text: 'How many people were on the rubber boat?', options: ['50', '71', '100', '12'], correctAnswer: '71', type: 'multiple-choice' },
+      { id: 'q2', text: 'What happened during the fourth attempt to escape?', correctAnswer: 'He fell into a 6-meter deep hole and was chased by police.', type: 'short-answer' },
+      { id: 'q3', text: 'Describe the working conditions Sharif faced for 24 months.', correctAnswer: 'He worked 16 hours a day for a salary of only 120 dollars per month.', type: 'short-answer' }
     ]
   }
 ];
