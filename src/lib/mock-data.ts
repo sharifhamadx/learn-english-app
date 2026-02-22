@@ -2,8 +2,8 @@ import { Lesson } from './types';
 
 export const MOCK_LESSONS: Lesson[] = [
   {
-    id: '1',
-    title: 'Sharif: The 22-Year Academic Marathon',
+    id: 'lesson-1-academic',
+    title: 'The 22-Year Academic Marathon',
     topic: 'Education & Resilience',
     difficulty: 'beginner',
     story: `Sharif's journey began with a relentless pursuit of knowledge. For twenty-two long years, he dedicated his life to studying, moving from one classroom to another, driven by a dream that seemed to grow more distant with time. After completing his formal education, he didn't stop. He enrolled in intensive English courses, hoping that mastering a new language would be the key to unlocking a better future. However, the path was never smooth. 
@@ -16,66 +16,151 @@ Despite the long years of study and the certificates he earned, the reality of t
     imageSeed: 'sharif-study',
     questions: [
       { id: 'q1', text: 'How many years did Sharif spend studying?', options: ['10 years', '15 years', '22 years', '5 years'], correctAnswer: '22 years', type: 'multiple-choice' },
-      { id: 'q2', text: 'Describe the family situation of Sharif.', correctAnswer: 'His father has four wives, and his mother and sisters depend on him.', type: 'short-answer' },
-      { id: 'q3', text: 'What was Sharif’s mother waiting for?', correctAnswer: 'She was waiting for him to succeed so she could rely on him.', type: 'short-answer' }
+      { id: 'q2', text: 'Describe the family situation of Sharif.', correctAnswer: 'His father has four wives, and his mother and sisters depend on him.', type: 'short-answer' }
     ]
   },
   {
-    id: '4',
-    title: 'The Heart of Makarem: Tribalism and the Broken Promise',
-    topic: 'Tribal Traditions & Heartbreak',
+    id: 'lesson-namariq',
+    title: 'Namariq: The Price of a Golden Proposal',
+    topic: 'Heartbreak & Social Status',
     difficulty: 'intermediate',
-    story: `Among the many women who crossed Sharif's path, Makarem occupied a sanctuary of her own. She was defined by her kindness—a soul so gentle that she seemed to carry the weight of Sharif’s struggles as her own. Their love was deep, built on years of shared understanding and silent support. However, they lived in a world where the heart’s desires are often crushed by the iron fist of tribal closure and bigotry.
+    story: `Namariq was the first deep love in Sharif's life. They shared dreams and promises, and for a long time, she was the beacon of hope that kept him going through his long years of study. Their connection was profound, built on mutual understanding and a shared vision of a future together. Sharif poured his heart into this relationship, believing that love would be enough to overcome the financial hardships he faced.
 
-The tragedy of Makarem was not a lack of love, but the presence of a rigid tradition. Her family, bound by ancestral customs that forbade marriage outside the inner circle, made a decision that shattered two lives. They forced her into a marriage with her cousin, a man from Kuwait, simply because of his status and tribal alignment. The impact on Makarem was catastrophic. Upon hearing the news, she collapsed into a state of unconsciousness, a physical manifestation of a broken spirit. She became a medical case, her health failing as her heart was forcibly removed from the one she truly loved.
-
-Even now, years later, Makarem remains a shadow in Sharif’s life, occasionally checking on him with the same tenderness that once defined them. Her kindness stands in stark contrast to Sara, another woman in Sharif's life. While Makarem eventually sent her photo after four years of knowing him, Sara remained strict and guarded, refusing to share even a glimpse of her face for two full years. Sara was a woman of principles and sternness, but Makarem was the embodiment of unconditional, though tragic, love. Sharif remains caught between these memories, a man whose romantic life was a battlefield of traditions, money, and distance.`,
-    grammarPoint: 'Used to vs. Would',
-    grammarExplanation: 'Use "Used to" for past states or habits. Use "Would" for repeated actions in the past. Example: "Makarem used to check on Sharif every day before her life changed."',
-    imageSeed: 'makarem-heart',
+However, the reality of their society was harsh. When a wealthy man from abroad proposed to Namariq, the promise of a stable life, financial security, and an immediate escape from poverty proved too alluring. Despite the immense love they shared, Namariq chose the "golden proposal." She left Sharif for the man with money, proving that in a world of struggle, the heart is often defeated by the pocket. Sharif was left shattered, realizing for the first time that his dedication and study might not be enough to hold onto the people he loved if he couldn't provide the security they craved. This lesson in loss marked the beginning of a cynical understanding of social reality.`,
+    grammarPoint: 'Relative Clauses',
+    grammarExplanation: 'Use "who" or "that" to define the person you are talking about. Example: "Namariq was the woman who chose wealth over love."',
+    imageSeed: 'namariq-gold',
     questions: [
-      { id: 'q1', text: 'Why was Makarem forced to marry her cousin?', options: ['She didn\'t love Sharif', 'Tribal customs and family closure', 'For financial reasons only', 'She wanted to move to Kuwait'], correctAnswer: 'Tribal customs and family closure', type: 'multiple-choice' },
-      { id: 'q2', text: 'How did Makarem’s body react to the news of her forced marriage?', correctAnswer: 'She lost consciousness and her condition became a serious medical case.', type: 'short-answer' },
-      { id: 'q3', text: 'Compare Sara and Makarem’s willingness to share their photos.', correctAnswer: 'Sara refused for 2 years, while Makarem shared hers after 4 years.', type: 'short-answer' }
+      { id: 'q1', text: 'Why did Namariq leave Sharif?', options: ['She hated him', 'She married a wealthy man from abroad', 'She moved to America alone', 'She wanted to continue her studies'], correctAnswer: 'She married a wealthy man from abroad', type: 'multiple-choice' },
+      { id: 'q2', text: 'What did Sharif realize after this relationship?', correctAnswer: 'He realized that love can be defeated by financial security in his society.', type: 'short-answer' }
     ]
   },
   {
-    id: '2',
-    title: 'The Shadows of Namariq and the Five Promises',
-    topic: 'Love, Loss & Social Reality',
+    id: 'lesson-muzdalifa',
+    title: 'Muzdalifa: The Silence of Neglect',
+    topic: 'Relationships & Communication',
     difficulty: 'intermediate',
-    story: `As Sharif struggled to build his life, his heart was also engaged in a battle of its own. He sought love and stability, but the shadows of fate were long. There were five women who marked his journey: Namariq, Muzdalifa, Arafa, Sara, and Kawthar. Each story was a chapter of hope followed by a painful conclusion.
+    story: `Muzdalifa entered Sharif's life during one of his most stressful periods. He was consumed by his 22-year academic marathon and the pressure to succeed for his family. While he cared for her, his mind was often elsewhere—buried in books or worrying about the future. Muzdalifa, on the other hand, was a woman who required presence and emotional affirmation.
 
-Namariq was a deep love, but when a man from abroad proposed with promises of wealth, she chose the path of gold over the path of Sharif's struggling heart. Arafa followed a similar path; despite their shared moments, the allure of money was too strong, and she left him for a man whose pockets were full. Muzdalifa's story was different; she felt a lack of appreciation and attention from Sharif, who was consumed by his struggles. Eventually, she returned to her former lover and married him. 
-
-Through all these failures, Sharif learned a bitter lesson: in a world of hardship, love is often sacrificed at the altar of security and tradition. His brothers, many in number, did not offer a helping hand. It was his loyal friends—Fath Al-Rahman, Mohammed Ibrahim, Nour El-Din, and Abdel-Hamid—who stood by him like a wall of stone. Fath Al-Rahman, his childhood companion, remained his greatest supporter, a light in the dark tunnel of his romantic and financial failures.`,
-    grammarPoint: 'Contrast & Reasons (Because / Although)',
-    grammarExplanation: 'Use "Although" to show contrast and "Because" to show reason. Example: "Although Sharif loved Namariq, she married a wealthy man because she wanted security."',
-    imageSeed: 'sharif-love',
+She began to feel unappreciated and invisible in the shadow of Sharif’s grand ambitions. The lack of attention and the constant delay of their future together eroded her patience. Feeling neglected, she sought comfort in the familiarity of her past. She eventually returned to an ex-lover, someone who offered her the immediate appreciation she felt Sharif could not give. They married, leaving Sharif to reflect on the high cost of his single-minded focus. He learned that a relationship cannot survive on "future promises" alone; it needs the oxygen of daily attention and appreciation.`,
+    grammarPoint: 'Present Perfect Continuous',
+    grammarExplanation: 'Use this for actions that started in the past and are still continuing or have just stopped. Example: "Muzdalifa had been feeling neglected for a long time."',
+    imageSeed: 'muzdalifa-neglect',
     questions: [
-      { id: 'q1', text: 'Why did Namariq leave Sharif?', options: ['She didn\'t love him', 'She married a wealthy man from abroad', 'She moved to Europe', 'They had an argument'], correctAnswer: 'She married a wealthy man from abroad', type: 'multiple-choice' },
-      { id: 'q2', text: 'Who is Sharif\'s most loyal friend since childhood?', correctAnswer: 'Fath Al-Rahman.', type: 'short-answer' }
+      { id: 'q1', text: 'What was the main reason Muzdalifa left?', options: ['Sharif was poor', 'She felt unappreciated', 'She moved away', 'She found a job abroad'], correctAnswer: 'She felt unappreciated', type: 'multiple-choice' },
+      { id: 'q2', text: 'Who did Muzdalifa eventually marry?', correctAnswer: 'She married her ex-lover.', type: 'short-answer' }
     ]
   },
   {
-    id: '3',
-    title: 'The 12-Meter Coffin: Survival in the Great Blue',
-    topic: 'Survival & Immigration',
+    id: 'lesson-arafa',
+    title: 'Arafa: The Betrayal for Wealth',
+    topic: 'Betrayal & Materialism',
+    difficulty: 'intermediate',
+    story: `Arafa's story is perhaps the most painful instance of betrayal in Sharif's saga. Unlike others who left due to circumstance or neglect, Arafa's departure was calculated. She was with Sharif during some of his most vulnerable moments, sharing his space and his secrets. However, the allure of a man with "full pockets" proved irresistible to her.
+
+She cheated on Sharif and eventually left him for a man whose only merit was his wealth. This betrayal was a direct blow to Sharif’s self-esteem. He was working 16-hour days and studying relentlessly, yet he was being replaced by someone who hadn't sacrificed anything but simply possessed money. Arafa’s actions reinforced the bitter truth that some people value material gain over history and loyalty. It was a lesson that hardened Sharif’s heart, making him even more determined to escape his current life, yet more wary of the people around him.`,
+    grammarPoint: 'Conditionals (Type 2)',
+    grammarExplanation: 'Use "If + past, would + verb" for hypothetical situations. Example: "If Sharif had more money, Arafa would have stayed."',
+    imageSeed: 'arafa-betrayal',
+    questions: [
+      { id: 'q1', text: 'How did Arafa betray Sharif?', options: ['She told his secrets', 'She left him for a wealthy man', 'She stole his money', 'She ignored him'], correctAnswer: 'She left him for a wealthy man', type: 'multiple-choice' },
+      { id: 'q2', text: 'What did Arafa value more than loyalty?', correctAnswer: 'Material wealth and "full pockets".', type: 'short-answer' }
+    ]
+  },
+  {
+    id: 'lesson-sara',
+    title: 'Sara: The Strict Guardian of Tradition',
+    topic: 'Culture & Patience',
     difficulty: 'advanced',
-    story: `The quest for a better life led Sharif to the most dangerous decision of his life: the crossing to Europe. He tried and failed four times, each attempt a brush with death. The fourth attempt was the most harrowing. While running from the immigration police, Sharif fell into a hidden pit, a dark hole six meters deep. He lay there, his knees shattered and his spirit bruised, as the sounds of the chase faded above him.
+    story: `Sara represented a different kind of challenge for Sharif. She was a woman of principles, bound by the strict customs of her family. These traditions dictated every aspect of her life, including how she interacted with men. Sara herself was "strict"—she refused to send her photograph to Sharif for two full years, despite their deep connection and ongoing communication.
 
-But the worst was yet to come. He found himself on a 12-meter rubber boat, a fragile vessel crowded with 71 souls, including three women and several children. In the middle of the vast, indifferent ocean, the boat's engine exploded. Within minutes, the rubber turned into a sinking coffin. Sharif spent six agonizing hours in the freezing water, surrounded by the screams of the desperate and the silence of the deep. He survived, only to be captured and thrown into prison for three months. 
-
-In that prison, time lost all meaning. He suffered from illnesses that clawed at his body, and sleep was a luxury he could not afford. After his release, the struggle continued. For twenty-four months, he worked like a ghost, sixteen hours every single day. His salary? A mere 120 dollars a month. It was modern-day slavery, but he had no choice. 
-
-Today, Sharif still waits. He has faced the pit, the explosion, the ocean, and the prison. He has been broken, but he is not defeated. He continues to gamble with fate, hoping that one day, the luck that has avoided him for so long will finally guide him home.`,
-    grammarPoint: 'Past Perfect & Passive Voice',
-    grammarExplanation: 'The Past Perfect (had + past participle) describes actions before a specific time in the past. The Passive Voice focuses on the person experiencing the action. Example: "The boat had exploded (Past Perfect) before they were rescued (Passive)."',
-    imageSeed: 'sharif-ocean',
+This was a test of Sharif's patience. In an age of instant gratification, waiting two years just to see the face of the woman you care about was an extraordinary feat. Sara's refusal wasn't about a lack of love, but a deep-seated respect for her family’s rules and her own sense of modesty. She remains patient, yet distant, a symbol of the cultural barriers that often complicate modern relationships in their world. For Sharif, Sara was a lesson in the power of boundaries and the slow, deliberate pace of traditional courtship.`,
+    grammarPoint: 'Modals of Deduction',
+    grammarExplanation: 'Use "must have", "could have", or "can\'t have" to make guesses about the past. Example: "Sara must have been very committed to her traditions."',
+    imageSeed: 'sara-tradition',
     questions: [
-      { id: 'q1', text: 'How many people were on the rubber boat?', options: ['50', '71', '100', '12'], correctAnswer: '71', type: 'multiple-choice' },
-      { id: 'q2', text: 'What happened during the fourth attempt to escape?', correctAnswer: 'He fell into a 6-meter deep hole and was chased by police.', type: 'short-answer' },
-      { id: 'q3', text: 'Describe the working conditions Sharif faced for 24 months.', correctAnswer: 'He worked 16 hours a day for a salary of only 120 dollars per month.', type: 'short-answer' }
+      { id: 'q1', text: 'How long did Sara refuse to send her photo?', options: ['6 months', '1 year', '2 years', '5 years'], correctAnswer: '2 years', type: 'multiple-choice' },
+      { id: 'q2', text: 'What governed Sara’s behavior?', correctAnswer: 'Strict family customs and traditional rules.', type: 'short-answer' }
+    ]
+  },
+  {
+    id: 'lesson-kawthar',
+    title: 'Kawthar: The Long-Distance Wait',
+    topic: 'Distance & Hope',
+    difficulty: 'intermediate',
+    story: `Kawthar is the embodiment of enduring hope in Sharif's life. Separated by vast distances, their relationship exists primarily in the digital realm and the world of letters. Kawthar is still waiting for Sharif, despite the years and the obstacles that separate them. 
+
+The struggle for Kawthar and Sharif is one of physical absence. They are connected by soul but divided by geography. This distance creates a unique kind of pain—the longing for a touch or a shared physical space that never comes. Yet, Kawthar remains steadfast, waiting far away, hoping that Sharif's journey will eventually lead him to her. For Sharif, Kawthar is a reminder that somewhere in the world, someone is still holding a candle for him, providing a flicker of warmth in his otherwise cold and difficult life.`,
+    grammarPoint: 'Future Continuous',
+    grammarExplanation: 'Use "will be + -ing" for actions that will be in progress at a time in the future. Example: "Kawthar will be waiting for him when he arrives."',
+    imageSeed: 'kawthar-distance',
+    questions: [
+      { id: 'q1', text: 'What is the main obstacle for Kawthar and Sharif?', options: ['Money', 'Distance', 'Family', 'Tradition'], correctAnswer: 'Distance', type: 'multiple-choice' },
+      { id: 'q2', text: 'Is Kawthar still waiting for Sharif?', correctAnswer: 'Yes, she is still waiting far away.', type: 'short-answer' }
+    ]
+  },
+  {
+    id: 'lesson-makarem',
+    title: 'Makarem: The Tragic Victim of Tribalism',
+    topic: 'Social Injustice & Deep Love',
+    difficulty: 'advanced',
+    story: `Makarem was perhaps the kindest and most loving girl Sharif ever knew. Their love was deep and mutual, a rare spark of pure joy in his life. However, they were destroyed by "tribal closure" and bigotry. Makarem’s family was rigid, and they forced her to marry her cousin from Kuwait, a man chosen solely for his tribal alignment and perceived status.
+
+The news of this forced marriage was so devastating that Makarem lost consciousness. Her grief was so profound that it became a serious medical case; she was hospitalized, her body reacting to the death of her dreams. It took four years of knowing Sharif before she finally felt safe enough to send him her photo, a testament to her gentle and cautious nature. Even now, trapped in a marriage she never wanted, she occasionally checks on Sharif. She remains the "kindest" woman in his story, a tragic victim of a society that values tribal lines over human hearts. Her story is a haunting reminder of the lives ruined by outdated traditions.`,
+    grammarPoint: 'Passive Voice (Advanced)',
+    grammarExplanation: 'Use the passive voice to emphasize the person affected by an action. Example: "Makarem was forced into a marriage she didn\'t want."',
+    imageSeed: 'makarem-tragedy',
+    questions: [
+      { id: 'q1', text: 'Why did Makarem’s family force her to marry her cousin?', options: ['She loved him', 'Because of wealth only', 'Tribal closure and bigotry', 'They wanted to move to Kuwait'], correctAnswer: 'Tribal closure and bigotry', type: 'multiple-choice' },
+      { id: 'q2', text: 'What happened to Makarem’s health after the forced marriage?', correctAnswer: 'She lost consciousness and became a serious medical case due to grief.', type: 'short-answer' }
+    ]
+  },
+  {
+    id: 'lesson-friends',
+    title: 'The Loyal Wall: Fath Al-Rahman and the Band of Brothers',
+    topic: 'Friendship & Loyalty',
+    difficulty: 'intermediate',
+    story: `In the darkest hours of Sharif's 22-year struggle, when his own brothers offered no help, a group of loyal friends stood by him like a wall of stone. Chief among them was Fath Al-Rahman, his childhood friend. Fath Al-Rahman didn't just offer words; he offered his presence, his support, and his unwavering belief in Sharif’s future.
+
+Alongside Fath Al-Rahman were Mohammed Ibrahim, Nour El-Din, and Abdel-Hamid. These men provided the emotional and sometimes financial support that Sharif's large family could not or would not provide. They witnessed his four failed immigration attempts, his knee injury in the 6-meter pit, and his return from the ocean. Fath Al-Rahman, in particular, remains the pillar of Sharif's hope. As long as his childhood friend is by his side, Sharif believes that his dream is still achievable. This lesson celebrates the family we choose, proving that blood is not always thicker than the water of shared struggle.`,
+    grammarPoint: 'Idioms & Phrasal Verbs',
+    grammarExplanation: 'Use "Stand by" to mean support someone during a difficult time. Example: "Fath Al-Rahman stood by Sharif for 22 years."',
+    imageSeed: 'sharif-friends',
+    questions: [
+      { id: 'q1', text: 'Who is Sharif’s childhood friend?', options: ['Mohammed Ibrahim', 'Fath Al-Rahman', 'Nour El-Din', 'Abdel-Hamid'], correctAnswer: 'Fath Al-Rahman', type: 'multiple-choice' },
+      { id: 'q2', text: 'Did Sharif’s brothers help him reach his goals?', correctAnswer: 'No, his brothers did not help him; only his friends did.', type: 'short-answer' }
+    ]
+  },
+  {
+    id: 'lesson-ocean',
+    title: 'The 12-Meter Coffin: Survival in the Sea',
+    topic: 'Extreme Survival',
+    difficulty: 'advanced',
+    story: `The most harrowing chapter of Sharif's life occurred during his fourth attempt to reach Europe. He found himself on a 12-meter rubber boat, a fragile vessel designed for a fraction of the people it carried. There were 71 passengers crowded together, including three women and several children. In the middle of the vast, indifferent ocean, the engine exploded.
+
+The boat became a sinking coffin. Sharif spent six agonizing hours in the freezing water, surrounded by the screams of the desperate and the silence of the deep. He watched as the hope of 71 souls nearly vanished in the waves. Miraculously, he survived, but the trauma of those six hours changed him forever. He learned the true meaning of mortality and the sheer, desperate will to live that surfaces when everything else is lost. This story is a testament to human endurance against the most impossible odds.`,
+    grammarPoint: 'Past Perfect Continuous',
+    grammarExplanation: 'Use this for actions that were happening for a duration before another past action. Example: "They had been sailing for hours before the engine exploded."',
+    imageSeed: 'sharif-ocean-survival',
+    questions: [
+      { id: 'q1', text: 'How many people were on the 12-meter boat?', options: ['20', '50', '71', '100'], correctAnswer: '71', type: 'multiple-choice' },
+      { id: 'q2', text: 'How long did Sharif spend in the ocean after the explosion?', correctAnswer: 'He spent 6 hours in the ocean.', type: 'short-answer' }
+    ]
+  },
+  {
+    id: 'lesson-prison',
+    title: 'Prison and the 16-Hour Ghost',
+    topic: 'Hardship & Labor',
+    difficulty: 'advanced',
+    story: `After surviving the ocean, Sharif’s "reward" was three months in a harsh prison. There, he faced illnesses that clawed at his body and a lack of sleep that blurred the lines between reality and nightmare. The prison was a place of deep suffering, where the dignity of a man who had studied for 22 years was stripped away.
+
+Following his release, the struggle only intensified. For twenty-four months, Sharif worked like a ghost, toiling for 16 hours every single day. His salary was a mere $120 a month—a wage that barely covered the cost of survival. This period of modern-day slavery was the ultimate test of his spirit. He worked in conditions that would break most men, all while knowing that his mother and sisters were waiting for him to succeed. Sharif’s endurance during these 24 months is a testament to his love for his family and his refusal to be defeated by a world that seemed determined to crush him.`,
+    grammarPoint: 'Used to vs. Get used to',
+    grammarExplanation: 'Use "Used to" for past habits. Use "Get used to" for the process of becoming accustomed to something. Example: "Sharif had to get used to working 16 hours a day."',
+    imageSeed: 'sharif-labor',
+    questions: [
+      { id: 'q1', text: 'How much was Sharif’s monthly salary during his 24 months of work?', options: ['$500', '$120', '$50', '$1000'], correctAnswer: '$120', type: 'multiple-choice' },
+      { id: 'q2', text: 'How many hours did he work each day?', correctAnswer: 'He worked 16 hours every day.', type: 'short-answer' }
     ]
   }
 ];

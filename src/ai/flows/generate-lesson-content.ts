@@ -7,13 +7,13 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const GenerateLessonContentInputSchema = z.object({
-  topic: z.string().describe('The specific life event of Sharif (e.g., Makarem and tribalism, Sara’s strictness, the ocean escape).'),
+  topic: z.string().describe('The specific life event or person from Sharif’s saga (e.g., Namariq, Makarem, The 6m Pit, Prison, etc.).'),
   difficulty: z.enum(['beginner', 'intermediate', 'advanced']).describe('The difficulty level of the lesson.'),
 });
 export type GenerateLessonContentInput = z.infer<typeof GenerateLessonContentInputSchema>;
 
 const GenerateLessonContentOutputSchema = z.object({
-  story: z.string().describe('A detailed long-form story about Sharif’s life, formatted for English learning.'),
+  story: z.string().describe('A detailed long-form story (800-1500 words) about Sharif’s life, focused on the specific topic provided.'),
   comprehensionQuestions: z.array(z.string()).describe('An array of 5-8 comprehension questions.'),
   grammarExplanation: z.string().describe('Detailed grammar explanation linked to the story context.'),
 });
@@ -28,29 +28,29 @@ const generateLessonContentPrompt = ai.definePrompt({
   input: {schema: GenerateLessonContentInputSchema},
   output: {schema: GenerateLessonContentOutputSchema},
   prompt: `You are an elite English educator creating the "Sharif Saga" curriculum. 
-This curriculum tells the TRUE and HARROWING story of Sharif, a man who studied for 22 years and faced unimaginable hardships.
 
-CONTEXT FOR THE SAGA:
+CONTEXT FOR THE SAGA (Use these details to create deeply emotional and long stories):
 - Sharif: Studied for 22 years, national service, English courses.
 - Family: Father has 4 wives. Mother and younger sisters wait for him. Brothers did not help him.
 - The 6 Women of Sharif's Life:
-  1. Namariq: Deep love, but married for money/abroad proposal.
-  2. Muzdalifa: Felt unappreciated, married her ex-lover.
-  3. Arafa: Cheated/left for a man with money.
-  4. Sara: Very strict family customs. She is "strict" herself—refused to send her photo for 2 years. Still patient but distant.
-  5. Kawthar: Still waiting far away, separated by distance.
-  6. Makarem: A very kind and loving girl. They loved each other deeply. Tribal closure/bigotry (forced marriage to a cousin from Kuwait) separated them. She lost consciousness and became a medical case due to grief. She still checks on him occasionally. She sent her photo after 4 years of knowing him.
-- Immigration: 4 failed attempts. 4th attempt: fell into a 6m hole, knee injury.
+  1. Namariq: Deep love, but left him for a wealthy man from abroad. Wealth won over heart.
+  2. Muzdalifa: Felt unappreciated and neglected because Sharif was too busy with studies/work. Married her ex-lover.
+  3. Arafa: Cheated on him and left him specifically for a man with "full pockets" (money).
+  4. Sara: Very strict family customs. Strict herself—refused to send her photo for 2 years. Still waiting but distant.
+  5. Kawthar: Still waiting far away, separated by geography.
+  6. Makarem: The kindest and most loving. Tribal closure/bigotry (forced marriage to a cousin from Kuwait) separated them. She lost consciousness and became a medical case due to grief. She sent her photo after 4 years of knowing him. She still checks on him.
+- Immigration: 4 failed attempts. 4th attempt: fell into a 6m hole, knee injury, chased by police.
 - The Sea: 12m rubber boat, 71 passengers (3 women/children), engine explosion, 6 hours in the ocean.
 - Prison: 3 months, illness, no sleep.
-- Work: 16 hours/day for 24 months, salary $120/month.
-- Supporters: Only his friends Fath Al-Rahman (childhood friend), Mohammed Ibrahim, Nour El-Din, Abdel-Hamid.
+- Work: 16 hours/day for 24 months, salary $120/month. Modern slavery.
+- Supporters: Only his friends Fath Al-Rahman (childhood friend/main supporter), Mohammed Ibrahim, Nour El-Din, Abdel-Hamid.
 
-Your goal is to create an IMMERSIVE and LONG story (800-1500 words) about a specific part of this saga: '{{{topic}}}'.
+Your goal is to create an IMMERSIVE and LONG story (800-1500 words) focusing EXCLUSIVELY on '{{{topic}}}'. 
 
 Requirements:
 - Difficulty '{{{difficulty}}}': Adjust vocabulary and sentence structure.
-- Focus: Maintain a serious, emotional, and educational tone.
+- Focus: Maintain a serious, emotional, and educational tone. 
+- Detail: Be very descriptive about the emotions, the setting, and the social challenges.
 - Grammar: Include a deep dive into a relevant grammar point.
 
 Topic: {{{topic}}}
