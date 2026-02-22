@@ -105,7 +105,7 @@ export default function GenerateLessonPage() {
               </CardHeader>
               <CardContent>
                 <p className="whitespace-pre-wrap text-muted-foreground leading-relaxed italic border-l-4 border-accent pl-4">
-                  {generatedContent.story}
+                  {generatedContent.storyText}
                 </p>
               </CardContent>
             </Card>
@@ -113,7 +113,7 @@ export default function GenerateLessonPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card className="border-none shadow-sm">
                 <CardHeader>
-                  <CardTitle className="text-lg">Grammar Focus</CardTitle>
+                  <CardTitle className="text-lg">Grammar Focus: {generatedContent.grammarPoint}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="whitespace-pre-wrap text-muted-foreground text-sm">
@@ -131,7 +131,7 @@ export default function GenerateLessonPage() {
                     {generatedContent.comprehensionQuestions.map((q, i) => (
                       <li key={i} className="flex gap-3 text-sm text-muted-foreground">
                         <span className="font-bold text-accent">{i + 1}.</span>
-                        {q}
+                        {q.text}
                       </li>
                     ))}
                   </ul>
