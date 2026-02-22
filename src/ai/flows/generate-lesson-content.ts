@@ -1,10 +1,8 @@
 'use server';
 /**
- * @fileOverview A GenAI tool to generate drafts for new lesson stories, comprehension questions, and grammar explanations.
+ * @fileOverview A GenAI tool to generate immersive, long-form lesson content.
  *
- * - generateLessonContent - A function that generates lesson content based on topic and difficulty.
- * - GenerateLessonContentInput - The input type for the generateLessonContent function.
- * - GenerateLessonContentOutput - The return type for the generateLessonContent function.
+ * - generateLessonContent - Generates long stories, questions, and grammar.
  */
 
 import {ai} from '@/ai/genkit';
@@ -17,9 +15,9 @@ const GenerateLessonContentInputSchema = z.object({
 export type GenerateLessonContentInput = z.infer<typeof GenerateLessonContentInputSchema>;
 
 const GenerateLessonContentOutputSchema = z.object({
-  story: z.string().describe('A short story for the English lesson, appropriate for the specified topic and difficulty.'),
-  comprehensionQuestions: z.array(z.string()).describe('An array of 3-5 comprehension questions based on the story.'),
-  grammarExplanation: z.string().describe('A clear and concise explanation of a relevant grammar point, suitable for the difficulty level, with examples.'),
+  story: z.string().describe('A detailed long-form story for the English lesson.'),
+  comprehensionQuestions: z.array(z.string()).describe('An array of 5-8 comprehension questions.'),
+  grammarExplanation: z.string().describe('Detailed grammar explanation with multiple examples.'),
 });
 export type GenerateLessonContentOutput = z.infer<typeof GenerateLessonContentOutputSchema>;
 
@@ -31,17 +29,19 @@ const generateLessonContentPrompt = ai.definePrompt({
   name: 'generateLessonContentPrompt',
   input: {schema: GenerateLessonContentInputSchema},
   output: {schema: GenerateLessonContentOutputSchema},
-  prompt: `You are an expert English teacher and content creator for an English learning app called Moc-co. Your task is to generate comprehensive lesson content based on a given topic and difficulty level. The content should be engaging, educational, and suitable for learners.
+  prompt: `You are an elite English educator for Moc-co, building a library of 1,000 professional lessons. 
+Your goal is to create an IMMERSIVE and LONG story.
 
-Please generate the following three components:
+Requirements based on Difficulty '{{{difficulty}}}':
+- Beginner: 400-600 words. Simple vocabulary, clear sentence structure.
+- Intermediate: 800-1000 words. More complex tenses and descriptive language.
+- Advanced: 1200-1500 words. Nuanced vocabulary, professional idioms, and deep narrative structure.
 
-1.  **Story**: Create a short, simple, and interesting story that is appropriate for the '{{{difficulty}}}' level and focuses on the '{{{topic}}}'. The story should be between 150-250 words for 'beginner' and 'intermediate', and 250-400 words for 'advanced' levels. Use clear language and introduce vocabulary relevant to the topic.
+The story should focus on '{{{topic}}}'. 
 
-2.  **Comprehension Questions**: Generate 3-5 multiple-choice or short-answer comprehension questions directly related to the story. These questions should test the learner's understanding of the plot, characters, and key details. Ensure the questions are appropriate for the '{{{difficulty}}}' level.
-
-3.  **Grammar Explanation**: Provide a concise and clear explanation of one relevant grammar point that naturally arises from the story or is suitable for the '{{{difficulty}}}' level. Include at least two simple example sentences to illustrate the grammar rule. The explanation should be easy to understand for the target audience.
-
-Ensure all generated content aligns with the specified '{{{topic}}}' and '{{{difficulty}}}'.
+After the story, provide:
+1. 5 to 8 challenging comprehension questions.
+2. A deep dive into a relevant grammar point with at least 5 examples from the story context.
 
 Topic: {{{topic}}}
 Difficulty: {{{difficulty}}}`,
