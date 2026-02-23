@@ -9,8 +9,9 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { KeyRound, ShieldAlert, MessageCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useFirestore } from '@/firebase';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { useFirestore, useAuth } from '@/firebase';
+import { collection, query, where, getDocs, doc, setDoc } from 'firebase/firestore';
+import { signInAnonymously } from 'firebase/auth';
 
 export default function LoginPage() {
   const [code, setCode] = useState('');
@@ -18,6 +19,7 @@ export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
   const db = useFirestore();
+  const auth = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,8 +37,21 @@ export default function LoginPage() {
       const querySnapshot = await getDocs(q);
 
       if (!querySnapshot.empty) {
+        // Sign in anonymously to get a real UID for Firestore rules
+        const userCredential = await signInAnonymously(auth);
+        const user = userCredential.user;
+
+        // Save user profile with access code
+        await setDoc(doc(db, 'users', user.uid), {
+          id: user.uid,
+          accessCode: code.trim(),
+          createdAt: new Date().toISOString(),
+          lastLogin: new Date().toISOString()
+        }, { merge: true });
+
         localStorage.setItem('moc-co-auth', 'user');
         localStorage.setItem('moc-co-access-code', code.trim());
+        
         toast({ title: "تم التفعيل بنجاح", description: "استمتع برحلة التعلم الكاملة!" });
         router.push('/lessons');
       } else {

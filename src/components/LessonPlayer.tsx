@@ -1,18 +1,20 @@
 
 "use client";
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Lesson } from '@/lib/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, XCircle, BookOpen, Lightbulb, GraduationCap, Play, Volume2, Download, Loader2 } from 'lucide-react';
+import { CheckCircle2, XCircle, BookOpen, Lightbulb, GraduationCap, Play, Volume2, Download, Loader2, Clock } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { textToSpeech } from '@/ai/flows/text-to-speech';
 import { useToast } from '@/hooks/use-toast';
 import { jsPDF } from "jspdf";
+import { useFirestore, useUser } from '@/firebase';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   const [activeTab, setActiveTab] = useState('story');
@@ -21,8 +23,20 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   const [score, setScore] = useState(0);
   const [isAudioLoading, setIsAudioLoading] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [timeSpent, setTimeSpent] = useState(0); // in seconds
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  
   const { toast } = useToast();
+  const db = useFirestore();
+  const { user } = useUser();
+
+  // Track time spent
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeSpent(prev => prev + 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleAnswer = (questionId: string, answer: string) => {
     setAnswers(prev => ({ ...prev, [questionId]: answer }));
@@ -47,6 +61,28 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
     }));
   };
 
+  const handleFinishLesson = async () => {
+    if (!user) return;
+
+    try {
+      const progressRef = doc(db, 'users', user.uid, 'lessonProgress', lesson.id);
+      await setDoc(progressRef, {
+        lessonId: lesson.id,
+        lessonTitle: lesson.title,
+        difficulty: lesson.difficulty,
+        score: score,
+        totalQuestions: lesson.questions.length,
+        timeSpent: timeSpent,
+        completedAt: serverTimestamp(),
+        userId: user.uid
+      }, { merge: true });
+
+      toast({ title: "تم حفظ التقدم", description: `أنهيت الدرس بنجاح! النتيجة: ${score}/${lesson.questions.length}` });
+    } catch (error) {
+      console.error("Error saving progress:", error);
+    }
+  };
+
   const handleTTS = async () => {
     if (audioUrl) {
       audioRef.current?.play();
@@ -67,32 +103,30 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
 
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
-    
     doc.setFontSize(22);
     doc.text(lesson.title, 20, 20);
-    
     doc.setFontSize(14);
     doc.text(`Topic: ${lesson.topic} | Difficulty: ${lesson.difficulty}`, 20, 30);
-    
     doc.setFontSize(16);
     doc.text("The Story:", 20, 45);
-    
     doc.setFontSize(12);
     const splitStory = doc.splitTextToSize(lesson.story, 170);
     doc.text(splitStory, 20, 55);
-    
     let currentY = 55 + (splitStory.length * 7);
-    
     doc.setFontSize(16);
     doc.text("Grammar Point:", 20, currentY + 10);
     doc.setFontSize(12);
     doc.text(`${lesson.grammarPoint}: ${lesson.grammarExplanation}`, 20, currentY + 20);
-    
     toast({ title: "تم تجهيز الملف", description: "بدأ تحميل الدرس كملف PDF." });
     doc.save(`${lesson.title}.pdf`);
   };
 
   const quizProgress = (Object.keys(feedback).length / lesson.questions.length) * 100;
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
@@ -100,7 +134,9 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-3">
             <Badge variant="outline" className="text-accent border-accent uppercase tracking-wider">{lesson.difficulty}</Badge>
-            <span className="text-muted-foreground text-sm font-medium">{lesson.topic}</span>
+            <span className="text-muted-foreground text-sm font-medium flex items-center gap-1">
+              <Clock className="h-3 w-3" /> {formatTime(timeSpent)}
+            </span>
           </div>
           <h1 className="text-3xl font-bold text-primary font-headline">{lesson.title}</h1>
         </div>
@@ -230,8 +266,8 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
           </div>
           {quizProgress === 100 && (
             <div className="flex justify-center pt-4">
-              <Button onClick={() => setActiveTab('grammar')} size="lg" className="bg-accent text-primary font-bold shadow-lg shadow-accent/20">
-                عرض درس القواعد
+              <Button onClick={() => { setActiveTab('grammar'); handleFinishLesson(); }} size="lg" className="bg-accent text-primary font-bold shadow-lg shadow-accent/20">
+                عرض درس القواعد وإنهاء الفصل
               </Button>
             </div>
           )}
@@ -266,7 +302,9 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
               </div>
               <div className="pt-6 flex justify-between">
                 <Button variant="outline" onClick={() => setActiveTab('quiz')}>مراجعة التمارين</Button>
-                <Button className="bg-primary text-primary-foreground">إنهاء الدرس</Button>
+                <Button className="bg-primary text-primary-foreground" asChild>
+                   <a href="/lessons">العودة للمكتبة</a>
+                </Button>
               </div>
             </CardContent>
           </Card>
