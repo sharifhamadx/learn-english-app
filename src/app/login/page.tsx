@@ -7,10 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { KeyRound, ShieldAlert, MessageCircle } from 'lucide-react';
+import { KeyRound, ShieldAlert, MessageCircle, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore, useAuth } from '@/firebase';
-import { collection, query, where, getDocs, doc, setDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { signInAnonymously } from 'firebase/auth';
 
 export default function LoginPage() {
@@ -23,30 +23,46 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!code.trim()) return;
+    
     setLoading(true);
 
-    if (code === '77102026') {
-      localStorage.setItem('moc-co-auth', 'admin');
-      toast({ title: "أهلاً بك أيها المدير", description: "جاري الانتقال للوحة التحكم..." });
-      router.push('/admin/dashboard');
-      return;
-    }
-
     try {
-      const q = query(collection(db, 'accessCodes'), where('code', '==', code.trim()), where('isActive', '==', true));
-      const querySnapshot = await getDocs(q);
-
-      if (!querySnapshot.empty) {
-        // Sign in anonymously to get a real UID for Firestore rules
+      // نظام دخول المدير
+      if (code === '77102026') {
+        // تسجيل دخول حقيقي لـ Firebase لتمكين صلاحيات الكتابة
         const userCredential = await signInAnonymously(auth);
         const user = userCredential.user;
 
-        // Save user profile with access code
+        // تسجيله كمدير في Firestore (اختياري للتوثيق)
+        await setDoc(doc(db, 'adminUsers', user.uid), {
+          id: user.uid,
+          role: 'admin',
+          lastActive: serverTimestamp()
+        }, { merge: true });
+
+        localStorage.setItem('moc-co-auth', 'admin');
+        toast({ title: "أهلاً بك أيها المدير", description: "تم تفعيل صلاحيات الإدارة." });
+        router.push('/admin/dashboard');
+        return;
+      }
+
+      // نظام دخول المشتركين
+      const q = query(
+        collection(db, 'accessCodes'), 
+        where('code', '==', code.trim()), 
+        where('isActive', '==', true)
+      );
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        const userCredential = await signInAnonymously(auth);
+        const user = userCredential.user;
+
         await setDoc(doc(db, 'users', user.uid), {
           id: user.uid,
           accessCode: code.trim(),
-          createdAt: new Date().toISOString(),
-          lastLogin: new Date().toISOString()
+          lastLogin: serverTimestamp()
         }, { merge: true });
 
         localStorage.setItem('moc-co-auth', 'user');
@@ -61,9 +77,13 @@ export default function LoginPage() {
           description: "تأكد من الرمز أو تواصل معنا للاشتراك.",
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      toast({ variant: "destructive", title: "خطأ", description: "تعذر التحقق من الرمز حالياً." });
+      toast({ 
+        variant: "destructive", 
+        title: "خطأ في الاتصال", 
+        description: error.message || "تعذر التحقق من الرمز حالياً." 
+      });
     } finally {
       setLoading(false);
     }
@@ -94,7 +114,7 @@ export default function LoginPage() {
               />
             </div>
             <Button type="submit" className="w-full h-12 text-lg font-bold bg-primary hover:bg-primary/90" disabled={loading}>
-              {loading ? "جاري التحقق..." : "تفعيل الحساب"}
+              {loading ? <Loader2 className="animate-spin h-5 w-5" /> : "تفعيل الحساب"}
             </Button>
             
             <div className="pt-4 border-t text-center space-y-4">

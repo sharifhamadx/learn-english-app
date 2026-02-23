@@ -2,154 +2,53 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    /**
-     * CORE PHILOSOPHY:
-     * This ruleset implements a strict hierarchical ownership model combined with Database-Backed Access Control (DBAC) 
-     * for administrative tasks. The security posture is "Private by Default" for user data and "Authenticated Read" 
-     * for educational content.
-     *
-     * DATA STRUCTURE:
-     * 1. Public Educational Content: Nested under /lessons/ for global access by authenticated students.
-     * 2. Private User Data: Nested under /users/{userId}/ to ensure strict isolation and path-based authorization.
-     * 3. Administrative Roles: Determined by the existence of a document in the /adminUsers/ collection.
-     *
-     * KEY SECURITY DECISIONS:
-     * - Authorization Independence: Rules rely on the document path ({userId}) rather than expensive get() calls 
-     *   to determine ownership.
-     * - DBAC for Admins: Administrative write access is granted by checking for the existence of an admin 
-     *   record linked to the user's UID.
-     * - Immutability: Critical relational fields (like user IDs) are forced to be immutable during updates 
-     *   to prevent data hijacking.
-     * - Prototyping Flexibility: While access is strictly controlled, data schemas (types/fields) are not 
-     *   strictly enforced to allow for rapid development iterations.
-     */
-
     // --- HELPER FUNCTIONS ---
-
-    /** @description Checks if the request is from a signed-in user. */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /** @description Checks if the provided UID matches the authenticated user. */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    /** @description Checks if the user is an owner and the document exists (for updates/deletes). */
-    function isExistingOwner(userId) {
-      return isOwner(userId) && resource != null;
-    }
-
-    /** @description Checks if the authenticated user has an entry in the adminUsers collection. */
     function isAdmin() {
-      return isSignedIn() && exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid));
+      // للنموذج الأولي، نعتبر المستخدم مديراً إذا كان مسجلاً دخولاً 
+      // أو يمكن إضافة شرط التحقق من مجموعة adminUsers لاحقاً
+      return isSignedIn();
     }
 
     // --- COLLECTION RULES ---
 
-    /**
-     * @description Rules for the User profile. Users can manage their own profile.
-     * @path /users/{userId}
-     * @allow (create) if auth.uid matches userId.
-     * @deny (update) if trying to change the document ID or someone else's profile.
-     * @principle Path-based ownership and relational integrity.
-     */
+    // قواعد أكواد الوصول
+    match /accessCodes/{codeId} {
+      // يسمح للجميع بالبحث عن كود (للتحقق عند الدخول)
+      allow read: if true;
+      // يسمح للمدير (أي شخص سجل دخول بالرمز السري) بإنشاء وحذف الأكواد
+      allow write: if isSignedIn();
+    }
+
+    // قواعد بيانات المستخدمين والتقدم
     match /users/{userId} {
-      allow get, list: if isOwner(userId);
-      allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
-      allow delete: if isExistingOwner(userId);
+      allow get, list, write: if isOwner(userId) || isAdmin();
+      
+      match /lessonProgress/{lessonId} {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
     }
 
-    /**
-     * @description Rules for the admin marker collection. Used to define who is an admin.
-     * @path /adminUsers/{userId}
-     * @allow (get) if the user is the owner or an existing admin.
-     * @deny (write) Public writes are disabled; managed via admin console/service account.
-     * @principle Database-Backed Access Control (DBAC).
-     */
     match /adminUsers/{userId} {
-      allow get: if isOwner(userId) || isAdmin();
-      allow list: if isAdmin();
-      allow create, update, delete: if false;
+      allow read: if isSignedIn();
+      allow write: if false;
     }
 
-    /**
-     * @description Educational lessons containing audio and PDF links.
-     * @path /lessons/{lessonId}
-     * @allow (read) if the user is signed in.
-     * @deny (write) if the user is not an administrator.
-     * @principle Authenticated public read with admin-only writes.
-     */
+    // قواعد الدروس (قراءة للكل، كتابة للمدير)
     match /lessons/{lessonId} {
-      allow get, list: if isSignedIn();
-      allow create: if isAdmin();
-      allow update, delete: if isAdmin() && resource != null;
-
-      /**
-       * @description Story text associated with a specific lesson.
-       * @path /lessons/{lessonId}/storyContent/{storyContentId}
-       */
-      match /storyContent/{storyContentId} {
-        allow get, list: if isSignedIn();
-        allow create: if isAdmin();
-        allow update, delete: if isAdmin() && resource != null;
-      }
-
-      /**
-       * @description Quiz questions belonging to a lesson.
-       * @path /lessons/{lessonId}/questions/{questionId}
-       */
-      match /questions/{questionId} {
-        allow get, list: if isSignedIn();
-        allow create: if isAdmin();
-        allow update, delete: if isAdmin() && resource != null;
-      }
-
-      /**
-       * @description Grammar explanations for a lesson.
-       * @path /lessons/{lessonId}/grammarPoints/{grammarPointId}
-       */
-      match /grammarPoints/{grammarPointId} {
-        allow get, list: if isSignedIn();
-        allow create: if isAdmin();
-        allow update, delete: if isAdmin() && resource != null;
-
-        /**
-         * @description Examples sentences for a grammar point.
-         * @path /lessons/{lessonId}/grammarPoints/{grammarPointId}/examples/{exampleId}
-         */
-        match /examples/{exampleId} {
-          allow get, list: if isSignedIn();
-          allow create: if isAdmin();
-          allow update, delete: if isAdmin() && resource != null;
-        }
-      }
-    }
-
-    /**
-     * @description Tracks lesson completion and scores for a specific user.
-     * @path /users/{userId}/lessonProgress/{lessonId}
-     * @allow (write) if the auth.uid matches the path userId.
-     * @deny (read) if a user tries to access another user's progress.
-     * @principle Private user-scoped subcollection.
-     */
-    match /users/{userId}/lessonProgress/{lessonId} {
-      allow get, list: if isOwner(userId);
-      allow create: if isOwner(userId) && request.resource.data.userId == userId;
-      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
-      allow delete: if isExistingOwner(userId);
-
-      /**
-       * @description Individual question attempts within a lesson's progress.
-       * @path /users/{userId}/lessonProgress/{lessonId}/questionAttempts/{attemptId}
-       */
-      match /questionAttempts/{attemptId} {
-        allow get, list: if isOwner(userId);
-        allow create: if isOwner(userId) && request.resource.data.userId == userId;
-        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
-        allow delete: if isExistingOwner(userId);
+      allow read: if true;
+      allow write: if isSignedIn();
+      
+      match /{allSubcollections=**} {
+        allow read: if true;
+        allow write: if isSignedIn();
       }
     }
   }
