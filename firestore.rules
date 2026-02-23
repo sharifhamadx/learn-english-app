@@ -1,3 +1,4 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -7,49 +8,28 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
-    }
-
-    function isAdmin() {
-      // للنموذج الأولي، نعتبر المستخدم مديراً إذا كان مسجلاً دخولاً 
-      // أو يمكن إضافة شرط التحقق من مجموعة adminUsers لاحقاً
-      return isSignedIn();
-    }
-
     // --- COLLECTION RULES ---
 
-    // قواعد أكواد الوصول
     match /accessCodes/{codeId} {
-      // يسمح للجميع بالبحث عن كود (للتحقق عند الدخول)
       allow read: if true;
-      // يسمح للمدير (أي شخص سجل دخول بالرمز السري) بإنشاء وحذف الأكواد
       allow write: if isSignedIn();
     }
 
-    // قواعد بيانات المستخدمين والتقدم
     match /users/{userId} {
-      allow get, list, write: if isOwner(userId) || isAdmin();
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
       
       match /lessonProgress/{lessonId} {
-        allow read, write: if isOwner(userId) || isAdmin();
+        allow read, write: if isSignedIn() && request.auth.uid == userId;
       }
     }
 
     match /adminUsers/{userId} {
-      allow read: if isSignedIn();
-      allow write: if false;
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
     }
 
-    // قواعد الدروس (قراءة للكل، كتابة للمدير)
     match /lessons/{lessonId} {
       allow read: if true;
       allow write: if isSignedIn();
-      
-      match /{allSubcollections=**} {
-        allow read: if true;
-        allow write: if isSignedIn();
-      }
     }
   }
 }

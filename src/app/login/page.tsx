@@ -10,8 +10,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { KeyRound, ShieldAlert, MessageCircle, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore, useAuth } from '@/firebase';
-import { collection, query, where, getDocs, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, serverTimestamp } from 'firebase/firestore';
 import { signInAnonymously } from 'firebase/auth';
+import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 
 export default function LoginPage() {
   const [code, setCode] = useState('');
@@ -23,19 +24,20 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!code.trim()) return;
+    const cleanCode = code.trim();
+    if (!cleanCode) return;
     
     setLoading(true);
 
     try {
       // نظام دخول المدير
-      if (code === '77102026') {
-        // تسجيل دخول حقيقي لـ Firebase لتمكين صلاحيات الكتابة
+      if (cleanCode === '77102026') {
         const userCredential = await signInAnonymously(auth);
         const user = userCredential.user;
 
-        // تسجيله كمدير في Firestore (اختياري للتوثيق)
-        await setDoc(doc(db, 'adminUsers', user.uid), {
+        // تسجيله كمدير (Non-blocking)
+        const adminRef = doc(db, 'adminUsers', user.uid);
+        setDocumentNonBlocking(adminRef, {
           id: user.uid,
           role: 'admin',
           lastActive: serverTimestamp()
@@ -50,7 +52,7 @@ export default function LoginPage() {
       // نظام دخول المشتركين
       const q = query(
         collection(db, 'accessCodes'), 
-        where('code', '==', code.trim()), 
+        where('code', '==', cleanCode), 
         where('isActive', '==', true)
       );
       const querySnapshot = await getDocs(q);
@@ -59,14 +61,15 @@ export default function LoginPage() {
         const userCredential = await signInAnonymously(auth);
         const user = userCredential.user;
 
-        await setDoc(doc(db, 'users', user.uid), {
+        const userRef = doc(db, 'users', user.uid);
+        setDocumentNonBlocking(userRef, {
           id: user.uid,
-          accessCode: code.trim(),
+          accessCode: cleanCode,
           lastLogin: serverTimestamp()
         }, { merge: true });
 
         localStorage.setItem('moc-co-auth', 'user');
-        localStorage.setItem('moc-co-access-code', code.trim());
+        localStorage.setItem('moc-co-access-code', cleanCode);
         
         toast({ title: "تم التفعيل بنجاح", description: "استمتع برحلة التعلم الكاملة!" });
         router.push('/lessons');
@@ -74,15 +77,14 @@ export default function LoginPage() {
         toast({
           variant: "destructive",
           title: "رمز غير صحيح أو منتهي",
-          description: "تأكد من الرمز أو تواصل معنا للاشتراك.",
+          description: "تأكد من الرمز أو تواصل معنا للاشتراك عبر واتساب.",
         });
       }
     } catch (error: any) {
-      console.error(error);
       toast({ 
         variant: "destructive", 
         title: "خطأ في الاتصال", 
-        description: error.message || "تعذر التحقق من الرمز حالياً." 
+        description: "تعذر التحقق من الرمز حالياً. يرجى المحاولة لاحقاً." 
       });
     } finally {
       setLoading(false);
@@ -90,7 +92,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-[80vh] items-center justify-center p-4">
+    <div className="flex min-h-[80vh] items-center justify-center p-4" dir="rtl">
       <Card className="w-full max-w-md shadow-2xl border-none">
         <CardHeader className="text-center space-y-2">
           <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">

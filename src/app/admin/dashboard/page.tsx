@@ -2,76 +2,65 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useFirestore } from '@/firebase';
-import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { useFirestore, useMemoFirebase, useCollection } from '@/firebase';
+import { collection, serverTimestamp, doc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Trash2, UserPlus, ShieldCheck, ArrowLeft, RefreshCw } from 'lucide-react';
+import { Trash2, UserPlus, ShieldCheck, ArrowLeft, RefreshCw, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
+import { addDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 
 export default function AdminDashboard() {
-  const [codes, setCodes] = useState<any[]>([]);
   const [newCode, setNewCode] = useState('');
   const [newNote, setNewNote] = useState('');
-  const [loading, setLoading] = useState(false);
   const db = useFirestore();
   const { toast } = useToast();
 
-  const fetchCodes = async () => {
-    setLoading(true);
-    try {
-      const querySnapshot = await getDocs(collection(db, 'accessCodes'));
-      const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setCodes(data);
-    } catch (error) {
-      toast({ variant: "destructive", title: "خطأ", description: "فشل في تحميل الأكواد." });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const codesQuery = useMemoFirebase(() => {
+    return collection(db, 'accessCodes');
+  }, [db]);
+
+  const { data: codes, isLoading } = useCollection(codesQuery);
 
   useEffect(() => {
     const auth = localStorage.getItem('moc-co-auth');
     if (auth !== 'admin') {
       window.location.href = '/login';
-    } else {
-      fetchCodes();
     }
   }, []);
 
-  const handleAddCode = async () => {
-    if (!newCode) return;
-    try {
-      await addDoc(collection(db, 'accessCodes'), {
-        code: newCode.trim(),
-        note: newNote,
-        isActive: true,
-        createdAt: serverTimestamp(),
-      });
-      setNewCode('');
-      setNewNote('');
-      toast({ title: "تم إنشاء الكود", description: "يمكن للمشترك الآن استخدامه." });
-      fetchCodes();
-    } catch (error) {
-      toast({ variant: "destructive", title: "خطأ", description: "فشل في إنشاء الكود." });
+  const handleAddCode = () => {
+    if (!newCode.trim()) {
+      toast({ variant: "destructive", title: "تنبيه", description: "يرجى إدخال الكود أولاً." });
+      return;
     }
+
+    const codesRef = collection(db, 'accessCodes');
+    const data = {
+      code: newCode.trim(),
+      note: newNote,
+      isActive: true,
+      createdAt: serverTimestamp(),
+    };
+
+    addDocumentNonBlocking(codesRef, data);
+    
+    setNewCode('');
+    setNewNote('');
+    toast({ title: "جاري المعالجة", description: "يتم الآن إضافة الكود لقاعدة البيانات..." });
   };
 
-  const handleDeleteCode = async (id: string) => {
-    try {
-      await deleteDoc(doc(db, 'accessCodes', id));
-      toast({ title: "تم الحذف", description: "تم إلغاء تفعيل الكود بنجاح." });
-      fetchCodes();
-    } catch (error) {
-      toast({ variant: "destructive", title: "خطأ", description: "فشل الحذف." });
-    }
+  const handleDeleteCode = (id: string) => {
+    const docRef = doc(db, 'accessCodes', id);
+    deleteDocumentNonBlocking(docRef);
+    toast({ title: "جاري الحذف", description: "سيتم إزالة الكود من القائمة فوراً." });
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-10">
+    <div className="max-w-6xl mx-auto space-y-8 pb-10" dir="rtl">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild>
@@ -79,9 +68,6 @@ export default function AdminDashboard() {
           </Button>
           <h1 className="text-3xl font-bold font-headline text-primary">لوحة إدارة المشتركين</h1>
         </div>
-        <Button onClick={fetchCodes} variant="outline" size="icon" disabled={loading}>
-          <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-        </Button>
       </div>
 
       <Card className="border-none shadow-lg">
@@ -90,26 +76,29 @@ export default function AdminDashboard() {
             <UserPlus className="h-5 w-5 text-accent" />
             إضافة مشترك جديد
           </CardTitle>
-          <CardDescription>قم بتوليد كود وصول وربطه باسم المشترك.</CardDescription>
+          <CardDescription>قم بتوليد كود وصول وربطه باسم المشترك ليتمكن من الدخول.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col md:flex-row gap-4">
           <Input 
             placeholder="كود الوصول (مثلاً: STUD-123)" 
             value={newCode}
             onChange={(e) => setNewCode(e.target.value)}
+            className="text-right"
           />
           <Input 
             placeholder="ملاحظة (اسم المشترك)" 
             value={newNote}
             onChange={(e) => setNewNote(e.target.value)}
+            className="text-right"
           />
           <Button onClick={handleAddCode} className="bg-primary px-8">حفظ الكود</Button>
         </CardContent>
       </Card>
 
       <Card className="border-none shadow-md overflow-hidden">
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-lg">الأكواد النشطة</CardTitle>
+          {isLoading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
         </CardHeader>
         <Table>
           <TableHeader className="bg-muted">
@@ -121,9 +110,11 @@ export default function AdminDashboard() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {codes.length === 0 ? (
+            {!codes || codes.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-10 text-muted-foreground">لا يوجد مشتركين مسجلين بعد.</TableCell>
+                <TableCell colSpan={4} className="text-center py-10 text-muted-foreground">
+                  {isLoading ? 'جاري تحميل البيانات...' : 'لا يوجد مشتركين مسجلين بعد.'}
+                </TableCell>
               </TableRow>
             ) : (
               codes.map((c) => (
