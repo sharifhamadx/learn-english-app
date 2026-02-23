@@ -2,21 +2,22 @@
 "use client";
 
 import Link from 'next/link';
-import { BookOpen, Home, Trophy, Wand2, Search, LogIn, LogOut } from 'lucide-react';
+import { BookOpen, Home, Trophy, Wand2, Search, LogIn, LogOut, Settings } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 export function Navigation() {
-  const [isAuth, setIsAuth] = useState(false);
+  const [authType, setAuthType] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
-    setIsAuth(localStorage.getItem('moc-co-auth') === 'true');
+    setAuthType(localStorage.getItem('moc-co-auth'));
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('moc-co-auth');
-    setIsAuth(false);
+    localStorage.removeItem('moc-co-access-code');
+    setAuthType(null);
     router.push('/login');
   };
 
@@ -36,12 +37,20 @@ export function Navigation() {
             <Search className="h-5 w-5" />
             <span className="text-[10px] font-medium uppercase tracking-wider">الدروس</span>
           </Link>
+          
+          {authType === 'admin' && (
+            <Link href="/admin/dashboard" className="flex flex-col items-center gap-1 text-accent hover:text-accent/80 transition-colors font-bold">
+              <Settings className="h-5 w-5" />
+              <span className="text-[10px] uppercase tracking-wider">الإدارة</span>
+            </Link>
+          )}
+
           <Link href="/stats" className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors">
             <Trophy className="h-5 w-5" />
             <span className="text-[10px] font-medium uppercase tracking-wider">تقدمي</span>
           </Link>
           
-          {isAuth ? (
+          {authType ? (
             <button 
               onClick={handleLogout}
               className="flex flex-col items-center gap-1 text-muted-foreground hover:text-destructive transition-colors"
@@ -55,11 +64,6 @@ export function Navigation() {
               <span className="text-[10px] font-medium uppercase tracking-wider">دخول</span>
             </Link>
           )}
-          
-          <Link href="/admin/generate" className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors">
-            <Wand2 className="h-5 w-5" />
-            <span className="text-[10px] font-medium uppercase tracking-wider">المختبر</span>
-          </Link>
         </div>
       </div>
     </nav>
