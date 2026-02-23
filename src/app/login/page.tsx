@@ -10,9 +10,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { KeyRound, ShieldAlert, MessageCircle, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore, useAuth } from '@/firebase';
-import { collection, query, where, getDocs, doc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { signInAnonymously } from 'firebase/auth';
-import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 
 export default function LoginPage() {
   const [code, setCode] = useState('');
@@ -35,17 +34,19 @@ export default function LoginPage() {
         const userCredential = await signInAnonymously(auth);
         const user = userCredential.user;
 
-        // تسجيله كمدير (Non-blocking)
+        // تسجيله كمدير (ننتظر العملية هنا لضمان الصلاحية)
         const adminRef = doc(db, 'adminUsers', user.uid);
-        setDocumentNonBlocking(adminRef, {
+        await setDoc(adminRef, {
           id: user.uid,
           role: 'admin',
           lastActive: serverTimestamp()
         }, { merge: true });
 
         localStorage.setItem('moc-co-auth', 'admin');
-        toast({ title: "أهلاً بك أيها المدير", description: "تم تفعيل صلاحيات الإدارة." });
-        router.push('/admin/dashboard');
+        toast({ title: "أهلاً بك أيها المدير", description: "تم تفعيل صلاحيات الإدارة بنجاح." });
+        
+        // استخدام window.location لضمان تحديث حالة Auth بالكامل
+        window.location.href = '/admin/dashboard';
         return;
       }
 
@@ -62,7 +63,7 @@ export default function LoginPage() {
         const user = userCredential.user;
 
         const userRef = doc(db, 'users', user.uid);
-        setDocumentNonBlocking(userRef, {
+        await setDoc(userRef, {
           id: user.uid,
           accessCode: cleanCode,
           lastLogin: serverTimestamp()
@@ -72,7 +73,7 @@ export default function LoginPage() {
         localStorage.setItem('moc-co-access-code', cleanCode);
         
         toast({ title: "تم التفعيل بنجاح", description: "استمتع برحلة التعلم الكاملة!" });
-        router.push('/lessons');
+        window.location.href = '/lessons';
       } else {
         toast({
           variant: "destructive",
@@ -81,10 +82,11 @@ export default function LoginPage() {
         });
       }
     } catch (error: any) {
+      console.error(error);
       toast({ 
         variant: "destructive", 
-        title: "خطأ في الاتصال", 
-        description: "تعذر التحقق من الرمز حالياً. يرجى المحاولة لاحقاً." 
+        title: "خطأ في التفعيل", 
+        description: error.message || "تعذر التحقق من الرمز حالياً. يرجى المحاولة لاحقاً." 
       });
     } finally {
       setLoading(false);

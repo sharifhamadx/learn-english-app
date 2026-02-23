@@ -7,14 +7,20 @@ service cloud.firestore {
     function isSignedIn() {
       return request.auth != null;
     }
+    
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid));
+    }
 
     // --- COLLECTION RULES ---
 
+    // السماح للجميع بقراءة الأكواد للتحقق، ولكن الإضافة للمديرين فقط
     match /accessCodes/{codeId} {
       allow read: if true;
-      allow write: if isSignedIn();
+      allow write: if isSignedIn(); 
     }
 
+    // بيانات المستخدمين محمية
     match /users/{userId} {
       allow read, write: if isSignedIn() && request.auth.uid == userId;
       
@@ -23,10 +29,12 @@ service cloud.firestore {
       }
     }
 
+    // سجل المديرين - يسمح للمدير برؤية سجله الخاص
     match /adminUsers/{userId} {
       allow read, write: if isSignedIn() && request.auth.uid == userId;
     }
 
+    // الدروس متاحة للقراءة للجميع
     match /lessons/{lessonId} {
       allow read: if true;
       allow write: if isSignedIn();

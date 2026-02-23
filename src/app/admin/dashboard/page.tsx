@@ -2,21 +2,23 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useFirestore, useMemoFirebase, useCollection } from '@/firebase';
+import { useFirestore, useMemoFirebase, useCollection, useUser } from '@/firebase';
 import { collection, serverTimestamp, doc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Trash2, UserPlus, ShieldCheck, ArrowLeft, RefreshCw, Loader2 } from 'lucide-react';
+import { Trash2, UserPlus, ShieldCheck, ArrowLeft, Loader2, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { addDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function AdminDashboard() {
   const [newCode, setNewCode] = useState('');
   const [newNote, setNewNote] = useState('');
   const db = useFirestore();
+  const { user, isUserLoading } = useUser();
   const { toast } = useToast();
 
   const codesQuery = useMemoFirebase(() => {
@@ -26,13 +28,18 @@ export default function AdminDashboard() {
   const { data: codes, isLoading } = useCollection(codesQuery);
 
   useEffect(() => {
-    const auth = localStorage.getItem('moc-co-auth');
-    if (auth !== 'admin') {
+    const authFlag = localStorage.getItem('moc-co-auth');
+    if (!isUserLoading && (!user || authFlag !== 'admin')) {
       window.location.href = '/login';
     }
-  }, []);
+  }, [user, isUserLoading]);
 
   const handleAddCode = () => {
+    if (!user) {
+      toast({ variant: "destructive", title: "خطأ", description: "لم يتم التحقق من هويتك كمسؤول بعد. انتظر لحظة." });
+      return;
+    }
+
     if (!newCode.trim()) {
       toast({ variant: "destructive", title: "تنبيه", description: "يرجى إدخال الكود أولاً." });
       return;
@@ -44,6 +51,7 @@ export default function AdminDashboard() {
       note: newNote,
       isActive: true,
       createdAt: serverTimestamp(),
+      createdBy: user.uid
     };
 
     addDocumentNonBlocking(codesRef, data);
@@ -59,6 +67,14 @@ export default function AdminDashboard() {
     toast({ title: "جاري الحذف", description: "سيتم إزالة الكود من القائمة فوراً." });
   };
 
+  if (isUserLoading) {
+    return (
+      <div className="flex h-[80vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-6xl mx-auto space-y-8 pb-10" dir="rtl">
       <div className="flex items-center justify-between">
@@ -69,6 +85,16 @@ export default function AdminDashboard() {
           <h1 className="text-3xl font-bold font-headline text-primary">لوحة إدارة المشتركين</h1>
         </div>
       </div>
+
+      {!user && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>تنبيه</AlertTitle>
+          <AlertDescription>
+            جلسة العمل غير مفعلة برمجياً. يرجى إعادة تسجيل الدخول لتتمكن من إجراء التعديلات.
+          </AlertDescription>
+        </Alert>
+      )}
 
       <Card className="border-none shadow-lg">
         <CardHeader>
@@ -84,14 +110,16 @@ export default function AdminDashboard() {
             value={newCode}
             onChange={(e) => setNewCode(e.target.value)}
             className="text-right"
+            disabled={!user}
           />
           <Input 
             placeholder="ملاحظة (اسم المشترك)" 
             value={newNote}
             onChange={(e) => setNewNote(e.target.value)}
             className="text-right"
+            disabled={!user}
           />
-          <Button onClick={handleAddCode} className="bg-primary px-8">حفظ الكود</Button>
+          <Button onClick={handleAddCode} className="bg-primary px-8" disabled={!user}>حفظ الكود</Button>
         </CardContent>
       </Card>
 
