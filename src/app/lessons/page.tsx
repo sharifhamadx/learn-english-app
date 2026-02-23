@@ -5,7 +5,7 @@ import { MOCK_LESSONS } from '@/lib/mock-data';
 import { LessonCard } from '@/components/LessonCard';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, BookOpenCheck, Library } from 'lucide-react';
+import { Search, Library } from 'lucide-react';
 
 export default function LessonsPage() {
   const [search, setSearch] = useState('');
@@ -26,9 +26,9 @@ export default function LessonsPage() {
             <Library className="h-6 w-6" />
             <span className="font-bold tracking-widest uppercase text-sm">300 Chapters of the Saga</span>
           </div>
-          <h1 className="text-4xl font-black font-headline text-primary">المكتبة الشاملة</h1>
-          <p className="text-muted-foreground max-w-lg">
-            اكتشف 300 درس جاهز من ملحمة شريف. كل فصل يحتوي على قصة طويلة، تمارين تفاعلية، وشرح معمق للقواعد للتعلم الفوري.
+          <h1 className="text-4xl font-black font-headline text-primary text-right">المكتبة الشاملة (300 فصل)</h1>
+          <p className="text-muted-foreground max-w-lg text-right ml-auto">
+            جميع فصول ملحمة شريف جاهزة للتعلم. اختر فصلاً وابدأ فوراً في تطوير لغتك الإنجليزية من خلال القصة والتمارين.
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
@@ -36,7 +36,7 @@ export default function LessonsPage() {
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input 
               placeholder="بحث في الـ 300 فصل..." 
-              className="pl-10 h-12 rounded-xl"
+              className="pl-10 h-12 rounded-xl text-right"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
