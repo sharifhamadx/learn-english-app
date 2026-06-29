@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from 'next/link';
@@ -38,10 +37,10 @@ export function LessonCard({ lesson }: { lesson: Lesson }) {
         </div>
         <CardHeader className="p-4">
           <CardTitle className="text-lg text-muted-foreground">{lesson.title}</CardTitle>
-          <div className="bg-amber-50 p-3 rounded-lg border border-amber-100 flex flex-col gap-2 mt-2">
+          <div className="bg-amber-50 p-3 rounded-lg border border-amber-100 flex flex-col gap-2 mt-2 text-right">
             <p className="text-[10px] font-bold text-amber-800">هذا الدرس يتطلب اشتراكاً كاملاً</p>
             <a 
-              href="https://wa.me/13238181488" 
+              href="https://wa.me/447342322206" 
               className="text-[10px] bg-green-500 text-white p-1 rounded text-center flex items-center justify-center gap-1 hover:bg-green-600 transition-colors"
               target="_blank"
             >

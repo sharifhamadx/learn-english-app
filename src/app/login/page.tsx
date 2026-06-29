@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -29,12 +28,11 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // نظام دخول المدير
+      // نظام دخول المدير (الرمز: 77102026)
       if (cleanCode === '77102026') {
         const userCredential = await signInAnonymously(auth);
         const user = userCredential.user;
 
-        // تسجيله كمدير (ننتظر العملية هنا لضمان الصلاحية)
         const adminRef = doc(db, 'adminUsers', user.uid);
         await setDoc(adminRef, {
           id: user.uid,
@@ -45,12 +43,10 @@ export default function LoginPage() {
         localStorage.setItem('moc-co-auth', 'admin');
         toast({ title: "أهلاً بك أيها المدير", description: "تم تفعيل صلاحيات الإدارة بنجاح." });
         
-        // استخدام window.location لضمان تحديث حالة Auth بالكامل
         window.location.href = '/admin/dashboard';
         return;
       }
 
-      // نظام دخول المشتركين
       const q = query(
         collection(db, 'accessCodes'), 
         where('code', '==', cleanCode), 
@@ -124,9 +120,9 @@ export default function LoginPage() {
             <div className="pt-4 border-t text-center space-y-4">
               <p className="text-sm text-muted-foreground">ليس لديك رمز تفعيل؟</p>
               <Button variant="outline" className="w-full gap-2 text-green-600 border-green-200 hover:bg-green-50" asChild>
-                <a href="https://wa.me/13238181488" target="_blank" rel="noopener noreferrer">
+                <a href="https://wa.me/447342322206" target="_blank" rel="noopener noreferrer">
                   <MessageCircle className="h-5 w-5" />
-                  تواصل معنا عبر واتساب للاشتراك
+                  تواصل معنا لتفعيل الحساب
                 </a>
               </Button>
             </div>
