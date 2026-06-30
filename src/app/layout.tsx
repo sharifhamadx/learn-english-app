@@ -18,13 +18,29 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ar">
+    <html lang="ar" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Inter:wght@400;700;900&display=swap" rel="stylesheet" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('theme');
+                  var supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+                  if (!theme && supportDarkMode) theme = 'dark';
+                  if (theme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
       </head>
-      <body className="font-body antialiased bg-[#f8fafc] pb-20 md:pb-0 md:pt-16 min-h-screen flex flex-col">
+      <body className="font-body antialiased bg-background text-foreground pb-20 md:pb-0 md:pt-16 min-h-screen flex flex-col">
         <FirebaseClientProvider>
           <Navigation />
           <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 flex-grow w-full">
@@ -33,7 +49,7 @@ export default function RootLayout({
           
           <FloatingWhatsApp />
 
-          <footer className="bg-white border-t py-16 px-6 mt-20" dir="rtl">
+          <footer className="bg-card border-t py-16 px-6 mt-20" dir="rtl">
             <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 text-right">
               <div className="md:col-span-2 space-y-6">
                 <h3 className="font-headline text-3xl font-black text-primary">Moc-co</h3>

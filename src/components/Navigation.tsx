@@ -2,7 +2,7 @@
 "use client";
 
 import Link from 'next/link';
-import { BookOpen, Home, Trophy, Search, LogIn, LogOut, Settings, Moon, Sun, Info, Phone } from 'lucide-react';
+import { BookOpen, Home, Trophy, Search, LogIn, LogOut, Settings, Moon, Sun, Info } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -14,10 +14,8 @@ export function Navigation() {
 
   useEffect(() => {
     setAuthType(localStorage.getItem('moc-co-auth'));
-    // Check initial theme
-    if (document.documentElement.classList.contains('dark')) {
-      setIsDark(true);
-    }
+    // Check initial theme from document class
+    setIsDark(document.documentElement.classList.contains('dark'));
   }, []);
 
   const toggleTheme = () => {
@@ -40,9 +38,9 @@ export function Navigation() {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card md:top-0 md:bottom-auto md:border-t-0 md:border-b shadow-lg">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card md:top-0 md:bottom-auto md:border-t-0 md:border-b shadow-lg transition-colors duration-300">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 h-16">
-        <Link href="/" className="flex items-center gap-2 font-headline text-xl font-black text-primary">
+        <Link href="/" className="flex items-center gap-2 font-headline text-xl font-black text-primary hover:opacity-80 transition-opacity">
           <BookOpen className="h-6 w-6 text-accent" />
           <span className="inline">Mo_Co learn english</span>
         </Link>
@@ -75,8 +73,18 @@ export function Navigation() {
 
           <div className="h-8 w-px bg-border mx-2 hidden md:block" />
 
-          <Button variant="ghost" size="icon" onClick={toggleTheme} className="rounded-full shrink-0">
-            {isDark ? <Sun className="h-5 w-5 text-amber-400" /> : <Moon className="h-5 w-5 text-primary" />}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={toggleTheme} 
+            className="rounded-full shrink-0 hover:bg-accent/20 transition-all duration-300"
+            aria-label="Toggle Theme"
+          >
+            {isDark ? (
+              <Sun className="h-5 w-5 text-amber-400 animate-in zoom-in-50 duration-300" />
+            ) : (
+              <Moon className="h-5 w-5 text-primary animate-in zoom-in-50 duration-300" />
+            )}
           </Button>
           
           {authType ? (
