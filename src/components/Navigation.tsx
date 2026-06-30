@@ -42,9 +42,9 @@ export function Navigation() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card md:top-0 md:bottom-auto md:border-t-0 md:border-b shadow-lg">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 h-16">
-        <Link href="/" className="flex items-center gap-2 font-headline text-2xl font-bold text-primary">
-          <BookOpen className="h-8 w-8 text-accent" />
-          <span className="hidden sm:inline">Moc-co</span>
+        <Link href="/" className="flex items-center gap-2 font-headline text-xl font-black text-primary">
+          <BookOpen className="h-6 w-6 text-accent" />
+          <span className="inline">Mo_Co learn english</span>
         </Link>
         
         <div className="flex items-center gap-4 md:gap-6 overflow-x-auto no-scrollbar">
