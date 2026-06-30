@@ -2,49 +2,58 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { GraduationCap, BookOpen, User } from 'lucide-react';
+import { GraduationCap, BookOpen, User, Code, Award } from 'lucide-react';
 
 export default function AboutPage() {
   return (
-    <div className="max-w-4xl mx-auto space-y-10 py-12 text-right" dir="rtl">
-      <div className="text-center space-y-4">
-        <div className="mx-auto w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center">
-          <User className="h-10 w-10 text-primary" />
+    <div className="max-w-4xl mx-auto space-y-12 py-16 text-right px-4" dir="rtl">
+      <div className="text-center space-y-6">
+        <div className="mx-auto w-24 h-24 bg-primary/10 rounded-3xl flex items-center justify-center rotate-3 border-2 border-primary/20">
+          <User className="h-12 w-12 text-primary" />
         </div>
-        <h1 className="text-4xl font-black font-headline text-primary">من نحن</h1>
-        <p className="text-muted-foreground text-lg italic">"رحلة تعليمية ولدت من رحم التجربة الإنسانية"</p>
+        <h1 className="text-5xl font-black font-headline text-primary tracking-tight">من هو شريف حماد؟</h1>
+        <p className="text-muted-foreground text-xl italic max-w-2xl mx-auto">"رؤية تعليمية ولدت من قلب المعاناة لتصنع جيلاً من المتمكنين لغوياً"</p>
       </div>
 
-      <Card className="border-none shadow-xl rounded-[2.5rem] overflow-hidden">
-        <CardHeader className="bg-primary text-primary-foreground p-8">
-          <CardTitle className="text-2xl">عن المؤسس: شريف حمد عبد الله</CardTitle>
-        </CardHeader>
-        <CardContent className="p-8 space-y-8 text-lg leading-relaxed">
-          <div className="flex gap-4 items-start">
-            <div className="bg-accent/20 p-3 rounded-2xl">
-              <GraduationCap className="h-6 w-6 text-primary" />
+      <div className="grid grid-cols-1 gap-8">
+        <Card className="border-none shadow-[0_20px_50px_rgba(0,0,0,0.1)] rounded-[3rem] overflow-hidden bg-white/50 backdrop-blur-sm">
+          <CardHeader className="bg-primary text-primary-foreground p-10">
+            <CardTitle className="text-3xl font-bold flex items-center justify-end gap-3">
+              المؤسس والمطور
+              <Code className="h-8 w-8" />
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-10 space-y-10 text-lg leading-relaxed">
+            <div className="flex gap-6 items-start">
+              <div className="bg-accent/20 p-4 rounded-2xl shadow-inner">
+                <GraduationCap className="h-8 w-8 text-primary" />
+              </div>
+              <div>
+                <p className="font-bold text-primary text-xl mb-3">المسيرة الأكاديمية</p>
+                <p className="text-muted-foreground">
+                  شريف حماد عبد الله، خريج متميز من <strong className="text-foreground">جامعة السودان للعلوم والتكنولوجيا</strong>. مبرمج وباحث علمي شغوف، يواصل حالياً رحلته الأكاديمية العالمية كطالب في <strong className="text-foreground">جامعة الناس (UoPeople)</strong> بالولايات المتحدة الأمريكية، متخصصاً في علوم الحاسوب وتطوير الأنظمة التعليمية الذكية.
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="font-bold text-primary mb-2">الخلفية الأكاديمية</p>
-              <p>شريف حمد عبد الله، خريج <strong>جامعة السودان للعلوم والتكنولوجيا</strong> (Sudan University of Science and Technology). وباحث علمي طموح يواصل حالياً مسيرته الأكاديمية كطالب في <strong>جامعة الناس</strong> (University of the People - UoPeople) بالولايات المتحدة الأمريكية.</p>
-            </div>
-          </div>
 
-          <div className="flex gap-4 items-start">
-            <div className="bg-accent/20 p-3 rounded-2xl">
-              <BookOpen className="h-6 w-6 text-primary" />
+            <div className="flex gap-6 items-start">
+              <div className="bg-accent/20 p-4 rounded-2xl shadow-inner">
+                <Award className="h-8 w-8 text-primary" />
+              </div>
+              <div>
+                <p className="font-bold text-primary text-xl mb-3">فلسفة Moc-co</p>
+                <p className="text-muted-foreground">
+                  لم يكن Moc-co مجرد تطبيق برمجي، بل هو تجسيد لرحلة إنسانية (ملحمة شريف). كخبير في الحلول الرقمية، صمم شريف هذا النظام ليدمج بين "القصة الدرامية" و"الخوارزميات التعليمية" لضمان ترسيخ اللغة الإنجليزية في عقل المتعلم بطريقة طبيعية وتفاعلية بعيداً عن الرتابة.
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="font-bold text-primary mb-2">رؤية تطبيق Moc-co</p>
-              <p>جاءت فكرة هذا التطبيق لتكون جسراً بين التجربة الحياتية العميقة وبين الرغبة في تمكين الآخرين لغوياً. "ملحمة شريف" ليست مجرد قصص، بل هي منهج تعليمي صمم بعناية لدمج مفردات وقواعد اللغة الإنجليزية في سياقات إنسانية واقعية تجعل التعلم تجربة لا تُنسى.</p>
-            </div>
-          </div>
 
-          <div className="pt-6 border-t italic text-muted-foreground">
-            "أؤمن أن اللغة هي المفتاح الوحيد الذي لا يمكن لأي سجن أو بحر أو حفرة أن ينتزعه منك." - شريف حمد
-          </div>
-        </CardContent>
-      </Card>
+            <div className="pt-8 border-t border-dashed italic text-primary font-medium text-center">
+              "في Moc-co، نحن لا ندرس الإنجليزية.. نحن نعيشها."
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
