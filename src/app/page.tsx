@@ -11,7 +11,7 @@ export default function HomePage() {
 
   return (
     <div className="space-y-20 pb-20">
-      {/* Hero Section - Ultra Professional */}
+      {/* Hero Section - Ultra Professional with updated text */}
       <section className="relative overflow-hidden rounded-[3.5rem] bg-slate-900 px-8 py-24 text-white md:px-20 md:py-36 shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)]">
         <div className="absolute top-0 right-0 w-full h-full bg-[url('https://picsum.photos/seed/tech/1920/1080')] bg-cover bg-center opacity-20 mix-blend-overlay" />
         <div className="absolute inset-0 bg-gradient-to-l from-slate-900 via-slate-900/80 to-transparent" />
@@ -25,8 +25,8 @@ export default function HomePage() {
             لا تتعلم اللغة.. <br />
             <span className="text-accent underline decoration-white/20 underline-offset-8">عِش الملحمة.</span>
           </h1>
-          <p className="text-2xl text-slate-300 leading-relaxed max-w-3xl mr-auto font-light">
-            بضغطة واحدة، افتح عالم الـ 300 فصل الجاهزة. من قاعات جامعة السودان إلى أهوال المحيط المظلمة. منهج لغوي مكثف مبني على "ملحمة شريف" الحقيقية، مصمم لغرس المفردات في عقلك اللاواعي.
+          <p className="text-2xl text-slate-300 leading-relaxed max-w-3xl mr-auto font-bold">
+            تعلم الإنجليزية بـ 300 قصة حقيقية مع تمارين وترجمة حصرية لأي كلمة جديدة.
           </p>
           <div className="flex flex-wrap gap-6 pt-6 justify-end">
             <Button size="lg" className="bg-accent text-slate-900 font-black hover:bg-white px-12 h-16 text-xl rounded-2xl shadow-2xl transition-all hover:scale-105" asChild>
