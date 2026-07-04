@@ -1,11 +1,16 @@
+
+"use client";
+
 import { MOCK_LESSONS } from '@/lib/mock-data';
 import { LessonCard } from '@/components/LessonCard';
 import { Button } from '@/components/ui/button';
 import { ShieldCheck, ChevronRight, Library, Sparkles, Volume2, FileDown, Globe, Zap, BookOpen } from 'lucide-react';
 import Link from 'next/link';
+import { useLanguage } from '@/components/LanguageProvider';
 
 export default function HomePage() {
   const featuredLessons = MOCK_LESSONS.slice(0, 3);
+  const { t, language } = useLanguage();
 
   return (
     <div className="space-y-32 pb-32">
@@ -17,67 +22,69 @@ export default function HomePage() {
         <div className="relative z-10 max-w-5xl mx-auto text-center space-y-12">
           <div className="inline-flex items-center gap-3 bg-white/10 px-6 py-2.5 rounded-full backdrop-blur-xl border border-white/20">
             <Sparkles className="h-5 w-5 text-accent" />
-            <span className="text-sm font-black tracking-widest uppercase">The Next Gen of Language Learning</span>
+            <span className="text-sm font-black tracking-widest uppercase">{t.hero.badge}</span>
           </div>
           
           <h1 className="text-6xl font-black font-headline md:text-8xl leading-none tracking-tighter">
-            Learn English with <br />
-            <span className="text-accent underline decoration-white/20 underline-offset-8">300 Real Stories</span>
+            {language === 'en' ? (
+              <>Learn English with <br /><span className="text-accent underline decoration-white/20 underline-offset-8">300 Real Stories</span></>
+            ) : (
+              <>تعلم الإنجليزية مع <br /><span className="text-accent underline decoration-white/20 underline-offset-8">300 قصة حقيقية</span></>
+            )}
           </h1>
           
           <p className="text-xl md:text-3xl text-white/80 leading-relaxed max-w-3xl mx-auto font-medium">
-            Master the language through real-life drama, interactive exercises, and context-aware translations. 
-            300 chapters of professional experience.
+            {t.hero.description}
           </p>
           
           <div className="flex flex-col sm:flex-row gap-6 justify-center pt-8">
             <Button size="lg" className="bg-accent text-primary font-black hover:bg-white px-12 h-20 text-2xl rounded-[2rem] shadow-2xl transition-all hover:scale-105 active:scale-95" asChild>
-              <Link href="/lessons">Start the Journey</Link>
+              <Link href="/lessons">{t.hero.start}</Link>
             </Button>
             <Button size="lg" variant="outline" className="border-white/30 bg-white/5 hover:bg-white/10 text-white px-12 h-20 text-2xl rounded-[2rem] backdrop-blur-md" asChild>
-              <Link href="/stats">View Progress</Link>
+              <Link href="/stats">{t.hero.viewStats}</Link>
             </Button>
           </div>
         </div>
       </section>
 
-      {/* Why Choose Us Section */}
+      {/* Features Section */}
       <section className="space-y-20 py-10 px-4">
         <div className="text-center space-y-6">
-          <h2 className="text-5xl font-black font-headline text-primary">System Features</h2>
-          <p className="text-muted-foreground text-xl max-w-3xl mx-auto">Educational engineering designed for ambitious learners.</p>
+          <h2 className="text-5xl font-black font-headline text-primary">{t.features.title}</h2>
+          <p className="text-muted-foreground text-xl max-w-3xl mx-auto">{t.features.subtitle}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
           <FeatureCard 
             icon={<Library className="h-10 w-10 text-blue-600" />}
-            title="300 Modular Chapters"
-            description="A massive curriculum covering all levels from foundation to absolute mastery."
+            title={t.features.f1_title}
+            description={t.features.f1_desc}
           />
           <FeatureCard 
             icon={<Globe className="h-10 w-10 text-accent" />}
-            title="Contextual Translation"
-            description="Smart technology to translate words in their original context for better retention."
+            title={t.features.f2_title}
+            description={t.features.f2_desc}
           />
           <FeatureCard 
             icon={<Volume2 className="h-10 w-10 text-purple-600" />}
-            title="High-Fidelity Audio"
-            description="Integrated Text-to-Speech (TTS) engine to enhance pronunciation and listening."
+            title={t.features.f3_title}
+            description={t.features.f3_desc}
           />
           <FeatureCard 
             icon={<FileDown className="h-10 w-10 text-green-600" />}
-            title="Professional PDF Reports"
-            description="Generate complete educational documents in PDF format for every single lesson."
+            title={t.features.f4_title}
+            description={t.features.f4_desc}
           />
           <FeatureCard 
             icon={<Zap className="h-10 w-10 text-amber-600" />}
-            title="Real-Time Analytics"
-            description="Intelligent dashboard calculating XP, accuracy, and real learning hours."
+            title={t.features.f5_title}
+            description={t.features.f5_desc}
           />
           <FeatureCard 
             icon={<ShieldCheck className="h-10 w-10 text-red-600" />}
-            title="Secure Access System"
-            description="Subscription management via unique codes and secure cloud database."
+            title={t.features.f6_title}
+            description={t.features.f6_desc}
           />
         </div>
       </section>
@@ -86,12 +93,12 @@ export default function HomePage() {
       <section className="space-y-16 px-4">
         <div className="flex flex-col md:flex-row items-end justify-between gap-8 border-b border-primary/10 pb-12">
           <div className="space-y-4">
-            <h2 className="text-4xl font-black font-headline text-slate-900">Chapter Highlights</h2>
-            <p className="text-muted-foreground text-xl">Experience the quality with our featured trial lessons.</p>
+            <h2 className="text-4xl font-black font-headline text-slate-900">{language === 'en' ? 'Chapter Highlights' : 'أبرز الفصول'}</h2>
+            <p className="text-muted-foreground text-xl">{language === 'en' ? 'Experience the quality with our featured trial lessons.' : 'اختبر الجودة من خلال فصولنا التجريبية المختارة.'}</p>
           </div>
           <Button variant="ghost" className="text-primary font-black group text-xl hover:bg-primary/5 px-8 h-16 rounded-2xl" asChild>
             <Link href="/lessons" className="flex items-center gap-3">
-              Explore All Lessons <ChevronRight className="h-6 w-6 transition-transform group-hover:translate-x-1" />
+              {language === 'en' ? 'Explore All Lessons' : 'استكشف جميع الدروس'} <ChevronRight className="h-6 w-6 transition-transform group-hover:translate-x-1" />
             </Link>
           </Button>
         </div>

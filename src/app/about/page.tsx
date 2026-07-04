@@ -1,17 +1,21 @@
+
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { GraduationCap, Code, Award, User } from 'lucide-react';
+import { useLanguage } from '@/components/LanguageProvider';
 
 export default function AboutPage() {
+  const { t } = useLanguage();
+
   return (
     <div className="max-w-4xl mx-auto space-y-12 py-16 px-4">
       <div className="text-center space-y-6">
         <div className="mx-auto w-24 h-24 bg-primary/10 rounded-3xl flex items-center justify-center rotate-3 border-2 border-primary/20">
           <User className="h-12 w-12 text-primary" />
         </div>
-        <h1 className="text-5xl font-black font-headline text-primary tracking-tight">Who is Sharif Hamad?</h1>
-        <p className="text-muted-foreground text-xl italic max-w-2xl mx-auto">"An educational vision born from struggle to create a generation of linguistically empowered individuals"</p>
+        <h1 className="text-5xl font-black font-headline text-primary tracking-tight">{t.about.title}</h1>
+        <p className="text-muted-foreground text-xl italic max-w-2xl mx-auto">{t.about.subtitle}</p>
       </div>
 
       <div className="grid grid-cols-1 gap-8">
@@ -19,7 +23,7 @@ export default function AboutPage() {
           <CardHeader className="bg-primary text-primary-foreground p-10">
             <CardTitle className="text-3xl font-bold flex items-center gap-3">
               <Code className="h-8 w-8" />
-              Founder and Developer
+              {t.about.founder}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-10 space-y-10 text-lg leading-relaxed">
@@ -28,9 +32,9 @@ export default function AboutPage() {
                 <GraduationCap className="h-8 w-8 text-primary" />
               </div>
               <div>
-                <p className="font-bold text-primary text-xl mb-3">Academic Journey</p>
+                <p className="font-bold text-primary text-xl mb-3">{t.about.academic}</p>
                 <p className="text-muted-foreground">
-                  Sharif Hamad Abdallah is a distinguished graduate from <strong className="text-foreground">Sudan University of Science and Technology</strong>. A passionate programmer and scientific researcher, currently continuing his academic journey as a student at <strong className="text-foreground">University of the People (UoPeople)</strong>, USA, specializing in Computer Science and intelligent educational systems.
+                  {t.about.academic_desc}
                 </p>
               </div>
             </div>
@@ -40,9 +44,9 @@ export default function AboutPage() {
                 <Award className="h-8 w-8 text-primary" />
               </div>
               <div>
-                <p className="font-bold text-primary text-xl mb-3">Moc-co Philosophy</p>
+                <p className="font-bold text-primary text-xl mb-3">{t.about.philosophy}</p>
                 <p className="text-muted-foreground">
-                  Moc-co is not just software; it is the embodiment of a human journey (The Sharif Saga). As a digital solutions expert, Sharif designed this system to merge "narrative drama" with "educational algorithms" to ensure language acquisition is natural and interactive.
+                  {t.about.philosophy_desc}
                 </p>
               </div>
             </div>
