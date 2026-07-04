@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from 'next/link';
@@ -14,7 +13,6 @@ export function Navigation() {
 
   useEffect(() => {
     setAuthType(localStorage.getItem('moc-co-auth'));
-    // Check initial theme from document class
     setIsDark(document.documentElement.classList.contains('dark'));
   }, []);
 
@@ -48,27 +46,27 @@ export function Navigation() {
         <div className="flex items-center gap-4 md:gap-6 overflow-x-auto no-scrollbar">
           <Link href="/" className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors shrink-0">
             <Home className="h-5 w-5" />
-            <span className="text-[10px] font-medium uppercase tracking-wider">الرئيسية</span>
+            <span className="text-[10px] font-medium uppercase tracking-wider">Home</span>
           </Link>
           <Link href="/lessons" className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors shrink-0">
             <Search className="h-5 w-5" />
-            <span className="text-[10px] font-medium uppercase tracking-wider">الدروس</span>
+            <span className="text-[10px] font-medium uppercase tracking-wider">Lessons</span>
           </Link>
           <Link href="/about" className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors shrink-0">
             <Info className="h-5 w-5" />
-            <span className="text-[10px] font-medium uppercase tracking-wider">من نحن</span>
+            <span className="text-[10px] font-medium uppercase tracking-wider">About</span>
           </Link>
           
           {authType === 'admin' && (
             <Link href="/admin/dashboard" className="flex flex-col items-center gap-1 text-accent hover:text-accent/80 transition-colors font-bold shrink-0">
               <Settings className="h-5 w-5" />
-              <span className="text-[10px] uppercase tracking-wider">الإدارة</span>
+              <span className="text-[10px] uppercase tracking-wider">Admin</span>
             </Link>
           )}
 
           <Link href="/stats" className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors shrink-0">
             <Trophy className="h-5 w-5" />
-            <span className="text-[10px] font-medium uppercase tracking-wider">تقدمي</span>
+            <span className="text-[10px] font-medium uppercase tracking-wider">Stats</span>
           </Link>
 
           <div className="h-8 w-px bg-border mx-2 hidden md:block" />
@@ -93,12 +91,12 @@ export function Navigation() {
               className="flex flex-col items-center gap-1 text-muted-foreground hover:text-destructive transition-colors shrink-0"
             >
               <LogOut className="h-5 w-5" />
-              <span className="text-[10px] font-medium uppercase tracking-wider">خروج</span>
+              <span className="text-[10px] font-medium uppercase tracking-wider">Logout</span>
             </button>
           ) : (
             <Link href="/login" className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors shrink-0">
               <LogIn className="h-5 w-5" />
-              <span className="text-[10px] font-medium uppercase tracking-wider">دخول</span>
+              <span className="text-[10px] font-medium uppercase tracking-wider">Login</span>
             </Link>
           )}
         </div>
