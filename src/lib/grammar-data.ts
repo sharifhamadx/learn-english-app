@@ -6,10 +6,8 @@ export interface GrammarTopic {
   explanationEn: string;
   explanationAr: string;
   stories: {
-    titleEn: string;
-    contentEn: string;
-    titleAr: string;
-    contentAr: string;
+    title: string;
+    content: string;
   }[];
   examples: string[];
   quiz: {
@@ -24,20 +22,16 @@ export const GRAMMAR_DATA: GrammarTopic[] = [
     id: "present-simple",
     titleEn: "Present Simple",
     titleAr: "المضارع البسيط",
-    explanationEn: "Used to describe habits, general truths, and fixed arrangements. Add -s/-es for he, she, it.",
-    explanationAr: "يستخدم لوصف العادات، الحقائق العامة، والمواعيد الثابتة. نضيف -s للفعل مع المفرد الغائب.",
+    explanationEn: "Used to describe habits, general truths, and fixed arrangements.",
+    explanationAr: "يستخدم لوصف العادات، الحقائق العامة، والمواعيد الثابتة.",
     stories: [
       {
-        titleEn: "Sharif's Routine",
-        contentEn: "Every morning, Sharif wakes up at 5 AM. He prays, drinks a cup of coffee, and then walks to the English center. He studies for six hours daily. His friends, like Fath Al-Rahman, often visit him. They discuss the future and share their dreams. Sharif works hard because he wants to succeed.",
-        titleAr: "روتين شريف",
-        contentAr: "كل صباح، يستيقظ شريف في الخامسة فجراً. يصلي، يشرب كوباً من القهوة، ثم يمشي إلى مركز اللغة الإنجليزية. يذاكر لمدة ست ساعات يومياً. أصدقاؤه، مثل فتح الرحمن، يزورونه غالباً. يناقشون المستقبل ويشاركون أحلامهم. شريف يعمل بجد لأنه يريد النجاح."
+        title: "Sharif's Routine",
+        content: "Every morning, Sharif wakes up at 5 AM. He prays, drinks a cup of coffee, and then walks to the English center. He studies for six hours daily. His friends, like Fath Al-Rahman, often visit him. They discuss the future and share their dreams. Sharif works hard because he wants to succeed."
       },
       {
-        titleEn: "Namariq's New Life",
-        contentEn: "Namariq lives in a beautiful house abroad. She speaks English fluently now. Every weekend, she calls her family. She misses her home, but she enjoys the stability. Her husband works in a large company. Life seems perfect on the outside, but she sometimes remembers the old days in Sudan.",
-        titleAr: "حياة نمارق الجديدة",
-        contentAr: "تعيش نمارق في منزل جميل في الخارج. تتحدث الإنجليزية بطلاقة الآن. كل عطلة نهاية أسبوع، تتصل بعائلتها. تشتاق لمنزلها، لكنها تستمتع بالاستقرار. زوجها يعمل في شركة كبيرة. تبدو الحياة مثالية من الخارج، لكنها تتذكر أحياناً الأيام الخوالي في السودان."
+        title: "Namariq's New Life",
+        content: "Namariq lives in a beautiful house abroad. She speaks English fluently now. Every weekend, she calls her family. She misses her home, but she enjoys the stability. Her husband works in a large company. Life seems perfect on the outside."
       }
     ],
     examples: [
@@ -67,20 +61,16 @@ export const GRAMMAR_DATA: GrammarTopic[] = [
     id: "past-simple",
     titleEn: "Past Simple",
     titleAr: "الماضي البسيط",
-    explanationEn: "Used for actions that started and finished in the past. Regular verbs end in -ed.",
-    explanationAr: "يستخدم للأفعال التي بدأت وانتهت في الماضي. الأفعال المنتظمة تنتهي بـ -ed.",
+    explanationEn: "Used for actions that started and finished in the past.",
+    explanationAr: "يستخدم للأفعال التي بدأت وانتهت في الماضي.",
     stories: [
       {
-        titleEn: "The Sea Journey",
-        contentEn: "In 2022, Sharif crossed the ocean in a rubber boat. The engine exploded suddenly. He fought the waves for six hours. He felt terrified, but he never gave up. Finally, a rescue ship arrived and saved everyone. That day changed his life forever.",
-        titleAr: "رحلة البحر",
-        contentAr: "في عام 2022، عبر شريف المحيط في قارب مطاطي. انفجر المحرك فجأة. صارع الأمواج لمدة ست ساعات. شعر بالرعب، لكنه لم يستسلم أبداً. أخيراً، وصلت سفينة إنقاذ وأنقذت الجميع. ذلك اليوم غير حياته للأبد."
+        title: "The Sea Journey",
+        content: "In 2022, Sharif crossed the ocean in a rubber boat. The engine exploded suddenly. He fought the waves for six hours. He felt terrified, but he never gave up. Finally, a rescue ship arrived and saved everyone. That day changed his life forever."
       },
       {
-        titleEn: "Makarem's Wedding",
-        contentEn: "Makarem cried when her father told her the news. She lost consciousness because of grief. Her family forced her to marry a man she didn't love. She stayed in the hospital for two weeks. She sent her photo to Sharif after four years of waiting. It was a tragic day for both of them.",
-        titleAr: "زفاف مكارم",
-        contentAr: "بكت مكارم عندما أخبرها والدها بالخبر. فقدت وعيها بسبب الحزن. أجبرتها عائلتها على الزواج من رجل لا تحبه. بقيت في المستشفى لمدة أسبوعين. أرسلت صورتها لشريف بعد أربع سنوات من الانتظار. كان يوماً مأساوياً لكليهما."
+        title: "Makarem's Wedding",
+        content: "Makarem cried when her father told her the news. She lost consciousness because of grief. Her family forced her to marry a man she didn't love. She stayed in the hospital for two weeks. It was a tragic day for both of them."
       }
     ],
     examples: [
@@ -104,6 +94,123 @@ export const GRAMMAR_DATA: GrammarTopic[] = [
       { question: "Sharif ___ the ocean in 2022.", options: ["cross", "crossed", "crosses"], correct: "crossed" },
       { question: "Makarem ___ her photo after 4 years.", options: ["send", "sends", "sent"], correct: "sent" },
       { question: "___ you see the news?", options: ["Do", "Did", "Was"], correct: "Did" }
+    ]
+  },
+  {
+    id: "future-simple",
+    titleEn: "Future Simple",
+    titleAr: "المستقبل البسيط",
+    explanationEn: "Used to talk about future plans, predictions, or promises using 'will' or 'going to'.",
+    explanationAr: "يستخدم للحديث عن خطط المستقبل، التوقعات، أو الوعود باستخدام 'will' أو 'going to'.",
+    stories: [
+      {
+        title: "The Hope of Return",
+        content: "One day, Sharif will return to his family. He will build a big house for his mother. He is going to start his own English school. His sisters will be proud of him. He knows the journey is long, but he will succeed. The future will be brighter than the past."
+      },
+      {
+        title: "Namariq's Regret",
+        content: "Namariq will probably visit Sudan next summer. She will see the changes in her old neighborhood. She will wonder about Sharif and his life. She is going to bring gifts for her family. Perhaps she will find the peace she left behind."
+      }
+    ],
+    examples: [
+      "I will call you tomorrow.",
+      "Sharif is going to study medicine.",
+      "It will rain in the evening.",
+      "We will win the game.",
+      "They are going to travel to London.",
+      "I promise I will help you.",
+      "She will be a great doctor.",
+      "Will you help me with my homework?",
+      "The sun will rise at 6 AM tomorrow.",
+      "He is not going to quit.",
+      "I think I will stay home tonight.",
+      "We are going to have a party.",
+      "They will buy a new car soon.",
+      "I'm sure everything will be fine.",
+      "What are you going to do this weekend?"
+    ],
+    quiz: [
+      { question: "I ___ you tomorrow.", options: ["call", "will call", "called"], correct: "will call" },
+      { question: "He is ___ to start a school.", options: ["go", "goes", "going"], correct: "going" },
+      { question: "___ you be at the party?", options: ["Will", "Do", "Are"], correct: "Will" }
+    ]
+  },
+  {
+    id: "present-perfect",
+    titleEn: "Present Perfect",
+    titleAr: "المضارع التام",
+    explanationEn: "Connects the past to the present. Used for experiences or actions that happened at an unspecified time.",
+    explanationAr: "يربط الماضي بالحاضر. يستخدم للخبرات أو الأفعال التي حدثت في وقت غير محدد.",
+    stories: [
+      {
+        title: "The Survivor",
+        content: "Sharif has survived many challenges. He has seen the dark side of the ocean. He has worked for 16 hours a day in difficult conditions. He has never lost his faith. These experiences have made him stronger. He has learned that resilience is the only way forward."
+      },
+      {
+        title: "The Traveler",
+        content: "Namariq has lived abroad for several years. She has visited many famous landmarks. She has forgotten some of her old habits. However, she has always kept a photo of her family. She has achieved stability, but she hasn't found true happiness yet."
+      }
+    ],
+    examples: [
+      "I have finished my lesson.",
+      "Sharif has never given up.",
+      "Have you ever seen a rubber boat?",
+      "They have lived here since 2010.",
+      "She has already eaten breakfast.",
+      "We haven't seen that movie yet.",
+      "He has broken his leg once.",
+      "I have lost my keys.",
+      "The train has just left.",
+      "How long have you known him?",
+      "They have built a new hospital.",
+      "She has worked there for five years.",
+      "I have never been to Kuwait.",
+      "Have they arrived yet?",
+      "We have studied these rules before."
+    ],
+    quiz: [
+      { question: "Sharif ___ many challenges.", options: ["has survived", "survive", "survives"], correct: "has survived" },
+      { question: "I have ___ my lesson.", options: ["finish", "finished", "finishing"], correct: "finished" },
+      { question: "___ you ever seen a boat?", options: ["Do", "Has", "Have"], correct: "Have" }
+    ]
+  },
+  {
+    id: "modals",
+    titleEn: "Modal Verbs",
+    titleAr: "الأفعال المساعدة",
+    explanationEn: "Used to express ability, necessity, or permission (can, must, should).",
+    explanationAr: "تستخدم للتعبير عن القدرة، الضرورة، أو الإذن (يمكن، يجب، ينبغي).",
+    stories: [
+      {
+        title: "The Immigrant's Rules",
+        content: "An immigrant must be very patient. He can face many dangers on his way. He should keep his documents safe. He must not trust everyone he meets. He can learn a new language to survive. He should never forget his roots."
+      },
+      {
+        title: "The Student's Duty",
+        content: "A student should study every day. He can achieve his dreams through education. He must listen to his teachers. He shouldn't waste his time on useless things. He can ask for help when he feels stuck. He must believe in himself."
+      }
+    ],
+    examples: [
+      "I can speak English.",
+      "You must wear a seatbelt.",
+      "He should study harder.",
+      "We can't go out tonight.",
+      "They must not enter this room.",
+      "Should I call him now?",
+      "She can play the piano very well.",
+      "You must finish your work before 5 PM.",
+      "He shouldn't smoke.",
+      "Can you help me with this?",
+      "We must respect our parents.",
+      "They can swim across the river.",
+      "I should drink more water.",
+      "You can stay here if you want.",
+      "Everything must be ready by tomorrow."
+    ],
+    quiz: [
+      { question: "He ___ study harder.", options: ["can", "should", "must not"], correct: "should" },
+      { question: "I ___ speak three languages.", options: ["can", "should", "must"], correct: "can" },
+      { question: "You ___ not enter.", options: ["must", "can", "should"], correct: "must" }
     ]
   }
 ];

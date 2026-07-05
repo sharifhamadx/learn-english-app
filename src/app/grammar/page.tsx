@@ -27,12 +27,12 @@ export default function GrammarAcademy() {
     doc.text(title, 20, 20);
     
     doc.setFontSize(14);
-    doc.text("Explanation:", 20, 35);
+    doc.text("Explanation / الشرح:", 20, 35);
     doc.setFontSize(12);
     doc.text(explanation, 20, 45, { maxWidth: 170 });
 
     doc.setFontSize(14);
-    doc.text("Examples:", 20, 70);
+    doc.text("English Examples:", 20, 70);
     doc.setFontSize(11);
     topic.examples.forEach((ex, i) => {
       doc.text(`${i + 1}. ${ex}`, 20, 80 + (i * 7));
@@ -40,14 +40,12 @@ export default function GrammarAcademy() {
 
     doc.addPage();
     doc.setFontSize(14);
-    doc.text("Stories:", 20, 20);
+    doc.text("English Stories:", 20, 20);
     topic.stories.forEach((s, i) => {
-      const sTitle = language === 'en' ? s.titleEn : s.titleAr;
-      const sContent = language === 'en' ? s.contentEn : s.contentAr;
       doc.setFontSize(12);
-      doc.text(`${i + 1}. ${sTitle}`, 20, 35 + (i * 60));
+      doc.text(`${i + 1}. ${s.title}`, 20, 35 + (i * 60));
       doc.setFontSize(10);
-      doc.text(sContent, 20, 45 + (i * 60), { maxWidth: 170 });
+      doc.text(s.content, 20, 45 + (i * 60), { maxWidth: 170 });
     });
 
     doc.save(`${topic.id}-guide.pdf`);
@@ -77,25 +75,27 @@ export default function GrammarAcademy() {
         {/* Sidebar Topics */}
         <div className="lg:col-span-1 space-y-4">
           <h3 className="font-black text-primary uppercase tracking-widest text-sm px-4">{t.grammar.select_topic}</h3>
-          {GRAMMAR_DATA.map(topic => (
-            <button
-              key={topic.id}
-              onClick={() => {
-                setSelectedTopic(topic);
-                setAnswers({});
-                setFeedback({});
-              }}
-              className={cn(
-                "w-full text-left p-6 rounded-[2rem] transition-all flex items-center justify-between group border-2",
-                selectedTopic?.id === topic.id 
-                  ? "bg-primary text-white border-primary shadow-xl scale-105" 
-                  : "bg-white hover:border-primary/20 border-transparent shadow-sm"
-              )}
-            >
-              <span className="font-bold text-lg">{language === 'en' ? topic.titleEn : topic.titleAr}</span>
-              <ArrowRight className={cn("h-5 w-5 transition-transform", selectedTopic?.id === topic.id ? "translate-x-1" : "group-hover:translate-x-1")} />
-            </button>
-          ))}
+          <div className="grid grid-cols-1 gap-3">
+            {GRAMMAR_DATA.map(topic => (
+              <button
+                key={topic.id}
+                onClick={() => {
+                  setSelectedTopic(topic);
+                  setAnswers({});
+                  setFeedback({});
+                }}
+                className={cn(
+                  "w-full text-left p-6 rounded-[2rem] transition-all flex items-center justify-between group border-2",
+                  selectedTopic?.id === topic.id 
+                    ? "bg-primary text-white border-primary shadow-xl scale-105" 
+                    : "bg-white hover:border-primary/20 border-transparent shadow-sm"
+                )}
+              >
+                <span className="font-bold text-lg">{language === 'en' ? topic.titleEn : topic.titleAr}</span>
+                <ArrowRight className={cn("h-5 w-5 transition-transform", selectedTopic?.id === topic.id ? (language === 'ar' ? '-translate-x-1 rotate-180' : 'translate-x-1') : "group-hover:translate-x-1")} />
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Content Area */}
@@ -104,9 +104,9 @@ export default function GrammarAcademy() {
             <div className="space-y-10 animate-in fade-in slide-in-from-right-4 duration-500">
               {/* Explanation Card */}
               <Card className="border-none shadow-xl rounded-[3rem] overflow-hidden bg-white/50 backdrop-blur-sm border border-white">
-                <CardHeader className="bg-primary/5 p-10 flex flex-row items-center justify-between">
-                  <div className="space-y-2">
-                    <CardTitle className="text-3xl font-black text-primary flex items-center gap-3">
+                <CardHeader className="bg-primary/5 p-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                  <div className="space-y-2 text-center md:text-left rtl:md:text-right">
+                    <CardTitle className="text-3xl font-black text-primary flex items-center gap-3 justify-center md:justify-start">
                       <Lightbulb className="h-8 w-8 text-accent" />
                       {language === 'en' ? selectedTopic.titleEn : selectedTopic.titleAr}
                     </CardTitle>
@@ -116,7 +116,7 @@ export default function GrammarAcademy() {
                   </div>
                   <Button 
                     variant="outline" 
-                    className="rounded-2xl border-2 h-14 px-6 font-bold gap-2"
+                    className="rounded-2xl border-2 h-14 px-6 font-bold gap-2 shrink-0"
                     onClick={() => handleDownloadPDF(selectedTopic)}
                   >
                     <Download className="h-5 w-5" />
@@ -135,9 +135,9 @@ export default function GrammarAcademy() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {selectedTopic.stories.map((story, i) => (
                           <div key={i} className="bg-white p-8 rounded-[2.5rem] shadow-md space-y-4 border-b-4 border-primary/10">
-                            <h4 className="text-xl font-black text-primary">{language === 'en' ? story.titleEn : story.titleAr}</h4>
-                            <p className={cn("text-muted-foreground leading-relaxed italic", language === 'ar' ? 'font-arabic text-right' : 'text-left')}>
-                              {language === 'en' ? story.contentEn : story.contentAr}
+                            <h4 className="text-xl font-black text-primary">{story.title}</h4>
+                            <p className="text-muted-foreground leading-relaxed italic font-body text-left" dir="ltr">
+                              {story.content}
                             </p>
                           </div>
                         ))}
@@ -147,8 +147,8 @@ export default function GrammarAcademy() {
                     <TabsContent value="examples" className="space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {selectedTopic.examples.map((ex, i) => (
-                          <div key={i} className="flex items-center gap-4 p-4 bg-white rounded-2xl border-2 border-slate-50">
-                            <span className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-black text-xs">{i+1}</span>
+                          <div key={i} className="flex items-center gap-4 p-4 bg-white rounded-2xl border-2 border-slate-50" dir="ltr">
+                            <span className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-black text-xs shrink-0">{i+1}</span>
                             <span className="font-medium text-slate-700">{ex}</span>
                           </div>
                         ))}
@@ -158,8 +158,8 @@ export default function GrammarAcademy() {
                     <TabsContent value="quiz" className="space-y-6">
                       {selectedTopic.quiz.map((q, i) => (
                         <div key={i} className="p-8 bg-white rounded-[2.5rem] shadow-sm space-y-6">
-                          <p className="text-xl font-bold text-slate-800">{q.question}</p>
-                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          <p className="text-xl font-bold text-slate-800" dir="ltr">{q.question}</p>
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4" dir="ltr">
                             {q.options.map(opt => (
                               <Button
                                 key={opt}
@@ -199,7 +199,7 @@ export default function GrammarAcademy() {
               </div>
               <div className="space-y-2">
                 <h3 className="text-2xl font-black text-primary/60">{t.grammar.select_topic}</h3>
-                <p className="text-muted-foreground">Pick a rule from the left to start mastering English grammar.</p>
+                <p className="text-muted-foreground">{language === 'en' ? 'Pick a rule from the left to start mastering English grammar.' : 'اختر قاعدة من القائمة لتبدأ إتقان قواعد اللغة الإنجليزية.'}</p>
               </div>
             </div>
           )}
