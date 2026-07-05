@@ -4,10 +4,9 @@
 import { useState } from 'react';
 import { useLanguage } from '@/components/LanguageProvider';
 import { GRAMMAR_DATA, GrammarTopic } from '@/lib/grammar-data';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Sparkles, BookOpen, CheckCircle2, XCircle, ArrowRight, BookCheck, Lightbulb, Settings2, Info, GraduationCap, ListChecks } from 'lucide-react';
+import { Sparkles, BookOpen, CheckCircle2, XCircle, ArrowRight, BookCheck, Settings2, ListChecks, GraduationCap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function GrammarAcademy() {
@@ -15,7 +14,6 @@ export default function GrammarAcademy() {
   const [selectedTopic, setSelectedTopic] = useState<GrammarTopic | null>(null);
   const [examAnswers, setExamAnswers] = useState<Record<number, string>>({});
   const [examFeedback, setExamFeedback] = useState<Record<number, boolean>>({});
-  const [showExamResults, setShowExamResults] = useState(false);
 
   const checkAnswer = (idx: number, opt: string, correct: string) => {
     setExamAnswers(prev => ({ ...prev, [idx]: opt }));
@@ -33,13 +31,13 @@ export default function GrammarAcademy() {
       {/* Header */}
       <div className="bg-gradient-to-r from-primary to-blue-600 rounded-[3rem] p-10 md:p-16 text-white space-y-6 shadow-2xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl" />
-        <div className="relative z-10 space-y-4">
-          <div className="inline-flex items-center gap-2 bg-white/20 px-4 py-2 rounded-full backdrop-blur-md">
+        <div className="relative z-10 space-y-4 text-center md:text-left rtl:md:text-right">
+          <div className="inline-flex items-center gap-2 bg-white/20 px-4 py-2 rounded-full backdrop-blur-md mx-auto md:mx-0">
             <Sparkles className="h-5 w-5 text-accent" />
             <span className="font-bold text-xs tracking-widest uppercase">{t.grammar.title}</span>
           </div>
           <h1 className="text-4xl md:text-6xl font-black font-headline">{t.grammar.title}</h1>
-          <p className="text-white/80 text-xl max-w-2xl">{t.grammar.subtitle}</p>
+          <p className="text-white/80 text-xl max-w-2xl mx-auto md:mx-0">{t.grammar.subtitle}</p>
         </div>
       </div>
 
@@ -47,7 +45,7 @@ export default function GrammarAcademy() {
         {/* Sidebar Topics */}
         <div className="lg:col-span-1 space-y-4">
           <h3 className="font-black text-primary uppercase tracking-widest text-sm px-4">{t.grammar.select_topic}</h3>
-          <div className="grid grid-cols-1 gap-3">
+          <div className="grid grid-cols-1 gap-3 max-h-[600px] overflow-y-auto pr-2 no-scrollbar">
             {GRAMMAR_DATA.map(topic => (
               <button
                 key={topic.id}
@@ -55,10 +53,9 @@ export default function GrammarAcademy() {
                   setSelectedTopic(topic);
                   setExamAnswers({});
                   setExamFeedback({});
-                  setShowExamResults(false);
                 }}
                 className={cn(
-                  "w-full text-left p-6 rounded-[2rem] transition-all flex items-center justify-between group border-2",
+                  "w-full text-left rtl:text-right p-6 rounded-[2rem] transition-all flex items-center justify-between group border-2",
                   selectedTopic?.id === topic.id 
                     ? "bg-primary text-white border-primary shadow-xl scale-105" 
                     : "bg-white hover:border-primary/20 border-transparent shadow-sm"
@@ -80,9 +77,9 @@ export default function GrammarAcademy() {
               <div className="space-y-6">
                 <div className="flex items-center gap-3 px-4">
                   <BookOpen className="h-6 w-6 text-primary" />
-                  <h2 className="text-2xl font-black text-primary uppercase tracking-tighter">Narrative Practice / القصص التعليمية</h2>
+                  <h2 className="text-2xl font-black text-primary uppercase tracking-tighter">Narrative Context / سياق القصة</h2>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 gap-6">
                   {selectedTopic.stories.map((story, i) => (
                     <Card key={i} className="border-none shadow-lg rounded-[2.5rem] overflow-hidden bg-white/80 border border-white">
                       <CardHeader className="bg-primary/5 p-8 pb-4">
@@ -145,7 +142,7 @@ export default function GrammarAcademy() {
                     <GraduationCap className="h-4 w-4" />
                     Interactive Exam / امتحان تفاعلي
                   </div>
-                  <h2 className="text-4xl font-black text-slate-900 tracking-tighter">Test Your Knowledge</h2>
+                  <h2 className="text-4xl font-black text-slate-900 tracking-tighter">Mastery Test</h2>
                 </div>
 
                 <div className="space-y-6">
@@ -163,8 +160,8 @@ export default function GrammarAcademy() {
                               variant={examAnswers[i] === opt ? "default" : "outline"}
                               className={cn(
                                 "h-16 rounded-xl font-bold border-2 transition-all",
-                                examAnswers[i] === opt && examFeedback[i] ? "border-green-500 bg-green-50 text-green-700 hover:bg-green-100" : 
-                                examAnswers[i] === opt && !examFeedback[i] ? "border-red-500 bg-red-50 text-red-700 hover:bg-red-100" : ""
+                                examAnswers[i] === opt && examFeedback[i] ? "border-green-500 bg-green-50 text-green-700" : 
+                                examAnswers[i] === opt && !examFeedback[i] ? "border-red-500 bg-red-50 text-red-700" : ""
                               )}
                               onClick={() => checkAnswer(i, opt, q.correct)}
                               disabled={examFeedback[i] !== undefined}
@@ -179,7 +176,7 @@ export default function GrammarAcademy() {
                             examFeedback[i] ? "text-green-600" : "text-red-600"
                           )}>
                             {examFeedback[i] ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
-                            {examFeedback[i] ? 'Excellent / إجابة صحيحة' : `Wrong / الإجابة الصحيحة هي: ${q.correct}`}
+                            {examFeedback[i] ? 'Excellent' : `Correct Answer: ${q.correct}`}
                           </div>
                         )}
                       </CardContent>
@@ -188,21 +185,19 @@ export default function GrammarAcademy() {
                 </div>
 
                 {Object.keys(examAnswers).length === selectedTopic.quiz.length && (
-                  <Card className="border-none shadow-2xl rounded-[3rem] bg-gradient-to-br from-green-500 to-emerald-700 text-white p-10 text-center animate-in zoom-in-95">
+                  <Card className="border-none shadow-2xl rounded-[3rem] bg-gradient-to-br from-green-500 to-emerald-700 text-white p-10 text-center">
                     <CardContent className="space-y-6">
                       <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto">
                         <BookCheck className="h-10 w-10 text-white" />
                       </div>
-                      <h3 className="text-3xl font-black">Exam Completed!</h3>
-                      <div className="text-6xl font-black italic tracking-tighter">{calculateScore()}%</div>
-                      <p className="text-white/80 font-bold">"You are one step closer to mastering English."</p>
+                      <h3 className="text-3xl font-black">Score: {calculateScore()}%</h3>
+                      <p className="text-white/80 font-bold">Great progress! Keep studying the saga.</p>
                       <Button 
                         variant="secondary" 
                         className="rounded-2xl h-14 px-10 font-black text-primary bg-white hover:bg-white/90"
                         onClick={() => {
                           setExamAnswers({});
                           setExamFeedback({});
-                          setShowExamResults(false);
                         }}
                       >
                         Retake Exam / إعادة الامتحان
@@ -219,7 +214,7 @@ export default function GrammarAcademy() {
               </div>
               <div className="space-y-2">
                 <h3 className="text-2xl font-black text-primary/60">{t.grammar.select_topic}</h3>
-                <p className="text-muted-foreground">{language === 'en' ? 'Choose a rule to start your professional English journey.' : 'اختر قاعدة لتبدأ رحلتك الاحترافية في اللغة الإنجليزية.'}</p>
+                <p className="text-muted-foreground">{language === 'en' ? 'Everything you need to master English grammar is here.' : 'كل ما تحتاجه لإتقان قواعد الإنجليزية موجود هنا.'}</p>
               </div>
             </div>
           )}
