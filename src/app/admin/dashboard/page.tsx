@@ -30,12 +30,12 @@ export default function AdminDashboard() {
 
   const { data: codes, isLoading } = useCollection(codesQuery);
 
-  // البادئات المطلوبة من المدير العام شريف حماد
+  // البادئات الجديدة بناءً على كود المدير العام الجديد: 09136091280
   const prefixes = {
-    vip: '771020260',    // كبار الشخصيات
-    silver: '771020261', // فضية
-    bronze: '771020262', // برونزية
-    gold: '771020263'    // ذهبية
+    vip: '09136091280',    // كبار الشخصيات
+    silver: '09136091281', // فضية
+    bronze: '09136091282', // برونزية
+    gold: '09136091283'    // ذهبية
   };
 
   const handleGenerateCode = async () => {

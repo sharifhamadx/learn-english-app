@@ -29,8 +29,8 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // نظام دخول المدير العام (الرمز الماستر)
-      if (cleanCode === '77102026') {
+      // نظام دخول المدير العام (الرمز الماستر الجديد)
+      if (cleanCode === '09136091280') {
         const userCredential = await signInAnonymously(auth);
         const user = userCredential.user;
         await setDoc(doc(db, 'adminUsers', user.uid), {
@@ -134,7 +134,7 @@ export default function LoginPage() {
               <Label htmlFor="code" className="text-right block font-black text-primary text-xs uppercase tracking-widest">Serial Access Code</Label>
               <Input 
                 id="code" 
-                placeholder="77102026..." 
+                placeholder="0913..." 
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
                 className="text-center h-20 text-3xl font-black rounded-[1.5rem] border-4 focus:border-accent transition-all bg-muted/30 tracking-widest"
