@@ -24,17 +24,42 @@ export const translations = {
       silver: "Silver Plan",
       bronze: "Bronze Plan",
       gold: "Gold Plan",
+      vip: "VIP Plan",
       monthly: "Monthly",
       foundation: "Foundation Phase (1-100)",
       empowerment: "Empowerment Phase (101-200)",
       mastery: "Mastery Phase (201-300)",
       subscribe: "Subscribe Now",
+      recommended: "Recommended",
+      custom_plan_title: "Need a Custom Plan for Schools?",
+      custom_plan_desc: "Contact Sharif directly for bulk activation codes and institutional access.",
+      contact_button: "Contact Sharif",
       features: {
         audio: "High-Quality Audio",
         pdf: "PDF Downloads",
         translation: "Instant Translation",
         tracking: "Progress Tracking"
       }
+    },
+    lessons: {
+      title: "The Sharif Saga Library",
+      subtitle: "A 300-chapter journey divided into three strategic phases. Master English by living the story.",
+      badge: "300 Chapters of Narrative Learning",
+      search_placeholder: "Search topics or chapters...",
+      difficulty: "Difficulty",
+      all_levels: "All Levels",
+      beginner: "Beginner",
+      intermediate: "Intermediate",
+      advanced: "Advanced",
+      foundation_title: "Foundation Phase",
+      empowerment_title: "Empowerment Phase",
+      mastery_title: "Mastery Phase",
+      lessons_range: "Lessons {{start}} - {{end}}",
+      no_results: "No results found",
+      try_different: "Try different keywords or change the phase.",
+      required_plan: "REQUIRED: {{plan}}",
+      upgrade_plan: "Upgrade Plan",
+      license_required_msg: "License Required: ({{plan}})"
     },
     features: {
       title: "System Features",
@@ -51,6 +76,18 @@ export const translations = {
       f5_desc: "Intelligent dashboard calculating XP, accuracy, and real learning hours.",
       f6_title: "Secure Access System",
       f6_desc: "Subscription management via unique codes and secure cloud database."
+    },
+    footer: {
+      desc: "The primary educational platform merging human reality with linguistic empowerment. Designed by Sharif Hamad Abdallah, aiming to break the fear of English through immersive real-life stories.",
+      links_title: "Strategic Links",
+      contact_title: "Contact Center",
+      story: "The Story",
+      support: "Technical Support",
+      browse: "Browse 300 Chapters",
+      activate: "Activate Subscription",
+      rights: "All intellectual and software rights are reserved to Sharif Hamad Abdallah.",
+      law: "This project is protected by copyright laws according to the Sudanese Copyright Act of 1996.",
+      copyright: "Copyright © 2024 - Developed with Pride by Sharif Hamad"
     },
     about: {
       title: "Who is Sharif Hamad?",
@@ -86,17 +123,42 @@ export const translations = {
       silver: "الباقة الفضية",
       bronze: "الباقة البرونزية",
       gold: "الباقة الذهبية",
+      vip: "باقة VIP",
       monthly: "شهرياً",
       foundation: "مرحلة التأسيس (1-100)",
       empowerment: "مرحلة التمكين (101-200)",
       mastery: "مرحلة الاحتراف (201-300)",
       subscribe: "اشترك الآن",
+      recommended: "موصى به",
+      custom_plan_title: "هل تحتاج لخطة مخصصة للمدارس؟",
+      custom_plan_desc: "تواصل مع شريف مباشرة للحصول على أكواد تفعيل جماعية ووصول للمؤسسات.",
+      contact_button: "تواصل مع شريف",
       features: {
         audio: "استماع صوتي عالي الجودة",
         pdf: "تحميل ملفات PDF",
         translation: "ترجمة فورية ذكية",
         tracking: "تتبع التقدم الدراسي"
       }
+    },
+    lessons: {
+      title: "مكتبة ملحمة شريف",
+      subtitle: "رحلة من 300 فصل مقسمة إلى ثلاث مراحل استراتيجية. أتقن الإنجليزية من خلال عيش القصة.",
+      badge: "300 فصل من التعلم الروائي",
+      search_placeholder: "ابحث عن المواضيع أو الفصول...",
+      difficulty: "المستوى",
+      all_levels: "جميع المستويات",
+      beginner: "مبتدئ",
+      intermediate: "متوسط",
+      advanced: "متقدم",
+      foundation_title: "مرحلة التأسيس",
+      empowerment_title: "مرحلة التمكين",
+      mastery_title: "مرحلة الاحتراف",
+      lessons_range: "الدروس من {{start}} إلى {{end}}",
+      no_results: "لا توجد نتائج",
+      try_different: "حاول استخدام كلمات بحث مختلفة أو تغيير المرحلة.",
+      required_plan: "مطلوب: باقة {{plan}}",
+      upgrade_plan: "ترقية الاشتراك",
+      license_required_msg: "هذا الفصل يتطلب ترخيص ({{plan}})."
     },
     features: {
       title: "مميزات النظام",
@@ -113,6 +175,18 @@ export const translations = {
       f5_desc: "لوحة تحكم ذكية تحسب نقاط الخبرة والدقة وساعات التعلم الحقيقية.",
       f6_title: "نظام وصول آمن",
       f6_desc: "إدارة الاشتراكات عبر أكواد فريدة وقاعدة بيانات سحابية آمنة."
+    },
+    footer: {
+      desc: "المنصة التعليمية الأولى التي تدمج الواقع الإنساني مع التمكين اللغوي. صممه شريف حماد عبد الله، بهدف كسر حاجز الخوف من الإنجليزية من خلال قصص واقعية غامرة.",
+      links_title: "روابط استراتيجية",
+      contact_title: "مركز التواصل",
+      story: "القصة",
+      support: "الدعم الفني",
+      browse: "تصفح 300 فصل",
+      activate: "تفعيل الاشتراك",
+      rights: "جميع الحقوق الفكرية والبرمجية محفوظة لشريف حماد عبد الله.",
+      law: "هذا المشروع محمي بقوانين الملكية الفكرية وفقاً لقانون حق المؤلف السوداني لعام 1996.",
+      copyright: "حقوق النشر © 2024 - تم التطوير بكل فخر بواسطة شريف حماد"
     },
     about: {
       title: "من هو شريف حماد؟",

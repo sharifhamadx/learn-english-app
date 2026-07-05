@@ -35,9 +35,10 @@ export default function PricingPage() {
           ]}
           cta={t.pricing.subscribe}
           language={language}
+          t={t}
         />
 
-        {/* Bronze Plan (Middle/Highlighted for some) - In this system Bronze is 20k */}
+        {/* Bronze Plan */}
         <PricingCard 
           tier={t.pricing.bronze}
           price="20,000"
@@ -55,6 +56,7 @@ export default function PricingPage() {
           ]}
           cta={t.pricing.subscribe}
           language={language}
+          t={t}
         />
 
         {/* Gold Plan */}
@@ -75,16 +77,17 @@ export default function PricingPage() {
           ]}
           cta={t.pricing.subscribe}
           language={language}
+          t={t}
         />
       </div>
 
       <div className="bg-primary/5 rounded-[3rem] p-10 text-center space-y-6 border border-primary/10">
-        <h3 className="text-2xl font-bold text-primary">{language === 'en' ? 'Need a Custom Plan for Schools?' : 'هل تحتاج لخطة مخصصة للمدارس؟'}</h3>
-        <p className="text-muted-foreground">{language === 'en' ? 'Contact Sharif directly for bulk activation codes and institutional access.' : 'تواصل مع شريف مباشرة للحصول على أكواد تفعيل جماعية ووصول للمؤسسات.'}</p>
+        <h3 className="text-2xl font-bold text-primary">{t.pricing.custom_plan_title}</h3>
+        <p className="text-muted-foreground">{t.pricing.custom_plan_desc}</p>
         <Button className="bg-green-500 hover:bg-green-600 h-14 px-8 rounded-2xl gap-3" asChild>
           <a href="https://wa.me/447342322206" target="_blank" rel="noopener noreferrer">
             <MessageCircle className="h-6 w-6" />
-            {language === 'en' ? 'Contact Sharif' : 'تواصل مع شريف'}
+            {t.pricing.contact_button}
           </a>
         </Button>
       </div>
@@ -92,13 +95,13 @@ export default function PricingPage() {
   );
 }
 
-function PricingCard({ tier, price, currency, period, features, cta, color, highlight, language }: any) {
+function PricingCard({ tier, price, currency, period, features, cta, color, highlight, language, t }: any) {
   return (
     <Card className={`relative flex flex-col border-2 rounded-[3rem] transition-all hover:shadow-2xl hover:-translate-y-2 ${highlight ? 'border-primary shadow-xl scale-105 z-10' : 'border-slate-100 shadow-lg'}`}>
       {highlight && (
         <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-primary text-white px-6 py-1.5 rounded-full text-xs font-black uppercase tracking-[0.2em] flex items-center gap-2">
           <Sparkles className="h-3 w-3" />
-          {language === 'en' ? 'Recommended' : 'موصى به'}
+          {t.pricing.recommended}
         </div>
       )}
       <CardHeader className="p-10 text-center">

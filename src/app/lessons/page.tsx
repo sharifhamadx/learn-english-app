@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo } from 'react';
@@ -7,11 +8,13 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, Library, Anchor, Heart, GraduationCap } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useLanguage } from '@/components/LanguageProvider';
 
 export default function LessonsPage() {
   const [search, setSearch] = useState('');
   const [difficulty, setDifficulty] = useState('all');
   const [activePhase, setActivePhase] = useState('foundation');
+  const { t } = useLanguage();
 
   const filteredLessons = useMemo(() => {
     return MOCK_LESSONS.filter(lesson => {
@@ -36,11 +39,11 @@ export default function LessonsPage() {
         <div className="space-y-4">
           <div className="inline-flex items-center gap-2 text-accent bg-white px-4 py-2 rounded-full shadow-sm">
             <Library className="h-5 w-5" />
-            <span className="font-bold text-xs tracking-widest uppercase">300 Chapters of Narrative Learning</span>
+            <span className="font-bold text-xs tracking-widest uppercase">{t.lessons.badge}</span>
           </div>
-          <h1 className="text-4xl md:text-6xl font-black font-headline text-primary">The Sharif Saga Library</h1>
+          <h1 className="text-4xl md:text-6xl font-black font-headline text-primary">{t.lessons.title}</h1>
           <p className="text-muted-foreground text-xl max-w-2xl">
-            A 300-chapter journey divided into three strategic phases. Master English by living the story.
+            {t.lessons.subtitle}
           </p>
         </div>
 
@@ -48,7 +51,7 @@ export default function LessonsPage() {
           <div className="relative w-full md:max-w-md">
             <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
             <Input 
-              placeholder="Search topics or chapters..." 
+              placeholder={t.lessons.search_placeholder}
               className="pl-12 h-14 rounded-2xl border-none bg-white shadow-md text-lg"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -56,13 +59,13 @@ export default function LessonsPage() {
           </div>
           <Select value={difficulty} onValueChange={setDifficulty}>
             <SelectTrigger className="w-[180px] h-14 rounded-2xl bg-white shadow-md border-none font-bold">
-              <SelectValue placeholder="Difficulty" />
+              <SelectValue placeholder={t.lessons.difficulty} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Levels</SelectItem>
-              <SelectItem value="beginner">Beginner</SelectItem>
-              <SelectItem value="intermediate">Intermediate</SelectItem>
-              <SelectItem value="advanced">Advanced</SelectItem>
+              <SelectItem value="all">{t.lessons.all_levels}</SelectItem>
+              <SelectItem value="beginner">{t.lessons.beginner}</SelectItem>
+              <SelectItem value="intermediate">{t.lessons.intermediate}</SelectItem>
+              <SelectItem value="advanced">{t.lessons.advanced}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -74,20 +77,20 @@ export default function LessonsPage() {
           <PhaseTrigger 
             value="foundation" 
             icon={<GraduationCap className="h-6 w-6" />}
-            title="Foundation Phase" 
-            desc="Lessons 1 - 100" 
+            title={t.lessons.foundation_title} 
+            desc={t.lessons.lessons_range.replace('{{start}}', '1').replace('{{end}}', '100')} 
           />
           <PhaseTrigger 
             value="empowerment" 
             icon={<Heart className="h-6 w-6" />}
-            title="Empowerment Phase" 
-            desc="Lessons 101 - 200" 
+            title={t.lessons.empowerment_title} 
+            desc={t.lessons.lessons_range.replace('{{start}}', '101').replace('{{end}}', '200')} 
           />
           <PhaseTrigger 
             value="mastery" 
             icon={<Anchor className="h-6 w-6" />}
-            title="Mastery Phase" 
-            desc="Lessons 201 - 300" 
+            title={t.lessons.mastery_title} 
+            desc={t.lessons.lessons_range.replace('{{start}}', '201').replace('{{end}}', '300')} 
           />
         </TabsList>
 
@@ -101,8 +104,8 @@ export default function LessonsPage() {
                 <div className="mx-auto w-20 h-20 bg-muted rounded-[2rem] flex items-center justify-center">
                   <Search className="h-10 w-10 text-muted-foreground/30" />
                 </div>
-                <h3 className="text-2xl font-bold">No results found</h3>
-                <p className="text-muted-foreground text-lg">Try different keywords or change the phase.</p>
+                <h3 className="text-2xl font-bold">{t.lessons.no_results}</h3>
+                <p className="text-muted-foreground text-lg">{t.lessons.try_different}</p>
               </div>
             )}
           </div>
@@ -118,7 +121,7 @@ function PhaseTrigger({ value, icon, title, desc }: { value: string, icon: React
       value={value} 
       className="flex-1 h-24 rounded-[2rem] border-2 bg-white data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-white transition-all shadow-md flex items-center justify-between px-8"
     >
-      <div className="flex flex-col text-left">
+      <div className="flex flex-col text-left rtl:text-right">
         <span className="text-lg font-black">{title}</span>
         <span className="text-xs opacity-70 font-bold">{desc}</span>
       </div>

@@ -21,12 +21,10 @@ export function LessonCard({ lesson }: { lesson: Lesson }) {
   const lessonNumber = parseInt(lesson.id.replace('lesson-', ''));
   const isTrial = lessonNumber <= 3;
   
-  // Initialize isUnlocked to true if it's a trial lesson to avoid infinite re-renders
   const [isUnlocked, setIsUnlocked] = useState(isTrial);
   const [currentPlan, setCurrentPlan] = useState<string | null>(null);
 
   useEffect(() => {
-    // If it's already determined as unlocked (e.g. trial), we skip DB check
     if (isTrial) {
       setIsUnlocked(true);
       return;
@@ -35,13 +33,11 @@ export function LessonCard({ lesson }: { lesson: Lesson }) {
     async function checkAccess() {
       const authFlag = localStorage.getItem('moc-co-auth');
       
-      // 1. صلاحيات الإدارة العليا (المدير شريف حماد)
       if (authFlag === 'admin') {
         setIsUnlocked(true);
         return;
       }
 
-      // 2. التحقق من اشتراك المستخدم
       if (user) {
         try {
           const userDoc = await getDoc(doc(db, 'users', user.uid));
@@ -50,10 +46,6 @@ export function LessonCard({ lesson }: { lesson: Lesson }) {
             const plan = userData.plan;
             setCurrentPlan(plan);
 
-            // منطق فتح الدروس حسب الباقة:
-            // VIP & Gold: 1-300
-            // Bronze: 1-200
-            // Silver: 1-100
             let allowed = false;
             if (plan === 'gold' || plan === 'vip') allowed = true;
             else if (plan === 'bronze' && lessonNumber <= 200) allowed = true;
@@ -88,19 +80,19 @@ export function LessonCard({ lesson }: { lesson: Lesson }) {
         <div className="relative h-44 w-full flex items-center justify-center bg-muted/50 backdrop-blur-sm">
           <Lock className="h-16 w-16 text-primary/10 animate-pulse" />
           <div className="absolute top-4 right-4">
-            <Badge variant="secondary" className="bg-primary text-white border-none font-black text-[10px] py-1 px-3 tracking-widest uppercase shadow-lg">REQUIRED: {getRequiredPlan()}</Badge>
+            <Badge variant="secondary" className="bg-primary text-white border-none font-black text-[10px] py-1 px-3 tracking-widest uppercase shadow-lg">
+              {t.lessons.required_plan.replace('{{plan}}', getRequiredPlan())}
+            </Badge>
           </div>
         </div>
         <CardHeader className="p-8">
           <CardTitle className="text-xl text-muted-foreground/40 font-black font-headline line-clamp-1">{lesson.title}</CardTitle>
           <div className="bg-white/50 p-6 rounded-[2rem] border border-primary/10 mt-6 space-y-4">
             <p className="text-xs font-black text-primary/70 leading-relaxed uppercase tracking-widest">
-              {language === 'ar' 
-                ? `هذا الفصل يتطلب ترخيص (${getRequiredPlan()}).` 
-                : `License Required: (${getRequiredPlan()})`}
+              {t.lessons.license_required_msg.replace('{{plan}}', getRequiredPlan())}
             </p>
             <Button size="sm" className="w-full bg-primary text-white rounded-2xl h-12 font-black shadow-md hover:scale-[1.02] transition-all" asChild>
-              <Link href="/pricing">{language === 'ar' ? 'ترقية الاشتراك' : 'Upgrade Plan'}</Link>
+              <Link href="/pricing">{t.lessons.upgrade_plan}</Link>
             </Button>
           </div>
         </CardHeader>
@@ -121,7 +113,7 @@ export function LessonCard({ lesson }: { lesson: Lesson }) {
           <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent" />
           <div className="absolute bottom-6 left-6 flex gap-2">
             <Badge className={`${difficultyColors[lesson.difficulty]} border-none font-black uppercase text-[10px] py-1 px-4 tracking-widest shadow-md`}>
-              {lesson.difficulty}
+              {t.lessons[lesson.difficulty as keyof typeof t.lessons] || lesson.difficulty}
             </Badge>
             {isTrial && <Badge className="bg-accent text-primary border-none font-black text-[10px] py-1 px-4 tracking-widest shadow-md">TRIAL</Badge>}
           </div>
@@ -145,7 +137,7 @@ export function LessonCard({ lesson }: { lesson: Lesson }) {
             {lesson.grammarPoint}
           </div>
           <div className="pt-6">
-            <div className="bg-primary/5 p-2 rounded-full group-hover:bg-primary transition-all group-hover:translate-x-2">
+            <div className="bg-primary/5 p-2 rounded-full group-hover:bg-primary transition-all group-hover:translate-x-2 rtl:group-hover:-translate-x-2">
               <ChevronRight className="h-6 w-6 text-primary group-hover:text-white" />
             </div>
           </div>
