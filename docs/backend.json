@@ -10,7 +10,7 @@
         "email": { "type": "string", "format": "email" },
         "username": { "type": "string" },
         "registrationDate": { "type": "string", "format": "date-time" },
-        "plan": { "type": "string", "enum": ["free", "silver", "bronze", "gold"], "description": "The current subscription tier of the user." },
+        "plan": { "type": "string", "enum": ["free", "silver", "bronze", "gold", "vip"], "description": "The current subscription tier of the user." },
         "accessCode": { "type": "string" }
       },
       "required": ["id"]
@@ -22,7 +22,7 @@
       "properties": {
         "id": { "type": "string" },
         "code": { "type": "string", "description": "The serial string (e.g., 7710202611)." },
-        "plan": { "type": "string", "enum": ["silver", "bronze", "gold"] },
+        "plan": { "type": "string", "enum": ["silver", "bronze", "gold", "vip"] },
         "note": { "type": "string", "description": "Subscriber name or note." },
         "isActive": { "type": "boolean" },
         "usedByUid": { "type": "string", "description": "The Firebase UID of the device that first activated this code." },

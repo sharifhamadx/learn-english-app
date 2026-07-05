@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { KeyRound, ShieldAlert, MessageCircle, Loader2, Smartphone } from 'lucide-react';
+import { KeyRound, ShieldAlert, MessageCircle, Loader2, Smartphone, ShieldCheck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore, useAuth } from '@/firebase';
 import { collection, query, where, getDocs, doc, setDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
@@ -29,18 +29,19 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // نظام دخول المدير (الرمز الماستر)
+      // نظام دخول المدير العام (الرمز الماستر)
       if (cleanCode === '77102026') {
         const userCredential = await signInAnonymously(auth);
         const user = userCredential.user;
         await setDoc(doc(db, 'adminUsers', user.uid), {
           id: user.uid,
           role: 'admin',
+          name: 'شريف حماد عبد الله',
           lastActive: serverTimestamp()
         }, { merge: true });
 
         localStorage.setItem('moc-co-auth', 'admin');
-        toast({ title: "مرحباً يا مبرمج شريف", description: "تم تفعيل صلاحيات الإدارة الكاملة." });
+        toast({ title: "مرحباً يا أستاذ شريف حماد", description: "تم تفعيل صلاحيات الإدارة العليا." });
         window.location.href = '/admin/dashboard';
         return;
       }
@@ -50,7 +51,7 @@ export default function LoginPage() {
       const querySnapshot = await getDocs(q);
 
       if (querySnapshot.empty) {
-        toast({ variant: "destructive", title: "كود خاطئ", description: "هذا الكود غير موجود في نظامنا." });
+        toast({ variant: "destructive", title: "كود خاطئ", description: "عذراً، هذا الكود غير مسجل في النظام." });
         setLoading(false);
         return;
       }
@@ -59,34 +60,35 @@ export default function LoginPage() {
       const codeData = codeDoc.data();
 
       if (!codeData.isActive) {
-        toast({ variant: "destructive", title: "كود معطل", description: "عذراً، هذا الكود تم إبطاله من قبل الإدارة." });
+        toast({ variant: "destructive", title: "ترخيص معطل", description: "تم إبطال هذا الكود من قبل الإدارة." });
         setLoading(false);
         return;
       }
 
-      // تسجيل دخول مجهول للحصول على UID فريد لهذا الجهاز
+      // تسجيل دخول مجهول للحصول على UID فريد للجهاز
       const userCredential = await signInAnonymously(auth);
       const user = userCredential.user;
 
-      // فحص ربط الجهاز (Device Binding)
+      // فحص حماية ربط الجهاز (Device Binding)
       if (codeData.usedByUid && codeData.usedByUid !== user.uid) {
         toast({ 
           variant: "destructive", 
           title: "حماية الجهاز", 
-          description: "هذا الكود مرتبط بجهاز آخر. لا يمكن تفعيله على أكثر من جهاز." 
+          description: "هذا الكود مرتبط بجهاز آخر بالفعل. لا يسمح بالتفعيل المتعدد." 
         });
         setLoading(false);
         return;
       }
 
-      // إذا كان الكود جديداً، نربطه بهذا الـ UID
+      // ربط الجهاز بالكود إذا كان جديداً
       if (!codeData.usedByUid) {
         await updateDoc(doc(db, 'accessCodes', codeDoc.id), {
-          usedByUid: user.uid
+          usedByUid: user.uid,
+          activatedAt: serverTimestamp()
         });
       }
 
-      // تحديث ملف المستخدم بالباقة الصحيحة
+      // تحديث ملف المستخدم
       await setDoc(doc(db, 'users', user.uid), {
         id: user.uid,
         accessCode: cleanCode,
@@ -105,8 +107,8 @@ export default function LoginPage() {
       console.error(error);
       toast({ 
         variant: "destructive", 
-        title: "خطأ في الاتصال", 
-        description: "تعذر التحقق من الكود حالياً. يرجى التأكد من الإنترنت." 
+        title: "خطأ فني", 
+        description: "تعذر الاتصال بخادم الحماية. تأكد من الإنترنت." 
       });
     } finally {
       setLoading(false);
@@ -114,45 +116,48 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-[80vh] items-center justify-center p-4" dir="rtl">
-      <Card className="w-full max-w-md shadow-2xl border-none rounded-[3rem] overflow-hidden">
-        <div className="bg-primary p-10 text-center text-white space-y-4">
-          <div className="mx-auto w-16 h-16 bg-white/20 rounded-3xl flex items-center justify-center backdrop-blur-md">
-            <Smartphone className="h-8 w-8" />
+    <div className="flex min-h-[85vh] items-center justify-center p-4" dir="rtl">
+      <Card className="w-full max-w-md shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] border-none rounded-[3.5rem] overflow-hidden bg-white/90 backdrop-blur-xl">
+        <div className="bg-primary p-12 text-center text-white space-y-6 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl" />
+          <div className="mx-auto w-20 h-20 bg-white/20 rounded-[2rem] flex items-center justify-center backdrop-blur-md shadow-inner">
+            <Smartphone className="h-10 w-10 text-accent" />
           </div>
-          <CardTitle className="text-3xl font-black">Activation Lab</CardTitle>
-          <p className="text-white/70 text-sm">أدخل الكود التسلسلي المخصص لجهازك</p>
+          <div className="space-y-2">
+            <CardTitle className="text-4xl font-black font-headline">Security Hub</CardTitle>
+            <p className="text-white/70 text-sm font-bold tracking-widest uppercase">Activation System v2.0</p>
+          </div>
         </div>
-        <CardContent className="p-10">
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="code" className="text-right block font-bold">Serial Access Code</Label>
+        <CardContent className="p-12">
+          <form onSubmit={handleLogin} className="space-y-8">
+            <div className="space-y-3">
+              <Label htmlFor="code" className="text-right block font-black text-primary text-xs uppercase tracking-widest">Serial Access Code</Label>
               <Input 
                 id="code" 
                 placeholder="77102026..." 
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
-                className="text-center h-16 text-2xl font-black rounded-2xl border-2 focus:border-primary tracking-widest"
+                className="text-center h-20 text-3xl font-black rounded-[1.5rem] border-4 focus:border-accent transition-all bg-muted/30 tracking-widest"
                 disabled={loading}
               />
             </div>
-            <Button type="submit" className="w-full h-16 text-xl font-black bg-primary rounded-2xl shadow-xl shadow-primary/20" disabled={loading}>
-              {loading ? <Loader2 className="animate-spin h-6 w-6" /> : "Unlock Saga"}
+            <Button type="submit" className="w-full h-20 text-2xl font-black bg-primary rounded-[1.5rem] shadow-2xl shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all" disabled={loading}>
+              {loading ? <Loader2 className="animate-spin h-8 w-8" /> : "Unlock Full Saga"}
             </Button>
             
-            <div className="pt-6 border-t text-center space-y-4">
-              <p className="text-sm text-muted-foreground font-bold">لا تملك كود تفعيل؟</p>
-              <Button variant="outline" className="w-full gap-3 h-14 rounded-2xl text-green-600 border-green-200 bg-green-50/50 hover:bg-green-50" asChild>
+            <div className="pt-8 border-t border-dashed text-center space-y-4">
+              <p className="text-sm text-muted-foreground font-black uppercase tracking-widest opacity-60">Need a VIP Access Code?</p>
+              <Button variant="outline" className="w-full gap-3 h-16 rounded-[1.5rem] text-green-600 border-2 border-green-200 bg-green-50/50 hover:bg-green-50 font-black text-lg shadow-sm" asChild>
                 <a href="https://wa.me/447342322206" target="_blank" rel="noopener noreferrer">
-                  <MessageCircle className="h-6 w-6" />
-                  طلب كود من شريف حماد
+                  <MessageCircle className="h-7 w-7" />
+                  Request Serial from Sharif
                 </a>
               </Button>
             </div>
 
-            <div className="flex items-center gap-2 text-[10px] text-muted-foreground justify-center uppercase tracking-widest font-black opacity-50">
-              <ShieldAlert className="h-3 w-3" />
-              <span>Device Locked Protection System</span>
+            <div className="flex items-center gap-2 text-[10px] text-muted-foreground justify-center uppercase tracking-[0.3em] font-black opacity-40">
+              <ShieldCheck className="h-3 w-3" />
+              <span>Biometric Device Binding Active</span>
             </div>
           </form>
         </CardContent>

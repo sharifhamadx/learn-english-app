@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Lesson } from '@/lib/types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { ChevronRight, Lock, ShieldCheck } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
@@ -16,45 +17,58 @@ export function LessonCard({ lesson }: { lesson: Lesson }) {
   const { t, language } = useLanguage();
   const { user } = useUser();
   const db = useFirestore();
-  const [isUnlocked, setIsUnlocked] = useState(false);
-  const [currentPlan, setCurrentPlan] = useState<string | null>(null);
-
+  
   const lessonNumber = parseInt(lesson.id.replace('lesson-', ''));
   const isTrial = lessonNumber <= 3;
+  
+  // Initialize isUnlocked to true if it's a trial lesson to avoid infinite re-renders
+  const [isUnlocked, setIsUnlocked] = useState(isTrial);
+  const [currentPlan, setCurrentPlan] = useState<string | null>(null);
 
   useEffect(() => {
+    // If it's already determined as unlocked (e.g. trial), we skip DB check
+    if (isTrial) {
+      setIsUnlocked(true);
+      return;
+    }
+
     async function checkAccess() {
-      // 1. تحقق من الـ Admin أولاً (دخول كامل)
       const authFlag = localStorage.getItem('moc-co-auth');
+      
+      // 1. صلاحيات الإدارة العليا (المدير شريف حماد)
       if (authFlag === 'admin') {
         setIsUnlocked(true);
         return;
       }
 
-      // 2. التحقق من المستخدم العادي
+      // 2. التحقق من اشتراك المستخدم
       if (user) {
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          const plan = userData.plan;
-          setCurrentPlan(plan);
+        try {
+          const userDoc = await getDoc(doc(db, 'users', user.uid));
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            const plan = userData.plan;
+            setCurrentPlan(plan);
 
-          // منطق فتح الدروس بناءً على الباقة:
-          // Silver: 1-100
-          // Bronze: 1-200
-          // Gold: 1-300
-          let allowed = false;
-          if (plan === 'gold') allowed = true;
-          else if (plan === 'bronze' && lessonNumber <= 200) allowed = true;
-          else if (plan === 'silver' && lessonNumber <= 100) allowed = true;
-          
-          setIsUnlocked(allowed);
+            // منطق فتح الدروس حسب الباقة:
+            // VIP & Gold: 1-300
+            // Bronze: 1-200
+            // Silver: 1-100
+            let allowed = false;
+            if (plan === 'gold' || plan === 'vip') allowed = true;
+            else if (plan === 'bronze' && lessonNumber <= 200) allowed = true;
+            else if (plan === 'silver' && lessonNumber <= 100) allowed = true;
+            
+            setIsUnlocked(allowed);
+          }
+        } catch (error) {
+          console.error("Error checking access:", error);
         }
       }
     }
     
     checkAccess();
-  }, [user, db, lessonNumber]);
+  }, [user, db, lessonNumber, isTrial]);
 
   const difficultyColors = {
     beginner: 'bg-green-100 text-green-700',
@@ -65,28 +79,28 @@ export function LessonCard({ lesson }: { lesson: Lesson }) {
   const getRequiredPlan = () => {
     if (lessonNumber <= 100) return 'Silver';
     if (lessonNumber <= 200) return 'Bronze';
-    return 'Gold';
+    return 'Gold / VIP';
   };
 
-  if (!isTrial && !isUnlocked) {
+  if (!isUnlocked) {
     return (
-      <Card className="group overflow-hidden opacity-90 border-dashed border-2 relative rounded-[2rem] bg-muted/20">
-        <div className="relative h-40 w-full flex items-center justify-center bg-muted/50 backdrop-blur-sm">
-          <Lock className="h-16 w-16 text-muted-foreground/20 animate-pulse" />
+      <Card className="group overflow-hidden opacity-90 border-dashed border-2 relative rounded-[2.5rem] bg-muted/20 border-primary/20">
+        <div className="relative h-44 w-full flex items-center justify-center bg-muted/50 backdrop-blur-sm">
+          <Lock className="h-16 w-16 text-primary/10 animate-pulse" />
           <div className="absolute top-4 right-4">
-            <Badge variant="secondary" className="bg-primary text-white border-none font-black text-[10px] py-1 px-3">REQUIRED: {getRequiredPlan()}</Badge>
+            <Badge variant="secondary" className="bg-primary text-white border-none font-black text-[10px] py-1 px-3 tracking-widest uppercase shadow-lg">REQUIRED: {getRequiredPlan()}</Badge>
           </div>
         </div>
-        <CardHeader className="p-6">
-          <CardTitle className="text-xl text-muted-foreground/60 font-bold">{lesson.title}</CardTitle>
-          <div className="bg-white/50 p-4 rounded-2xl border border-primary/10 mt-4 space-y-3">
-            <p className="text-xs font-bold text-primary/80 leading-relaxed">
+        <CardHeader className="p-8">
+          <CardTitle className="text-xl text-muted-foreground/40 font-black font-headline line-clamp-1">{lesson.title}</CardTitle>
+          <div className="bg-white/50 p-6 rounded-[2rem] border border-primary/10 mt-6 space-y-4">
+            <p className="text-xs font-black text-primary/70 leading-relaxed uppercase tracking-widest">
               {language === 'ar' 
-                ? `هذا الفصل يتطلب تفعيل الباقة (${getRequiredPlan()}) وما فوق.` 
-                : `This chapter requires activation of the (${getRequiredPlan()}) plan.`}
+                ? `هذا الفصل يتطلب ترخيص (${getRequiredPlan()}).` 
+                : `License Required: (${getRequiredPlan()})`}
             </p>
-            <Button size="sm" className="w-full bg-primary text-white rounded-xl h-10 font-bold" asChild>
-              <Link href="/pricing">{language === 'ar' ? 'ترقية الباقة' : 'Upgrade Now'}</Link>
+            <Button size="sm" className="w-full bg-primary text-white rounded-2xl h-12 font-black shadow-md hover:scale-[1.02] transition-all" asChild>
+              <Link href="/pricing">{language === 'ar' ? 'ترقية الاشتراك' : 'Upgrade Plan'}</Link>
             </Button>
           </div>
         </CardHeader>
@@ -96,41 +110,44 @@ export function LessonCard({ lesson }: { lesson: Lesson }) {
 
   return (
     <Link href={`/lessons/${lesson.id}`}>
-      <Card className="group overflow-hidden transition-all hover:shadow-2xl hover:-translate-y-2 border-2 rounded-[2.5rem] bg-white dark:bg-card">
-        <div className="relative h-48 w-full overflow-hidden">
+      <Card className="group overflow-hidden transition-all hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.15)] hover:-translate-y-3 border-none rounded-[2.5rem] bg-white dark:bg-card shadow-xl border border-white">
+        <div className="relative h-56 w-full overflow-hidden">
           <Image
             src={`https://picsum.photos/seed/${lesson.imageSeed}/600/400`}
             alt={lesson.title}
             fill
             className="object-cover transition-transform group-hover:scale-110 duration-1000"
-            data-ai-hint="lesson scene"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
-          <div className="absolute bottom-4 left-4 flex gap-2">
-            <Badge className={`${difficultyColors[lesson.difficulty]} border-none font-black uppercase text-[10px] py-1 px-3`}>
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent" />
+          <div className="absolute bottom-6 left-6 flex gap-2">
+            <Badge className={`${difficultyColors[lesson.difficulty]} border-none font-black uppercase text-[10px] py-1 px-4 tracking-widest shadow-md`}>
               {lesson.difficulty}
             </Badge>
-            {isTrial && <Badge className="bg-accent text-primary border-none font-black text-[10px] py-1 px-3">TRIAL</Badge>}
+            {isTrial && <Badge className="bg-accent text-primary border-none font-black text-[10px] py-1 px-4 tracking-widest shadow-md">TRIAL</Badge>}
           </div>
         </div>
-        <CardHeader className="p-6 pb-2">
-          <CardTitle className="text-2xl line-clamp-1 group-hover:text-primary transition-colors font-black tracking-tight">
-            {lesson.title}
-          </CardTitle>
-          <p className="text-xs font-black text-muted-foreground uppercase tracking-widest">{lesson.topic}</p>
+        <CardHeader className="p-8 pb-3">
+          <div className="flex justify-between items-start gap-4">
+            <CardTitle className="text-2xl line-clamp-1 group-hover:text-primary transition-colors font-black tracking-tighter">
+              {lesson.title}
+            </CardTitle>
+          </div>
+          <p className="text-xs font-black text-muted-foreground/60 uppercase tracking-[0.2em]">{lesson.topic}</p>
         </CardHeader>
-        <CardContent className="p-6 pt-2">
-          <p className="text-sm line-clamp-2 text-muted-foreground leading-relaxed italic opacity-80">
+        <CardContent className="p-8 pt-2">
+          <p className="text-sm line-clamp-2 text-muted-foreground/80 leading-relaxed italic border-r-4 border-accent pr-4">
             {lesson.story}
           </p>
         </CardContent>
-        <CardFooter className="p-6 pt-0 flex justify-between items-center border-t border-slate-50 mt-2">
-          <div className="flex items-center gap-2 text-[10px] font-black text-primary uppercase tracking-[0.2em] pt-4">
-            <ShieldCheck className="h-4 w-4" />
+        <CardFooter className="p-8 pt-0 flex justify-between items-center border-t border-slate-50 mt-4">
+          <div className="flex items-center gap-2 text-[10px] font-black text-primary uppercase tracking-[0.2em] pt-6">
+            <ShieldCheck className="h-4 w-4 text-accent" />
             {lesson.grammarPoint}
           </div>
-          <div className="pt-4">
-            <ChevronRight className="h-6 w-6 text-muted-foreground group-hover:text-primary group-hover:translate-x-2 transition-all" />
+          <div className="pt-6">
+            <div className="bg-primary/5 p-2 rounded-full group-hover:bg-primary transition-all group-hover:translate-x-2">
+              <ChevronRight className="h-6 w-6 text-primary group-hover:text-white" />
+            </div>
           </div>
         </CardFooter>
       </Card>
