@@ -30,35 +30,37 @@ export const GRAMMAR_DATA: GrammarTopic[] = [
     formulationAr: "الإثبات: فاعل + فعل (إضافة s مع المفرد). النفي: فاعل + do/does + not + فعل مجرد. السؤال: Do/Does + فاعل + فعل مجرد؟",
     stories: [
       {
-        title: "Sharif's Routine",
-        content: "Every morning, Sharif wakes up at 5 AM. He prays, drinks a cup of coffee, and then walks to the English center. He studies for six hours daily. His friends, like Fath Al-Rahman, often visit him. They discuss the future and share their dreams. Sharif works hard because he wants to succeed."
+        title: "Sharif's Daily Fight",
+        content: "Every single day, Sharif wakes up early before the sun rises. He drinks his coffee alone and thinks about his family. He works for 16 hours to earn a small salary. He doesn't complain, but he feels the pain of modern slavery. His friends often visit him to give him strength."
       },
       {
-        title: "Namariq's New Life",
-        content: "Namariq lives in a beautiful house abroad. She speaks English fluently now. Every weekend, she calls her family. She misses her home, but she enjoys the stability. Her husband works in a large company. Life seems perfect on the outside."
+        title: "Namariq's Routine Abroad",
+        content: "Namariq lives in a cold country now. She speaks English every day at work. She calls her mother every Friday evening. She misses the heat of Sudan, but she enjoys the stability of her new life. Her husband works hard to provide for them."
       }
     ],
     examples: [
-      "I study English every day.",
+      "I study English every morning.",
       "Sharif works 16 hours a day.",
       "The sun rises in the east.",
-      "Water boils at 100 degrees Celsius.",
-      "He speaks three languages fluently.",
-      "We live in a complex world.",
-      "They visit their mother every Friday.",
-      "She loves classical English literature.",
-      "My brother works as a digital designer.",
-      "Cats catch mice instinctively.",
-      "It rains a lot in winter seasons.",
-      "I don't like cold weather at all.",
-      "Does he speak English well?",
-      "The train leaves at 8 PM sharp.",
-      "Birds fly high in the blue sky."
+      "She speaks English fluently.",
+      "They visit us every weekend.",
+      "He doesn't like cold weather.",
+      "Do you know Fath Al-Rahman?",
+      "Water boils at 100 degrees.",
+      "The train leaves at 8 PM.",
+      "My sisters wait for me at home.",
+      "We live in a difficult world.",
+      "It rains a lot in London.",
+      "Does she send her photo?",
+      "I don't play football often.",
+      "Birds fly south in winter."
     ],
     quiz: [
-      { question: "Sharif ___ to the center every morning.", options: ["walk", "walks", "walking"], correct: "walks" },
-      { question: "They ___ about their dreams.", options: ["talks", "talking", "talk"], correct: "talk" },
-      { question: "___ she live abroad?", options: ["Do", "Does", "Is"], correct: "Does" }
+      { question: "Sharif ___ hard every day.", options: ["work", "works", "working"], correct: "works" },
+      { question: "They ___ about the future.", options: ["talks", "talk", "talking"], correct: "talk" },
+      { question: "___ she live in Sudan?", options: ["Do", "Does", "Is"], correct: "Does" },
+      { question: "I ___ not like betrayal.", options: ["do", "does", "am"], correct: "do" },
+      { question: "The cat ___ its milk quickly.", options: ["drink", "drinks", "drank"], correct: "drinks" }
     ]
   },
   {
@@ -71,158 +73,80 @@ export const GRAMMAR_DATA: GrammarTopic[] = [
     formulationAr: "الإثبات: فاعل + التصريف الثاني للفعل. النفي: فاعل + did + not + فعل مجرد. السؤال: Did + فاعل + فعل مجرد؟",
     stories: [
       {
-        title: "The Sea Journey",
-        content: "In 2022, Sharif crossed the ocean in a rubber boat. The engine exploded suddenly. He fought the waves for six hours. He felt terrified, but he never gave up. Finally, a rescue ship arrived and saved everyone. That day changed his life forever."
+        title: "The Ocean of Death",
+        content: "In 2022, Sharif jumped into a 12-meter rubber boat. The engine exploded suddenly in the middle of the ocean. He fought the waves for six long hours. He felt the cold water in his bones. Finally, he survived, but he lost his sense of safety that day."
       },
       {
-        title: "Makarem's Wedding",
-        content: "Makarem cried when her father told her the news. She lost consciousness because of grief. Her family forced her to marry a man she didn't love. She stayed in the hospital for two weeks. It was a tragic day for both of them."
+        title: "Makarem's Forced Marriage",
+        content: "Makarem cried for three days when her father told her the news. Her family forced her to marry a cousin she never loved. She lost consciousness due to grief. She sent her photo to Sharif after four years of knowing him. It was a tragic end to a pure love story."
       }
     ],
     examples: [
-      "I studied for 22 years before traveling.",
-      "Sharif fell into a 6-meter hole.",
-      "They lived in Sudan for a long time.",
-      "Namariq married a wealthy man abroad.",
-      "The boat stayed in water for six hours.",
-      "He saw his mother yesterday morning.",
-      "We went to the market to buy food.",
+      "I studied for 22 years.",
+      "Sharif fell into a deep hole.",
+      "The boat stayed in water for 6 hours.",
+      "Namariq married a wealthy man.",
+      "They lived in Khartoum once.",
       "She sent him a message last night.",
-      "It didn't rain last week at all.",
-      "Did you finish your lesson today?",
-      "I graduated in 2018 from university.",
-      "The police chased the immigrants fast.",
       "He broke his leg during the trip.",
-      "They were very happy together once.",
-      "I bought a new English book yesterday."
+      "We went to the hospital together.",
+      "Did you see the engine explode?",
+      "I didn't quit my studies.",
+      "Makarem stayed in the hospital.",
+      "The police chased the immigrants.",
+      "He saw his mother yesterday.",
+      "They were very happy before.",
+      "I bought a new book last week."
     ],
     quiz: [
       { question: "Sharif ___ the ocean in 2022.", options: ["cross", "crossed", "crosses"], correct: "crossed" },
-      { question: "Makarem ___ her photo after 4 years.", options: ["send", "sends", "sent"], correct: "sent" },
-      { question: "___ you see the news?", options: ["Do", "Did", "Was"], correct: "Did" }
-    ]
-  },
-  {
-    id: "future-simple",
-    titleEn: "Future Simple",
-    titleAr: "المستقبل البسيط",
-    explanationEn: "Used to talk about future plans, predictions, or promises.",
-    explanationAr: "يستخدم للحديث عن خطط المستقبل، التوقعات، أو الوعود.",
-    formulationEn: "Positive: Subject + will + Verb (base). Negative: Subject + will + not + Verb (base). Question: Will + Subject + Verb (base)?",
-    formulationAr: "الإثبات: فاعل + will + فعل مجرد. النفي: فاعل + will + not + فعل مجرد. السؤال: Will + فاعل + فعل مجرد؟",
-    stories: [
-      {
-        title: "The Hope of Return",
-        content: "One day, Sharif will return to his family. He will build a big house for his mother. He is going to start his own English school. His sisters will be proud of him. He knows the journey is long, but he will succeed. The future will be brighter than the past."
-      },
-      {
-        title: "Namariq's Regret",
-        content: "Namariq will probably visit Sudan next summer. She will see the changes in her old neighborhood. She will wonder about Sharif and his life. She is going to bring gifts for her family. Perhaps she will find the peace she left behind."
-      }
-    ],
-    examples: [
-      "I will call you tomorrow morning.",
-      "Sharif will study medicine later.",
-      "It will rain in the evening today.",
-      "We will win the game surely.",
-      "They will travel to London soon.",
-      "I promise I will help you now.",
-      "She will be a great doctor one day.",
-      "Will you help me with my work?",
-      "The sun will rise at 6 AM tomorrow.",
-      "He will not quit his dream ever.",
-      "I think I will stay home tonight.",
-      "We will have a big party next week.",
-      "They will buy a new car soon.",
-      "I'm sure everything will be fine.",
-      "What will you do this weekend?"
-    ],
-    quiz: [
-      { question: "I ___ you tomorrow.", options: ["call", "will call", "called"], correct: "will call" },
-      { question: "He ___ proud of his success.", options: ["is", "will be", "was"], correct: "will be" },
-      { question: "___ you be at the party?", options: ["Will", "Do", "Are"], correct: "Will" }
+      { question: "Namariq ___ for money.", options: ["leave", "left", "leaves"], correct: "left" },
+      { question: "___ you finish the lesson?", options: ["Do", "Did", "Was"], correct: "Did" },
+      { question: "She ___ not send the photo for 2 years.", options: ["do", "did", "was"], correct: "did" },
+      { question: "I ___ a doctor yesterday.", options: ["see", "saw", "seen"], correct: "saw" }
     ]
   },
   {
     id: "present-perfect",
     titleEn: "Present Perfect",
     titleAr: "المضارع التام",
-    explanationEn: "Connects the past to the present. Used for experiences or unspecified times.",
-    explanationAr: "يربط الماضي بالحاضر. يستخدم للخبرات أو الأوقات غير المحددة.",
-    formulationEn: "Positive: Subject + have/has + Verb (V3/Past Participle). Negative: Subject + have/has + not + Verb (V3). Question: Have/Has + Subject + Verb (V3)?",
-    formulationAr: "الإثبات: فاعل + have/has + التصريف الثالث للفعل. النفي: فاعل + have/has + not + التصريف الثالث. السؤال: Have/Has + فاعل + التصريف الثالث؟",
+    explanationEn: "Used for experiences or actions that happened at an unspecified time and still affect the present.",
+    explanationAr: "يستخدم للخبرات أو الأفعال التي حدثت في وقت غير محدد ولا تزال تؤثر على الحاضر.",
+    formulationEn: "Subject + have/has + Verb (V3/Past Participle).",
+    formulationAr: "فاعل + have/has + التصريف الثالث للفعل.",
     stories: [
       {
-        title: "The Survivor",
-        content: "Sharif has survived many challenges. He has seen the dark side of the ocean. He has worked for 16 hours a day in difficult conditions. He has never lost his faith. These experiences have made him stronger. He has learned that resilience is the only way forward."
+        title: "The Veteran Student",
+        content: "Sharif has studied for more than two decades. He has experienced many failures, but he has never lost hope. He has worked in difficult conditions to help his sisters. He has seen the worst of humanity, but he has also found the best friends."
       },
       {
-        title: "The Traveler",
-        content: "Namariq has lived abroad for several years. She has visited many famous landmarks. She has forgotten some of her old habits. However, she has always kept a photo of her family. She has achieved stability, but she hasn't found true happiness yet."
+        title: "The Distant Lover",
+        content: "Kawthar has waited for Sharif for a long time. She has lived alone in a distant city. She has kept all his letters. She hasn't seen him for years, but her heart has stayed loyal. They have shared many dreams across the borders."
       }
     ],
     examples: [
-      "I have finished my lesson now.",
-      "Sharif has never given up his hope.",
+      "I have finished my lesson.",
+      "Sharif has never given up.",
       "Have you ever seen a rubber boat?",
-      "They have lived here since 2010.",
-      "She has already eaten her breakfast.",
-      "We haven't seen that movie yet.",
-      "He has broken his leg once before.",
+      "She has lived abroad since 2022.",
+      "They have already eaten dinner.",
+      "We haven't seen Namariq yet.",
+      "He has broken his leg once.",
       "I have lost my house keys.",
-      "The train has just left the station.",
-      "How long have you known Sharif?",
-      "They have built a new hospital here.",
-      "She has worked there for five years.",
-      "I have never been to Kuwait before.",
-      "Have they arrived at the airport yet?",
-      "We have studied these rules together."
+      "The train has just left.",
+      "How long have you known him?",
+      "They have built a new house.",
+      "She has worked there for years.",
+      "I have never been to Kuwait.",
+      "Have they arrived at the airport?",
+      "We have studied these rules."
     ],
     quiz: [
       { question: "Sharif ___ many challenges.", options: ["has survived", "survive", "survives"], correct: "has survived" },
       { question: "I have ___ my lesson.", options: ["finish", "finished", "finishing"], correct: "finished" },
-      { question: "___ you ever seen a boat?", options: ["Do", "Has", "Have"], correct: "Have" }
-    ]
-  },
-  {
-    id: "modals",
-    titleEn: "Modal Verbs",
-    titleAr: "الأفعال المساعدة",
-    explanationEn: "Used to express ability, necessity, or permission (can, must, should).",
-    explanationAr: "تستخدم للتعبير عن القدرة، الضرورة، أو الإذن (يمكن، يجب، ينبغي).",
-    formulationEn: "Structure: Subject + Modal (can/must/should) + Verb (base).",
-    formulationAr: "القاعدة: فاعل + فعل مساعد + فعل مجرد.",
-    stories: [
-      {
-        title: "The Immigrant's Rules",
-        content: "An immigrant must be very patient. He can face many dangers on his way. He should keep his documents safe. He must not trust everyone he meets. He can learn a new language to survive. He should never forget his roots."
-      },
-      {
-        title: "The Student's Duty",
-        content: "A student should study every day. He can achieve his dreams through education. He must listen to his teachers. He shouldn't waste his time on useless things. He can ask for help when he feels stuck. He must believe in himself."
-      }
-    ],
-    examples: [
-      "I can speak English fluently.",
-      "You must wear a seatbelt always.",
-      "He should study harder for exams.",
-      "We can't go out tonight sadly.",
-      "They must not enter this room.",
-      "Should I call him right now?",
-      "She can play the piano well.",
-      "You must finish work before 5 PM.",
-      "He shouldn't smoke in this area.",
-      "Can you help me with this task?",
-      "We must respect our parents always.",
-      "They can swim across the river.",
-      "I should drink more water daily.",
-      "You can stay here if you want.",
-      "Everything must be ready by tomorrow."
-    ],
-    quiz: [
-      { question: "He ___ study harder.", options: ["can", "should", "must not"], correct: "should" },
-      { question: "I ___ speak three languages.", options: ["can", "should", "must"], correct: "can" },
-      { question: "You ___ not enter.", options: ["must", "can", "should"], correct: "must" }
+      { question: "___ you ever seen a boat?", options: ["Do", "Has", "Have"], correct: "Have" },
+      { question: "She ___ lived here for years.", options: ["has", "have", "is"], correct: "has" },
+      { question: "We ___ not seen him yet.", options: ["has", "have", "are"], correct: "have" }
     ]
   }
 ];
