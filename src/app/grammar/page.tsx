@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Sparkles, BookOpen, Download, CheckCircle2, XCircle, ArrowRight, BookCheck, Lightbulb } from 'lucide-react';
+import { Sparkles, BookOpen, Download, CheckCircle2, XCircle, ArrowRight, BookCheck, Lightbulb, Settings2, Info } from 'lucide-react';
 import { jsPDF } from "jspdf";
 import { cn } from '@/lib/utils';
 
@@ -20,35 +20,41 @@ export default function GrammarAcademy() {
 
   const handleDownloadPDF = (topic: GrammarTopic) => {
     const doc = new jsPDF();
-    const title = language === 'en' ? topic.titleEn : topic.titleAr;
+    const title = topic.titleEn; // Keep title En for PDF professional look
     const explanation = language === 'en' ? topic.explanationEn : topic.explanationAr;
+    const formulation = language === 'en' ? topic.formulationEn : topic.formulationAr;
     
     doc.setFontSize(22);
     doc.text(title, 20, 20);
     
     doc.setFontSize(14);
-    doc.text("Explanation / الشرح:", 20, 35);
-    doc.setFontSize(12);
-    doc.text(explanation, 20, 45, { maxWidth: 170 });
+    doc.text("How it's made / طريقة الصياغة:", 20, 35);
+    doc.setFontSize(11);
+    doc.text(formulation, 20, 45, { maxWidth: 170 });
 
     doc.setFontSize(14);
-    doc.text("English Examples:", 20, 70);
+    doc.text("Explanation / الشرح:", 20, 60);
     doc.setFontSize(11);
+    doc.text(explanation, 20, 70, { maxWidth: 170 });
+
+    doc.setFontSize(14);
+    doc.text("English Examples (15):", 20, 95);
+    doc.setFontSize(10);
     topic.examples.forEach((ex, i) => {
-      doc.text(`${i + 1}. ${ex}`, 20, 80 + (i * 7));
+      doc.text(`${i + 1}. ${ex}`, 20, 105 + (i * 7));
     });
 
     doc.addPage();
     doc.setFontSize(14);
-    doc.text("English Stories:", 20, 20);
+    doc.text("Educational Stories:", 20, 20);
     topic.stories.forEach((s, i) => {
       doc.setFontSize(12);
-      doc.text(`${i + 1}. ${s.title}`, 20, 35 + (i * 60));
+      doc.text(`${i + 1}. ${s.title}`, 20, 35 + (i * 70));
       doc.setFontSize(10);
-      doc.text(s.content, 20, 45 + (i * 60), { maxWidth: 170 });
+      doc.text(s.content, 20, 45 + (i * 70), { maxWidth: 170 });
     });
 
-    doc.save(`${topic.id}-guide.pdf`);
+    doc.save(`${topic.id}-complete-guide.pdf`);
   };
 
   const checkAnswer = (idx: number, opt: string, correct: string) => {
@@ -102,26 +108,42 @@ export default function GrammarAcademy() {
         <div className="lg:col-span-3">
           {selectedTopic ? (
             <div className="space-y-10 animate-in fade-in slide-in-from-right-4 duration-500">
-              {/* Explanation Card */}
+              {/* Formulation & Explanation Card */}
               <Card className="border-none shadow-xl rounded-[3rem] overflow-hidden bg-white/50 backdrop-blur-sm border border-white">
-                <CardHeader className="bg-primary/5 p-10 flex flex-col md:flex-row items-center justify-between gap-6">
-                  <div className="space-y-2 text-center md:text-left rtl:md:text-right">
-                    <CardTitle className="text-3xl font-black text-primary flex items-center gap-3 justify-center md:justify-start">
-                      <Lightbulb className="h-8 w-8 text-accent" />
-                      {language === 'en' ? selectedTopic.titleEn : selectedTopic.titleAr}
-                    </CardTitle>
-                    <CardDescription className="text-lg font-medium">
-                      {language === 'en' ? selectedTopic.explanationEn : selectedTopic.explanationAr}
-                    </CardDescription>
+                <CardHeader className="bg-primary/5 p-10 flex flex-col md:flex-row items-start justify-between gap-6">
+                  <div className="space-y-4 text-left rtl:text-right w-full">
+                    <div className="flex items-center justify-between gap-4">
+                      <CardTitle className="text-3xl font-black text-primary flex items-center gap-3">
+                        <Lightbulb className="h-8 w-8 text-accent" />
+                        {language === 'en' ? selectedTopic.titleEn : selectedTopic.titleAr}
+                      </CardTitle>
+                      <Button 
+                        variant="outline" 
+                        className="rounded-2xl border-2 h-14 px-6 font-bold gap-2 shrink-0 hidden md:flex"
+                        onClick={() => handleDownloadPDF(selectedTopic)}
+                      >
+                        <Download className="h-5 w-5" />
+                        {t.grammar.download_pdf}
+                      </Button>
+                    </div>
+
+                    <div className="bg-accent/10 p-6 rounded-[2rem] border-2 border-dashed border-accent/30 space-y-2">
+                      <div className="flex items-center gap-2 text-accent font-black uppercase text-xs tracking-widest">
+                        <Settings2 className="h-4 w-4" />
+                        How it's made / طريقة الصياغة
+                      </div>
+                      <p className="text-xl font-bold text-primary italic leading-relaxed">
+                        {language === 'en' ? selectedTopic.formulationEn : selectedTopic.formulationAr}
+                      </p>
+                    </div>
+
+                    <div className="flex items-start gap-3 p-4 bg-muted/30 rounded-2xl">
+                      <Info className="h-5 w-5 text-muted-foreground shrink-0 mt-1" />
+                      <p className="text-lg font-medium text-muted-foreground">
+                        {language === 'en' ? selectedTopic.explanationEn : selectedTopic.explanationAr}
+                      </p>
+                    </div>
                   </div>
-                  <Button 
-                    variant="outline" 
-                    className="rounded-2xl border-2 h-14 px-6 font-bold gap-2 shrink-0"
-                    onClick={() => handleDownloadPDF(selectedTopic)}
-                  >
-                    <Download className="h-5 w-5" />
-                    {t.grammar.download_pdf}
-                  </Button>
                 </CardHeader>
                 <CardContent className="p-10">
                   <Tabs defaultValue="stories">
@@ -147,8 +169,8 @@ export default function GrammarAcademy() {
                     <TabsContent value="examples" className="space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {selectedTopic.examples.map((ex, i) => (
-                          <div key={i} className="flex items-center gap-4 p-4 bg-white rounded-2xl border-2 border-slate-50" dir="ltr">
-                            <span className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-black text-xs shrink-0">{i+1}</span>
+                          <div key={i} className="flex items-center gap-4 p-4 bg-white rounded-2xl border-2 border-slate-50 transition-all hover:border-primary/20 group" dir="ltr">
+                            <span className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-black text-xs shrink-0 group-hover:bg-primary group-hover:text-white transition-colors">{i+1}</span>
                             <span className="font-medium text-slate-700">{ex}</span>
                           </div>
                         ))}
@@ -191,6 +213,15 @@ export default function GrammarAcademy() {
                   </Tabs>
                 </CardContent>
               </Card>
+              <div className="md:hidden px-4">
+                <Button 
+                  className="w-full rounded-2xl h-16 font-black gap-2 shadow-xl"
+                  onClick={() => handleDownloadPDF(selectedTopic)}
+                >
+                  <Download className="h-6 w-6" />
+                  {t.grammar.download_pdf}
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="h-full min-h-[400px] flex flex-col items-center justify-center text-center space-y-6 bg-white/30 rounded-[3rem] border-4 border-dashed border-primary/10">

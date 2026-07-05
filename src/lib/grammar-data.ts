@@ -5,6 +5,8 @@ export interface GrammarTopic {
   titleAr: string;
   explanationEn: string;
   explanationAr: string;
+  formulationEn: string;
+  formulationAr: string;
   stories: {
     title: string;
     content: string;
@@ -24,6 +26,8 @@ export const GRAMMAR_DATA: GrammarTopic[] = [
     titleAr: "المضارع البسيط",
     explanationEn: "Used to describe habits, general truths, and fixed arrangements.",
     explanationAr: "يستخدم لوصف العادات، الحقائق العامة، والمواعيد الثابتة.",
+    formulationEn: "Positive: Subject + Verb (s/es with he/she/it). Negative: Subject + do/does + not + Verb. Question: Do/Does + Subject + Verb?",
+    formulationAr: "الإثبات: فاعل + فعل (إضافة s مع المفرد). النفي: فاعل + do/does + not + فعل مجرد. السؤال: Do/Does + فاعل + فعل مجرد؟",
     stories: [
       {
         title: "Sharif's Routine",
@@ -39,17 +43,17 @@ export const GRAMMAR_DATA: GrammarTopic[] = [
       "Sharif works 16 hours a day.",
       "The sun rises in the east.",
       "Water boils at 100 degrees Celsius.",
-      "He speaks three languages.",
-      "We live in Khartoum.",
+      "He speaks three languages fluently.",
+      "We live in a complex world.",
       "They visit their mother every Friday.",
-      "She loves classical music.",
-      "My brother works as a doctor.",
-      "Cats catch mice.",
-      "It rains a lot in winter.",
-      "I don't like cold weather.",
-      "Does he speak English?",
-      "The train leaves at 8 PM.",
-      "Birds fly in the sky."
+      "She loves classical English literature.",
+      "My brother works as a digital designer.",
+      "Cats catch mice instinctively.",
+      "It rains a lot in winter seasons.",
+      "I don't like cold weather at all.",
+      "Does he speak English well?",
+      "The train leaves at 8 PM sharp.",
+      "Birds fly high in the blue sky."
     ],
     quiz: [
       { question: "Sharif ___ to the center every morning.", options: ["walk", "walks", "walking"], correct: "walks" },
@@ -63,6 +67,8 @@ export const GRAMMAR_DATA: GrammarTopic[] = [
     titleAr: "الماضي البسيط",
     explanationEn: "Used for actions that started and finished in the past.",
     explanationAr: "يستخدم للأفعال التي بدأت وانتهت في الماضي.",
+    formulationEn: "Positive: Subject + Verb (Past Form / -ed). Negative: Subject + did + not + Verb (base). Question: Did + Subject + Verb (base)?",
+    formulationAr: "الإثبات: فاعل + التصريف الثاني للفعل. النفي: فاعل + did + not + فعل مجرد. السؤال: Did + فاعل + فعل مجرد؟",
     stories: [
       {
         title: "The Sea Journey",
@@ -74,21 +80,21 @@ export const GRAMMAR_DATA: GrammarTopic[] = [
       }
     ],
     examples: [
-      "I studied for 22 years.",
+      "I studied for 22 years before traveling.",
       "Sharif fell into a 6-meter hole.",
       "They lived in Sudan for a long time.",
-      "Namariq married a wealthy man.",
-      "The boat stayed in the water for six hours.",
-      "He saw his mother yesterday.",
-      "We went to the market.",
+      "Namariq married a wealthy man abroad.",
+      "The boat stayed in water for six hours.",
+      "He saw his mother yesterday morning.",
+      "We went to the market to buy food.",
       "She sent him a message last night.",
-      "It didn't rain last week.",
-      "Did you finish your lesson?",
-      "I graduated in 2018.",
-      "The police chased the immigrants.",
+      "It didn't rain last week at all.",
+      "Did you finish your lesson today?",
+      "I graduated in 2018 from university.",
+      "The police chased the immigrants fast.",
       "He broke his leg during the trip.",
-      "They were very happy together.",
-      "I bought a new book."
+      "They were very happy together once.",
+      "I bought a new English book yesterday."
     ],
     quiz: [
       { question: "Sharif ___ the ocean in 2022.", options: ["cross", "crossed", "crosses"], correct: "crossed" },
@@ -100,8 +106,10 @@ export const GRAMMAR_DATA: GrammarTopic[] = [
     id: "future-simple",
     titleEn: "Future Simple",
     titleAr: "المستقبل البسيط",
-    explanationEn: "Used to talk about future plans, predictions, or promises using 'will' or 'going to'.",
-    explanationAr: "يستخدم للحديث عن خطط المستقبل، التوقعات، أو الوعود باستخدام 'will' أو 'going to'.",
+    explanationEn: "Used to talk about future plans, predictions, or promises.",
+    explanationAr: "يستخدم للحديث عن خطط المستقبل، التوقعات، أو الوعود.",
+    formulationEn: "Positive: Subject + will + Verb (base). Negative: Subject + will + not + Verb (base). Question: Will + Subject + Verb (base)?",
+    formulationAr: "الإثبات: فاعل + will + فعل مجرد. النفي: فاعل + will + not + فعل مجرد. السؤال: Will + فاعل + فعل مجرد؟",
     stories: [
       {
         title: "The Hope of Return",
@@ -113,25 +121,25 @@ export const GRAMMAR_DATA: GrammarTopic[] = [
       }
     ],
     examples: [
-      "I will call you tomorrow.",
-      "Sharif is going to study medicine.",
-      "It will rain in the evening.",
-      "We will win the game.",
-      "They are going to travel to London.",
-      "I promise I will help you.",
-      "She will be a great doctor.",
-      "Will you help me with my homework?",
+      "I will call you tomorrow morning.",
+      "Sharif will study medicine later.",
+      "It will rain in the evening today.",
+      "We will win the game surely.",
+      "They will travel to London soon.",
+      "I promise I will help you now.",
+      "She will be a great doctor one day.",
+      "Will you help me with my work?",
       "The sun will rise at 6 AM tomorrow.",
-      "He is not going to quit.",
+      "He will not quit his dream ever.",
       "I think I will stay home tonight.",
-      "We are going to have a party.",
+      "We will have a big party next week.",
       "They will buy a new car soon.",
       "I'm sure everything will be fine.",
-      "What are you going to do this weekend?"
+      "What will you do this weekend?"
     ],
     quiz: [
       { question: "I ___ you tomorrow.", options: ["call", "will call", "called"], correct: "will call" },
-      { question: "He is ___ to start a school.", options: ["go", "goes", "going"], correct: "going" },
+      { question: "He ___ proud of his success.", options: ["is", "will be", "was"], correct: "will be" },
       { question: "___ you be at the party?", options: ["Will", "Do", "Are"], correct: "Will" }
     ]
   },
@@ -139,8 +147,10 @@ export const GRAMMAR_DATA: GrammarTopic[] = [
     id: "present-perfect",
     titleEn: "Present Perfect",
     titleAr: "المضارع التام",
-    explanationEn: "Connects the past to the present. Used for experiences or actions that happened at an unspecified time.",
-    explanationAr: "يربط الماضي بالحاضر. يستخدم للخبرات أو الأفعال التي حدثت في وقت غير محدد.",
+    explanationEn: "Connects the past to the present. Used for experiences or unspecified times.",
+    explanationAr: "يربط الماضي بالحاضر. يستخدم للخبرات أو الأوقات غير المحددة.",
+    formulationEn: "Positive: Subject + have/has + Verb (V3/Past Participle). Negative: Subject + have/has + not + Verb (V3). Question: Have/Has + Subject + Verb (V3)?",
+    formulationAr: "الإثبات: فاعل + have/has + التصريف الثالث للفعل. النفي: فاعل + have/has + not + التصريف الثالث. السؤال: Have/Has + فاعل + التصريف الثالث؟",
     stories: [
       {
         title: "The Survivor",
@@ -152,21 +162,21 @@ export const GRAMMAR_DATA: GrammarTopic[] = [
       }
     ],
     examples: [
-      "I have finished my lesson.",
-      "Sharif has never given up.",
+      "I have finished my lesson now.",
+      "Sharif has never given up his hope.",
       "Have you ever seen a rubber boat?",
       "They have lived here since 2010.",
-      "She has already eaten breakfast.",
+      "She has already eaten her breakfast.",
       "We haven't seen that movie yet.",
-      "He has broken his leg once.",
-      "I have lost my keys.",
-      "The train has just left.",
-      "How long have you known him?",
-      "They have built a new hospital.",
+      "He has broken his leg once before.",
+      "I have lost my house keys.",
+      "The train has just left the station.",
+      "How long have you known Sharif?",
+      "They have built a new hospital here.",
       "She has worked there for five years.",
-      "I have never been to Kuwait.",
-      "Have they arrived yet?",
-      "We have studied these rules before."
+      "I have never been to Kuwait before.",
+      "Have they arrived at the airport yet?",
+      "We have studied these rules together."
     ],
     quiz: [
       { question: "Sharif ___ many challenges.", options: ["has survived", "survive", "survives"], correct: "has survived" },
@@ -180,6 +190,8 @@ export const GRAMMAR_DATA: GrammarTopic[] = [
     titleAr: "الأفعال المساعدة",
     explanationEn: "Used to express ability, necessity, or permission (can, must, should).",
     explanationAr: "تستخدم للتعبير عن القدرة، الضرورة، أو الإذن (يمكن، يجب، ينبغي).",
+    formulationEn: "Structure: Subject + Modal (can/must/should) + Verb (base).",
+    formulationAr: "القاعدة: فاعل + فعل مساعد + فعل مجرد.",
     stories: [
       {
         title: "The Immigrant's Rules",
@@ -191,19 +203,19 @@ export const GRAMMAR_DATA: GrammarTopic[] = [
       }
     ],
     examples: [
-      "I can speak English.",
-      "You must wear a seatbelt.",
-      "He should study harder.",
-      "We can't go out tonight.",
+      "I can speak English fluently.",
+      "You must wear a seatbelt always.",
+      "He should study harder for exams.",
+      "We can't go out tonight sadly.",
       "They must not enter this room.",
-      "Should I call him now?",
-      "She can play the piano very well.",
-      "You must finish your work before 5 PM.",
-      "He shouldn't smoke.",
-      "Can you help me with this?",
-      "We must respect our parents.",
+      "Should I call him right now?",
+      "She can play the piano well.",
+      "You must finish work before 5 PM.",
+      "He shouldn't smoke in this area.",
+      "Can you help me with this task?",
+      "We must respect our parents always.",
       "They can swim across the river.",
-      "I should drink more water.",
+      "I should drink more water daily.",
       "You can stay here if you want.",
       "Everything must be ready by tomorrow."
     ],
