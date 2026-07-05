@@ -40,85 +40,87 @@ export function Navigation() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card md:top-0 md:bottom-auto md:border-t-0 md:border-b shadow-lg transition-colors duration-300">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 h-16">
-        <Link href="/" className="flex items-center gap-2 font-headline text-lg md:text-xl font-black text-primary hover:opacity-80 transition-opacity shrink-0">
-          <BookOpen className="h-6 w-6 text-accent shrink-0" />
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-3 md:px-6 h-16">
+        <Link href="/" className="flex items-center gap-1.5 md:gap-2 font-headline text-lg md:text-xl font-black text-primary hover:opacity-80 transition-opacity shrink-0">
+          <BookOpen className="h-5 w-5 md:h-6 md:w-6 text-accent shrink-0" />
           <span className="inline whitespace-nowrap">Moc-co</span>
         </Link>
         
-        <div className="flex items-center gap-4 md:gap-6 overflow-x-auto no-scrollbar px-2">
+        <div className="flex items-center gap-3 sm:gap-4 md:gap-6 overflow-x-auto no-scrollbar px-2 flex-1 justify-end md:justify-center">
           <Link href="/" className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors shrink-0">
             <Home className="h-5 w-5" />
-            <span className="text-[10px] font-medium uppercase tracking-wider">{t.nav.home}</span>
+            <span className="text-[9px] md:text-[10px] font-medium uppercase tracking-wider">{t.nav.home}</span>
           </Link>
           <Link href="/lessons" className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors shrink-0">
             <Search className="h-5 w-5" />
-            <span className="text-[10px] font-medium uppercase tracking-wider">{t.nav.lessons}</span>
+            <span className="text-[9px] md:text-[10px] font-medium uppercase tracking-wider">{t.nav.lessons}</span>
           </Link>
           <Link href="/grammar" className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors shrink-0">
             <Sparkles className="h-5 w-5" />
-            <span className="text-[10px] font-medium uppercase tracking-wider">{t.nav.grammar}</span>
+            <span className="text-[9px] md:text-[10px] font-medium uppercase tracking-wider">{t.nav.grammar}</span>
           </Link>
           <Link href="/pricing" className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors shrink-0">
             <CreditCard className="h-5 w-5" />
-            <span className="text-[10px] font-medium uppercase tracking-wider">{t.nav.pricing}</span>
+            <span className="text-[9px] md:text-[10px] font-medium uppercase tracking-wider">{t.nav.pricing}</span>
           </Link>
           <Link href="/about" className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors shrink-0">
             <Info className="h-5 w-5" />
-            <span className="text-[10px] font-medium uppercase tracking-wider">{t.nav.about}</span>
+            <span className="text-[9px] md:text-[10px] font-medium uppercase tracking-wider">{t.nav.about}</span>
           </Link>
           
           {authType === 'admin' && (
             <Link href="/admin/dashboard" className="flex flex-col items-center gap-1 text-accent hover:text-accent/80 transition-colors font-bold shrink-0">
               <Settings className="h-5 w-5" />
-              <span className="text-[10px] uppercase tracking-wider">{t.nav.admin}</span>
+              <span className="text-[9px] md:text-[10px] uppercase tracking-wider">{t.nav.admin}</span>
             </Link>
           )}
 
           <Link href="/stats" className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors shrink-0">
             <Trophy className="h-5 w-5" />
-            <span className="text-[10px] font-medium uppercase tracking-wider">{t.nav.stats}</span>
+            <span className="text-[9px] md:text-[10px] font-medium uppercase tracking-wider">{t.nav.stats}</span>
           </Link>
+        </div>
 
-          <div className="h-8 w-px bg-border mx-2 hidden md:block" />
+        <div className="flex items-center gap-1 md:gap-3 shrink-0 ml-2 md:ml-0">
+          <div className="h-8 w-px bg-border mx-1 hidden sm:block" />
 
           <Button 
             variant="ghost" 
             size="icon" 
             onClick={toggleLanguage} 
-            className="rounded-full shrink-0 hover:bg-primary/10 transition-all text-primary font-bold"
+            className="h-9 w-9 md:h-10 md:w-10 rounded-full shrink-0 hover:bg-primary/10 transition-all text-primary font-bold"
             aria-label="Toggle Language"
           >
-            <Languages className="h-5 w-5 mr-1" />
-            <span className="text-xs">{language === 'en' ? 'AR' : 'EN'}</span>
+            <Languages className="h-4 w-4 md:h-5 md:w-5" />
+            <span className="text-[10px] md:text-xs ml-0.5">{language === 'en' ? 'AR' : 'EN'}</span>
           </Button>
 
           <Button 
             variant="ghost" 
             size="icon" 
             onClick={toggleTheme} 
-            className="rounded-full shrink-0 hover:bg-accent/20 transition-all duration-300"
+            className="h-9 w-9 md:h-10 md:w-10 rounded-full shrink-0 hover:bg-accent/20 transition-all duration-300"
             aria-label="Toggle Theme"
           >
             {isDark ? (
-              <Sun className="h-5 w-5 text-amber-400 animate-in zoom-in-50 duration-300" />
+              <Sun className="h-4 w-4 md:h-5 md:w-5 text-amber-400" />
             ) : (
-              <Moon className="h-5 w-5 text-primary animate-in zoom-in-50 duration-300" />
+              <Moon className="h-4 w-4 md:h-5 md:w-5 text-primary" />
             )}
           </Button>
           
           {authType ? (
             <button 
               onClick={handleLogout}
-              className="flex flex-col items-center gap-1 text-muted-foreground hover:text-destructive transition-colors shrink-0"
+              className="flex flex-col items-center gap-1 text-muted-foreground hover:text-destructive transition-colors shrink-0 ml-1 md:ml-0"
             >
               <LogOut className="h-5 w-5" />
-              <span className="text-[10px] font-medium uppercase tracking-wider">{t.nav.logout}</span>
+              <span className="text-[9px] md:text-[10px] font-medium uppercase tracking-wider">{t.nav.logout}</span>
             </button>
           ) : (
-            <Link href="/login" className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors shrink-0">
+            <Link href="/login" className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors shrink-0 ml-1 md:ml-0">
               <LogIn className="h-5 w-5" />
-              <span className="text-[10px] font-medium uppercase tracking-wider">{t.nav.login}</span>
+              <span className="text-[9px] md:text-[10px] font-medium uppercase tracking-wider">{t.nav.login}</span>
             </Link>
           )}
         </div>
