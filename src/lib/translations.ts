@@ -8,7 +8,8 @@ export const translations = {
       stats: "Stats",
       admin: "Admin",
       login: "Login",
-      logout: "Logout"
+      logout: "Logout",
+      pricing: "Pricing"
     },
     hero: {
       badge: "The Next Gen of Language Learning",
@@ -16,6 +17,24 @@ export const translations = {
       description: "Master the language through real-life drama, interactive exercises, and context-aware translations. 300 chapters of professional experience.",
       start: "Start the Journey",
       viewStats: "View Progress"
+    },
+    pricing: {
+      title: "Choose Your Path",
+      subtitle: "Invest in your future with our flexible subscription plans.",
+      silver: "Silver Plan",
+      bronze: "Bronze Plan",
+      gold: "Gold Plan",
+      monthly: "Monthly",
+      foundation: "Foundation Phase (1-100)",
+      empowerment: "Empowerment Phase (101-200)",
+      mastery: "Mastery Phase (201-300)",
+      subscribe: "Subscribe Now",
+      features: {
+        audio: "High-Quality Audio",
+        pdf: "PDF Downloads",
+        translation: "Instant Translation",
+        tracking: "Progress Tracking"
+      }
     },
     features: {
       title: "System Features",
@@ -51,7 +70,8 @@ export const translations = {
       stats: "تقدمي",
       admin: "الإدارة",
       login: "دخول",
-      logout: "خروج"
+      logout: "خروج",
+      pricing: "الاشتراكات"
     },
     hero: {
       badge: "الجيل القادم من تعلم اللغات",
@@ -59,6 +79,24 @@ export const translations = {
       description: "أتقن اللغة من خلال الدراما الواقعية، والتمارين التفاعلية، والترجمة السياقية. 300 فصل من الخبرة المهنية.",
       start: "ابدأ الرحلة",
       viewStats: "عرض الإنجازات"
+    },
+    pricing: {
+      title: "اختر مسارك التعليمي",
+      subtitle: "استثمر في مستقبلك مع خطط الاشتراك المرنة لدينا.",
+      silver: "الباقة الفضية",
+      bronze: "الباقة البرونزية",
+      gold: "الباقة الذهبية",
+      monthly: "شهرياً",
+      foundation: "مرحلة التأسيس (1-100)",
+      empowerment: "مرحلة التمكين (101-200)",
+      mastery: "مرحلة الاحتراف (201-300)",
+      subscribe: "اشترك الآن",
+      features: {
+        audio: "استماع صوتي عالي الجودة",
+        pdf: "تحميل ملفات PDF",
+        translation: "ترجمة فورية ذكية",
+        tracking: "تتبع التقدم الدراسي"
+      }
     },
     features: {
       title: "مميزات النظام",

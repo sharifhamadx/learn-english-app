@@ -9,7 +9,8 @@
         "id": { "type": "string" },
         "email": { "type": "string", "format": "email" },
         "username": { "type": "string" },
-        "registrationDate": { "type": "string", "format": "date-time" }
+        "registrationDate": { "type": "string", "format": "date-time" },
+        "plan": { "type": "string", "enum": ["free", "silver", "bronze", "gold"], "description": "The current subscription tier of the user." }
       },
       "required": ["id", "email", "username", "registrationDate"]
     },
@@ -22,7 +23,8 @@
         "code": { "type": "string", "description": "The actual string used to unlock the app." },
         "note": { "type": "string", "description": "Admin note, e.g., 'Student: Ahmed'" },
         "isActive": { "type": "boolean" },
-        "createdAt": { "type": "string", "format": "date-time" }
+        "createdAt": { "type": "string", "format": "date-time" },
+        "plan": { "type": "string", "enum": ["silver", "bronze", "gold"], "description": "The tier associated with this specific code." }
       },
       "required": ["id", "code", "isActive", "createdAt"]
     }
