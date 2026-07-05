@@ -2,7 +2,7 @@
 "use client";
 
 import Link from 'next/link';
-import { BookOpen, Home, Trophy, Search, LogIn, LogOut, Settings, Moon, Sun, Info, Languages, CreditCard } from 'lucide-react';
+import { BookOpen, Home, Trophy, Search, LogIn, LogOut, Settings, Moon, Sun, Info, Languages, CreditCard, Sparkles } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -54,6 +54,10 @@ export function Navigation() {
           <Link href="/lessons" className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors shrink-0">
             <Search className="h-5 w-5" />
             <span className="text-[10px] font-medium uppercase tracking-wider">{t.nav.lessons}</span>
+          </Link>
+          <Link href="/grammar" className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors shrink-0">
+            <Sparkles className="h-5 w-5" />
+            <span className="text-[10px] font-medium uppercase tracking-wider">{t.nav.grammar}</span>
           </Link>
           <Link href="/pricing" className="flex flex-col items-center gap-1 text-muted-foreground hover:text-primary transition-colors shrink-0">
             <CreditCard className="h-5 w-5" />

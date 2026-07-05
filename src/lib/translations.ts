@@ -4,6 +4,7 @@ export const translations = {
     nav: {
       home: "Home",
       lessons: "Lessons",
+      grammar: "Grammar",
       about: "About",
       stats: "Stats",
       admin: "Admin",
@@ -61,6 +62,24 @@ export const translations = {
       upgrade_plan: "Upgrade Plan",
       license_required_msg: "License Required: ({{plan}})"
     },
+    grammar: {
+      title: "Grammar Academy",
+      subtitle: "Master the rules through Sharif's real-life stories and practical examples.",
+      download_pdf: "Download PDF Guide",
+      stories_title: "Contextual Stories",
+      examples_title: "15 Practical Examples",
+      quiz_title: "Test Your Knowledge",
+      explanation: "Simplified Explanation",
+      select_topic: "Select a Topic",
+      correct: "Correct!",
+      wrong: "Try again!",
+      verify: "Verify",
+      topics: {
+        present_simple: "Present Simple",
+        past_simple: "Past Simple",
+        future_simple: "Future Simple"
+      }
+    },
     features: {
       title: "System Features",
       subtitle: "Educational engineering designed for ambitious learners.",
@@ -103,6 +122,7 @@ export const translations = {
     nav: {
       home: "الرئيسية",
       lessons: "الدروس",
+      grammar: "القواعد",
       about: "من نحن",
       stats: "تقدمي",
       admin: "الإدارة",
@@ -159,6 +179,24 @@ export const translations = {
       required_plan: "مطلوب: باقة {{plan}}",
       upgrade_plan: "ترقية الاشتراك",
       license_required_msg: "هذا الفصل يتطلب ترخيص ({{plan}})."
+    },
+    grammar: {
+      title: "أكاديمية القواعد",
+      subtitle: "أتقن القواعد من خلال قصص شريف الواقعية والأمثلة التطبيقية.",
+      download_pdf: "تحميل دليل PDF",
+      stories_title: "القصص السياقية",
+      examples_title: "15 مثالاً تطبيقياً",
+      quiz_title: "اختبر معلوماتك",
+      explanation: "شرح مبسط للقاعدة",
+      select_topic: "اختر قاعدة للدراسة",
+      correct: "إجابة صحيحة!",
+      wrong: "حاول مرة أخرى!",
+      verify: "تحقق من الإجابة",
+      topics: {
+        present_simple: "المضارع البسيط",
+        past_simple: "الماضي البسيط",
+        future_simple: "المستقبل البسيط"
+      }
     },
     features: {
       title: "مميزات النظام",
