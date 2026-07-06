@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { Switch } from '@/components/ui/switch';
 import { Trophy, Star, Clock, BookOpen, Flame, Anchor, Heart, ShieldCheck, Bell, BellRing, Loader2 } from 'lucide-react';
-import { useFirestore, useUser, useCollection, useMemoFirebase } from '@/firebase';
+import { useFirestore, useUser, useCollection, useMemoFirebase, useDoc } from '@/firebase';
 import { collection, doc, setDoc } from 'firebase/firestore';
 
 export default function StatsPage() {
@@ -16,12 +16,19 @@ export default function StatsPage() {
   const [reminderEnabled, setReminderEnabled] = useState(false);
   const [reminderTime, setReminderTime] = useState("20:00");
 
+  const userDocRef = useMemoFirebase(() => {
+    if (!user) return null;
+    return doc(db, 'users', user.uid);
+  }, [user, db]);
+
+  const { data: userData, isLoading: isUserDataLoading } = useDoc(userDocRef);
+
   const progressQuery = useMemoFirebase(() => {
     if (!user) return null;
     return collection(db, 'users', user.uid, 'lessonProgress');
   }, [user, db]);
 
-  const { data: progressData, isLoading } = useCollection(progressQuery);
+  const { data: progressData, isLoading: isProgressLoading } = useCollection(progressQuery);
 
   const completedCount = progressData?.length || 0;
   const totalLessons = 300;
@@ -40,7 +47,9 @@ export default function StatsPage() {
     return progressData?.reduce((acc, curr) => acc + (curr.timeSpent || 0), 0) || 0;
   }, [progressData]);
 
-  const totalXP = (completedCount * 100) + (accuracy * 10);
+  // Use real data from user document if available
+  const totalXP = userData?.xp || 0;
+  const currentStreak = userData?.streak || 0;
 
   useEffect(() => {
     const savedReminder = localStorage.getItem('daily-reminder');
@@ -78,7 +87,7 @@ export default function StatsPage() {
     }
   };
 
-  if (isUserLoading || (user && isLoading)) {
+  if (isUserLoading || (user && (isUserDataLoading || isProgressLoading))) {
     return (
       <div className="flex h-[80vh] items-center justify-center">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
@@ -141,7 +150,10 @@ export default function StatsPage() {
               <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-md">
                 <Trophy className="h-8 w-8 md:h-10 md:w-10 text-accent" />
               </div>
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80">Current Rank</span>
+              <div className="flex flex-col items-end">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80">Streak</span>
+                <span className="text-2xl font-black text-accent">{currentStreak} 🔥</span>
+              </div>
             </div>
             <div className="space-y-2">
               <div className="text-5xl md:text-6xl font-black italic tracking-tighter">

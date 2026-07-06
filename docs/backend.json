@@ -4,28 +4,43 @@
     "User": {
       "title": "User",
       "type": "object",
-      "description": "Represents a user of the application.",
+      "description": "Represents a user of the application with gamification data.",
       "properties": {
         "id": { "type": "string" },
         "email": { "type": "string", "format": "email" },
         "username": { "type": "string" },
         "registrationDate": { "type": "string", "format": "date-time" },
-        "plan": { "type": "string", "enum": ["free", "silver", "bronze", "gold", "vip"], "description": "The current subscription tier of the user." },
-        "accessCode": { "type": "string" }
+        "plan": { "type": "string", "enum": ["free", "silver", "bronze", "gold", "vip"] },
+        "accessCode": { "type": "string" },
+        "xp": { "type": "number", "description": "Total experience points earned." },
+        "streak": { "type": "number", "description": "Current consecutive days active." },
+        "lastActiveDate": { "type": "string", "format": "date", "description": "Last date the user completed a lesson (YYYY-MM-DD)." }
       },
       "required": ["id"]
+    },
+    "LessonProgress": {
+      "title": "LessonProgress",
+      "type": "object",
+      "description": "Record of a completed lesson.",
+      "properties": {
+        "lessonId": { "type": "string" },
+        "score": { "type": "number" },
+        "totalQuestions": { "type": "number" },
+        "timeSpent": { "type": "number" },
+        "completedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["lessonId", "score", "completedAt"]
     },
     "AccessCode": {
       "title": "AccessCode",
       "type": "object",
-      "description": "A unique serial code to grant access to the app, locked to a specific device.",
+      "description": "A unique serial code to grant access.",
       "properties": {
         "id": { "type": "string" },
-        "code": { "type": "string", "description": "The serial string (e.g., 7710202611)." },
+        "code": { "type": "string" },
         "plan": { "type": "string", "enum": ["silver", "bronze", "gold", "vip"] },
-        "note": { "type": "string", "description": "Subscriber name or note." },
         "isActive": { "type": "boolean" },
-        "usedByUid": { "type": "string", "description": "The Firebase UID of the device that first activated this code." },
+        "usedByUid": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "code", "plan", "isActive", "createdAt"]
@@ -35,17 +50,17 @@
     "providers": ["anonymous"]
   },
   "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Root user profiles."
+    },
+    "/users/{userId}/lessonProgress/{lessonId}": {
+      "schema": { "$ref": "#/entities/LessonProgress" },
+      "description": "Sub-collection for detailed lesson completion."
+    },
     "/accessCodes/{codeId}": {
       "schema": { "$ref": "#/entities/AccessCode" },
       "description": "Collection of valid access codes."
-    },
-    "/adminUsers/{userId}": {
-      "schema": { "$ref": "#/entities/User" },
-      "description": "Admin privilege marker."
-    },
-    "/users/{userId}": {
-      "schema": { "$ref": "#/entities/User" },
-      "description": "Standard user profiles with plan and device binding info."
     }
   }
 }

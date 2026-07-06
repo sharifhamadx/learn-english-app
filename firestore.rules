@@ -8,36 +8,31 @@ service cloud.firestore {
       return request.auth != null;
     }
     
-    function isAdmin() {
-      return isSignedIn() && exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid));
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
     }
 
     // --- COLLECTION RULES ---
 
-    // السماح للجميع بقراءة الأكواد للتحقق، ولكن الإضافة للمديرين فقط
-    match /accessCodes/{codeId} {
-      allow read: if true;
-      allow write: if isSignedIn(); 
-    }
-
-    // بيانات المستخدمين محمية
+    // Users can only read and write their own profile and progress
     match /users/{userId} {
-      allow read, write: if isSignedIn() && request.auth.uid == userId;
+      allow read, write: if isOwner(userId);
       
       match /lessonProgress/{lessonId} {
-        allow read, write: if isSignedIn() && request.auth.uid == userId;
+        allow read, write: if isOwner(userId);
       }
     }
 
-    // سجل المديرين - يسمح للمدير برؤية سجله الخاص
-    match /adminUsers/{userId} {
-      allow read, write: if isSignedIn() && request.auth.uid == userId;
-    }
-
-    // الدروس متاحة للقراءة للجميع
-    match /lessons/{lessonId} {
+    // Access codes are read-only for verification, write for authenticated users during activation
+    match /accessCodes/{codeId} {
       allow read: if true;
       allow write: if isSignedIn();
+    }
+
+    // Lessons are globally readable, only admin (system) can write
+    match /lessons/{lessonId} {
+      allow read: if true;
+      allow write: if false; 
     }
   }
 }

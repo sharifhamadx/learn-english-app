@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect, useMemo } from 'react';
@@ -27,7 +28,7 @@ import { translateWord } from '@/ai/flows/translate-word';
 import { useToast } from '@/hooks/use-toast';
 import { jsPDF } from "jspdf";
 import { useFirestore, useUser } from '@/firebase';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, getDoc, updateDoc, increment } from 'firebase/firestore';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Slider } from '@/components/ui/slider';
 import { 
@@ -103,13 +104,58 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
 
   const saveProgress = async (finalScore: number) => {
     if (!user || !db) return;
+    
     try {
-      await setDoc(doc(db, 'users', user.uid, 'lessonProgress', lesson.id), {
+      // 1. Save Lesson Progress
+      const progressRef = doc(db, 'users', user.uid, 'lessonProgress', lesson.id);
+      setDoc(progressRef, {
+        lessonId: lesson.id,
         score: finalScore,
         totalQuestions: lesson.questions.length,
         timeSpent,
         completedAt: serverTimestamp(),
       }, { merge: true });
+
+      // 2. Update User Gamification Data
+      const userRef = doc(db, 'users', user.uid);
+      const userSnap = await getDoc(userRef);
+      
+      const xpEarned = (finalScore * 50) + 100; // Base 100 + 50 per correct answer
+      const today = new Date().toISOString().split('T')[0];
+
+      if (userSnap.exists()) {
+        const userData = userSnap.data();
+        const lastActive = userData.lastActiveDate || "";
+        let newStreak = userData.streak || 0;
+
+        if (lastActive !== today) {
+          const yesterday = new Date();
+          yesterday.setDate(yesterday.getDate() - 1);
+          const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+          if (lastActive === yesterdayStr) {
+            newStreak += 1;
+          } else {
+            newStreak = 1;
+          }
+        }
+
+        updateDoc(userRef, {
+          xp: increment(xpEarned),
+          streak: newStreak,
+          lastActiveDate: today,
+          lastLogin: serverTimestamp()
+        });
+      } else {
+        // Initial setup for new user doc if missing
+        setDoc(userRef, {
+          xp: xpEarned,
+          streak: 1,
+          lastActiveDate: today,
+          lastLogin: serverTimestamp()
+        }, { merge: true });
+      }
+
     } catch (e) {
       console.error("Error saving progress", e);
     }
@@ -212,7 +258,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
     if (Object.keys(newFeedback).length === lesson.questions.length) {
       setIsCompleted(true);
       saveProgress(newScore);
-      toast({ title: "Lesson Mastered!", description: "Progress saved to your profile." });
+      toast({ title: "Lesson Mastered!", description: "XP and Streak updated." });
     }
   };
 
