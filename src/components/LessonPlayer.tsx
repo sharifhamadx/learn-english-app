@@ -8,7 +8,22 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, XCircle, Play, Pause, Download, Loader2, Clock, Trophy, Sparkles, ArrowRight, RotateCcw } from 'lucide-react';
+import { 
+  CheckCircle2, 
+  XCircle, 
+  Play, 
+  Pause, 
+  Download, 
+  Loader2, 
+  Clock, 
+  Trophy, 
+  Sparkles, 
+  ArrowRight, 
+  RotateCcw, 
+  FastForward, 
+  FileDown,
+  Volume2
+} from 'lucide-react';
 import { textToSpeech } from '@/ai/flows/text-to-speech';
 import { translateWord } from '@/ai/flows/translate-word';
 import { useToast } from '@/hooks/use-toast';
@@ -16,6 +31,13 @@ import { jsPDF } from "jspdf";
 import { useFirestore, useUser } from '@/firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Slider } from '@/components/ui/slider';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
@@ -32,6 +54,11 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   const [isCompleted, setIsCompleted] = useState(false);
   const [activeWordIndex, setActiveWordIndex] = useState<number | null>(null);
   
+  // Audio Player States
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [playbackRate, setPlaybackRate] = useState(1);
+  
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { toast } = useToast();
   const db = useFirestore();
@@ -43,7 +70,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
 
   const storyWords = useMemo(() => lesson.story.split(' '), [lesson.story]);
 
-  // Track time spent
+  // Track total time spent on lesson
   useEffect(() => {
     const interval = setInterval(() => {
       if (!isCompleted && activeTab === 'story') setTimeSpent(prev => prev + 1);
@@ -51,12 +78,13 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
     return () => clearInterval(interval);
   }, [activeTab, isCompleted]);
 
-  // Sync highlighting with audio
+  // Handle Audio Logic
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
     const handleTimeUpdate = () => {
+      setCurrentTime(audio.currentTime);
       if (audio.duration) {
         const progress = audio.currentTime / audio.duration;
         const index = Math.floor(progress * storyWords.length);
@@ -64,9 +92,19 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
       }
     };
 
+    const handleLoadedMetadata = () => {
+      setDuration(audio.duration);
+    };
+
     audio.addEventListener('timeupdate', handleTimeUpdate);
-    return () => audio.removeEventListener('timeupdate', handleTimeUpdate);
-  }, [audioUrl, storyWords.length]);
+    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+    audio.playbackRate = playbackRate;
+
+    return () => {
+      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+    };
+  }, [audioUrl, storyWords.length, playbackRate]);
 
   const saveProgress = async (finalScore: number) => {
     if (!user || !db) return;
@@ -98,10 +136,12 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
     try {
       const result = await textToSpeech({ text: lesson.story });
       setAudioUrl(result.audioUri);
-      // Wait for audio element to load the source
       setTimeout(() => {
-        audioRef.current?.play();
-        setIsPlaying(true);
+        if (audioRef.current) {
+          audioRef.current.playbackRate = playbackRate;
+          audioRef.current.play();
+          setIsPlaying(true);
+        }
       }, 100);
     } catch (error) {
       toast({ variant: "destructive", title: "Audio Error", description: "Failed to generate speech." });
@@ -117,6 +157,24 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
       setIsPlaying(false);
       setActiveWordIndex(null);
     }
+  };
+
+  const handleSeek = (value: number[]) => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = value[0];
+      setCurrentTime(value[0]);
+    }
+  };
+
+  const handleDownloadAudio = () => {
+    if (!audioUrl) return;
+    const link = document.createElement('a');
+    link.href = audioUrl;
+    link.download = `${lesson.title}.wav`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast({ title: "Audio Downloaded", description: "The lesson audio has been saved to your device." });
   };
 
   const handleTranslate = async (word: string) => {
@@ -135,6 +193,12 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
     doc.text(lesson.title, 20, 20);
     doc.text(lesson.story, 20, 30, { maxWidth: 170 });
     doc.save(`${lesson.title}.pdf`);
+  };
+
+  const formatAudioTime = (time: number) => {
+    const mins = Math.floor(time / 60);
+    const secs = Math.floor(time % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   const formatTime = (seconds: number) => {
@@ -159,33 +223,84 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-20 px-4">
-      {/* Persistent Audio Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 sticky top-16 z-30 bg-background/90 backdrop-blur-xl py-6 border-b-2 border-primary/10 transition-all duration-300">
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-3">
-            <Badge variant="outline" className="text-primary border-primary bg-primary/5 font-bold uppercase tracking-wider">{lesson.difficulty}</Badge>
-            <span className="text-muted-foreground text-sm font-bold flex items-center gap-1 bg-muted px-2 py-0.5 rounded-lg">
-              <Clock className="h-3.5 w-3.5" /> {formatTime(timeSpent)}
-            </span>
+      {/* Persistent Audio Header - Refined Kaltura Style */}
+      <div className="sticky top-16 z-30 bg-background/95 backdrop-blur-2xl py-4 border-b-2 border-primary/10 transition-all duration-300">
+        <div className="space-y-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-3">
+                <Badge variant="outline" className="text-primary border-primary bg-primary/5 font-black uppercase text-[10px] tracking-widest">{lesson.difficulty}</Badge>
+                <span className="text-muted-foreground text-[10px] font-black flex items-center gap-1 bg-muted/50 px-2 py-0.5 rounded-full uppercase tracking-tighter">
+                  <Clock className="h-3 w-3" /> Study Time: {formatTime(timeSpent)}
+                </span>
+              </div>
+              <h1 className="text-xl md:text-2xl font-black text-primary font-headline tracking-tight truncate max-w-md">{lesson.title}</h1>
+            </div>
+            
+            <div className="flex items-center gap-2 bg-white/40 dark:bg-black/20 p-1.5 rounded-2xl border border-white/50 shadow-sm">
+              <Button variant="ghost" size="icon" onClick={handleStopAudio} disabled={!audioUrl} className="rounded-xl h-10 w-10 hover:bg-destructive/10 text-destructive">
+                <RotateCcw className="h-4 w-4" />
+              </Button>
+
+              <div className="h-6 w-px bg-border/50 mx-1" />
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-10 px-3 rounded-xl font-black text-xs gap-1.5 hover:bg-primary/10">
+                    <FastForward className="h-4 w-4 text-primary" />
+                    {playbackRate}x
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="rounded-2xl border-none shadow-2xl p-2 bg-white/90 backdrop-blur-xl">
+                  {[0.5, 0.75, 1, 1.25, 1.5, 2].map((rate) => (
+                    <DropdownMenuItem 
+                      key={rate} 
+                      onClick={() => setPlaybackRate(rate)}
+                      className={cn(
+                        "rounded-xl font-black text-sm px-4 py-2 cursor-pointer transition-colors",
+                        playbackRate === rate ? "bg-primary text-white" : "hover:bg-primary/5"
+                      )}
+                    >
+                      {rate === 1 ? 'Normal' : `${rate}x`}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <Button 
+                onClick={handleTogglePlay} 
+                disabled={isAudioLoading}
+                className="rounded-xl bg-primary text-white font-black hover:bg-primary/90 px-5 h-10 shadow-lg shadow-primary/20 transition-all active:scale-95 text-xs gap-2"
+              >
+                {isAudioLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                {isAudioLoading ? 'Generating...' : isPlaying ? 'Pause' : 'Play Lesson'}
+              </Button>
+
+              <div className="h-6 w-px bg-border/50 mx-1" />
+
+              <Button variant="outline" onClick={handleDownloadAudio} disabled={!audioUrl} size="icon" className="rounded-xl h-10 w-10 border-2 hover:bg-accent/10 hover:text-accent border-accent/20">
+                <Volume2 className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" onClick={handleDownloadPDF} size="icon" className="rounded-xl h-10 w-10 border-2 border-primary/20">
+                <FileDown className="h-4 w-4 text-primary" />
+              </Button>
+            </div>
           </div>
-          <h1 className="text-3xl font-black text-primary font-headline tracking-tight">{lesson.title}</h1>
-        </div>
-        <div className="flex gap-2 bg-white/50 dark:bg-black/20 p-2 rounded-2xl shadow-sm border border-white">
-          <Button variant="ghost" size="icon" onClick={handleStopAudio} disabled={!audioUrl} className="rounded-xl hover:bg-destructive/10 text-destructive">
-            <RotateCcw className="h-5 w-5" />
-          </Button>
-          <Button 
-            variant="secondary" 
-            onClick={handleTogglePlay} 
-            disabled={isAudioLoading}
-            className="rounded-xl bg-primary text-white font-black hover:bg-primary/90 px-6 h-12 shadow-lg shadow-primary/20 transition-all active:scale-95"
-          >
-            {isAudioLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
-            <span className="ml-2">{isAudioLoading ? 'Loading...' : isPlaying ? 'Pause' : 'Listen Now'}</span>
-          </Button>
-          <Button variant="outline" onClick={handleDownloadPDF} size="icon" className="rounded-xl h-12 w-12 border-2">
-            <Download className="h-5 w-5" />
-          </Button>
+
+          {/* Kaltura-style Progress Bar */}
+          <div className="space-y-1 px-1">
+            <Slider
+              value={[currentTime]}
+              max={duration || 100}
+              step={0.1}
+              onValueChange={handleSeek}
+              className="py-1 cursor-pointer"
+            />
+            <div className="flex justify-between text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest font-mono">
+              <span>{formatAudioTime(currentTime)}</span>
+              <span>{formatAudioTime(duration)}</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -224,9 +339,9 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3 h-16 p-1.5 bg-muted/50 backdrop-blur-md rounded-[2rem] border border-white">
-          <TabsTrigger value="story" className="rounded-[1.5rem] font-bold text-lg data-[state=active]:shadow-lg">Story</TabsTrigger>
-          <TabsTrigger value="quiz" className="rounded-[1.5rem] font-bold text-lg data-[state=active]:shadow-lg">Quiz</TabsTrigger>
-          <TabsTrigger value="grammar" className="rounded-[1.5rem] font-bold text-lg data-[state=active]:shadow-lg">Grammar</TabsTrigger>
+          <TabsTrigger value="story" className="rounded-[1.5rem] font-black text-lg data-[state=active]:shadow-lg">Story</TabsTrigger>
+          <TabsTrigger value="quiz" className="rounded-[1.5rem] font-black text-lg data-[state=active]:shadow-lg">Quiz</TabsTrigger>
+          <TabsTrigger value="grammar" className="rounded-[1.5rem] font-black text-lg data-[state=active]:shadow-lg">Grammar</TabsTrigger>
         </TabsList>
 
         <TabsContent value="story" className="mt-8">
