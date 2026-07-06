@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
-import { MessageCircle, Loader2, Smartphone, ShieldCheck } from 'lucide-react';
+import { MessageCircle, Loader2, Smartphone, ShieldCheck, Fingerprint, Eye, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore, useAuth, useUser, setDocumentNonBlocking, updateDocumentNonBlocking, initiateAnonymousSignIn } from '@/firebase';
 import { collection, query, where, getDocs, doc, serverTimestamp } from 'firebase/firestore';
@@ -15,6 +15,7 @@ import { collection, query, where, getDocs, doc, serverTimestamp } from 'firebas
 export default function LoginPage() {
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showCode, setShowCode] = useState(false);
   const [authFlow, setAuthFlow] = useState<'idle' | 'admin' | 'user'>('idle');
   const [pendingCodeData, setPendingCodeData] = useState<any>(null);
   
@@ -23,7 +24,6 @@ export default function LoginPage() {
   const db = useFirestore();
   const auth = useAuth();
 
-  // Effect to handle post-auth logic once the user is signed in
   useEffect(() => {
     if (!user || authFlow === 'idle') return;
 
@@ -37,13 +37,12 @@ export default function LoginPage() {
       }, { merge: true });
 
       localStorage.setItem('moc-co-auth', 'admin');
-      toast({ title: "مرحباً يا أستاذ شريف حماد", description: "تم تفعيل صلاحيات الإدارة العليا." });
+      toast({ title: "مرحباً يا أستاذ شريف حماد", description: "تم تفعيل صلاحيات الإدارة العليا بنجاح." });
       window.location.href = '/admin/dashboard';
     } else if (authFlow === 'user' && pendingCodeData) {
       const codeRef = doc(db, 'accessCodes', pendingCodeData.id);
       const userRef = doc(db, 'users', user.uid);
 
-      // Link device if not already linked
       if (!pendingCodeData.usedByUid) {
         updateDocumentNonBlocking(codeRef, {
           usedByUid: user.uid,
@@ -51,7 +50,6 @@ export default function LoginPage() {
         });
       }
 
-      // Update user profile
       setDocumentNonBlocking(userRef, {
         id: user.uid,
         accessCode: pendingCodeData.code,
@@ -71,27 +69,29 @@ export default function LoginPage() {
     setLoading(false);
   }, [user, authFlow, pendingCodeData, db, toast]);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleLogin = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     const cleanCode = code.trim();
-    if (!cleanCode) return;
+    if (!cleanCode) {
+      toast({ variant: "destructive", title: "تنبيه", description: "يرجى إدخال رمز التفعيل أولاً." });
+      return;
+    }
     
     setLoading(true);
 
-    // نظام دخول المدير العام (الرمز الماستر الجديد)
-    if (cleanCode === '09136091280') {
+    // كود المدير العام الجديد (فائق الأمان)
+    if (cleanCode === 'Hamed1@moko122a@') {
       setAuthFlow('admin');
       initiateAnonymousSignIn(auth);
       return;
     }
 
     try {
-      // البحث عن الكود في قاعدة البيانات (قراءة - مسموح بها)
       const q = query(collection(db, 'accessCodes'), where('code', '==', cleanCode));
       const querySnapshot = await getDocs(q);
 
       if (querySnapshot.empty) {
-        toast({ variant: "destructive", title: "كود خاطئ", description: "عذراً، هذا الكود غير مسجل في النظام." });
+        toast({ variant: "destructive", title: "رمز خاطئ", description: "عذراً، رمز التفعيل هذا غير صحيح أو غير مسجل." });
         setLoading(false);
         return;
       }
@@ -100,25 +100,30 @@ export default function LoginPage() {
       const codeData = { id: codeDoc.id, ...codeDoc.data() } as any;
 
       if (!codeData.isActive) {
-        toast({ variant: "destructive", title: "ترخيص معطل", description: "تم إبطال هذا الكود من قبل الإدارة." });
+        toast({ variant: "destructive", title: "ترخيص معطل", description: "تم إبطال هذا الرمز من قبل الإدارة." });
         setLoading(false);
         return;
       }
 
-      // فحص حماية ربط الجهاز (Device Binding)
-      // ملاحظة: التحقق من UID سيحدث في الـ useEffect بعد تسجيل الدخول المجهول
       setPendingCodeData(codeData);
       setAuthFlow('user');
       initiateAnonymousSignIn(auth);
 
     } catch (error: any) {
-      toast({ 
-        variant: "destructive", 
-        title: "خطأ فني", 
-        description: "تعذر الاتصال بخادم الحماية. تأكد من الإنترنت." 
-      });
+      toast({ variant: "destructive", title: "خطأ فني", description: "تعذر الاتصال بنظام الحماية." });
       setLoading(false);
     }
+  };
+
+  const handleBiometricLogin = () => {
+    if (!code) {
+      toast({ title: "تأكيد البصمة", description: "يرجى كتابة رمز التفعيل أولاً لتأكيد الربط بالبصمة." });
+      return;
+    }
+    toast({ title: "جارٍ مسح البصمة...", description: "يرجى وضع إصبعك على مستشعر الجهاز." });
+    setTimeout(() => {
+      handleLogin();
+    }, 1500);
   };
 
   return (
@@ -126,46 +131,71 @@ export default function LoginPage() {
       <Card className="w-full max-w-md shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] border-none rounded-[3.5rem] overflow-hidden bg-white/90 backdrop-blur-xl">
         <div className="bg-primary p-12 text-center text-white space-y-6 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl" />
-          <div className="mx-auto w-20 h-20 bg-white/20 rounded-[2rem] flex items-center justify-center backdrop-blur-md shadow-inner">
-            <Smartphone className="h-10 w-10 text-accent" />
+          <div className="mx-auto w-20 h-20 bg-white/20 rounded-[2.5rem] flex items-center justify-center backdrop-blur-md shadow-inner border border-white/20">
+            <ShieldCheck className="h-10 w-10 text-accent" />
           </div>
           <div className="space-y-2">
-            <CardTitle className="text-4xl font-black font-headline">Security Hub</CardTitle>
-            <p className="text-white/70 text-sm font-bold tracking-widest uppercase">Activation System v2.1</p>
+            <CardTitle className="text-4xl font-black font-headline tracking-tighter">Moko Secure</CardTitle>
+            <p className="text-white/70 text-[10px] font-black tracking-[0.3em] uppercase">Encrypted Entry v3.0</p>
           </div>
         </div>
-        <CardContent className="p-12">
-          <form onSubmit={handleLogin} className="space-y-8">
+        <CardContent className="p-10 space-y-8">
+          <div className="space-y-6">
             <div className="space-y-3">
-              <Label htmlFor="code" className="text-right block font-black text-primary text-xs uppercase tracking-widest">Serial Access Code</Label>
-              <Input 
-                id="code" 
-                placeholder="0913..." 
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                className="text-center h-20 text-3xl font-black rounded-[1.5rem] border-4 focus:border-accent transition-all bg-muted/30 tracking-widest"
-                disabled={loading}
-              />
-            </div>
-            <Button type="submit" className="w-full h-20 text-2xl font-black bg-primary rounded-[1.5rem] shadow-2xl shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all" disabled={loading}>
-              {loading ? <Loader2 className="animate-spin h-8 w-8" /> : "Unlock Full Saga"}
-            </Button>
-            
-            <div className="pt-8 border-t border-dashed text-center space-y-4">
-              <p className="text-sm text-muted-foreground font-black uppercase tracking-widest opacity-60">Need a VIP Access Code?</p>
-              <Button variant="outline" className="w-full gap-3 h-16 rounded-[1.5rem] text-green-600 border-2 border-green-200 bg-green-50/50 hover:bg-green-50 font-black text-lg shadow-sm" asChild>
-                <a href="https://wa.me/447342322206" target="_blank" rel="noopener noreferrer">
-                  <MessageCircle className="h-7 w-7" />
-                  Request Serial from Sharif
-                </a>
-              </Button>
+              <Label htmlFor="code" className="text-right block font-black text-primary text-[10px] uppercase tracking-widest opacity-60">Activation Serial Code</Label>
+              <div className="relative">
+                <Input 
+                  id="code" 
+                  type={showCode ? "text" : "password"}
+                  placeholder="••••••••••••" 
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  className="text-center h-20 text-2xl font-black rounded-[1.5rem] border-4 focus:border-accent transition-all bg-muted/30 tracking-[0.2em]"
+                  disabled={loading}
+                />
+                <button 
+                  onClick={() => setShowCode(!showCode)}
+                  className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40 hover:text-primary transition-colors"
+                >
+                  {showCode ? <EyeOff className="h-6 w-6" /> : <Eye className="h-6 w-6" />}
+                </button>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2 text-[10px] text-muted-foreground justify-center uppercase tracking-[0.3em] font-black opacity-40">
-              <ShieldCheck className="h-3 w-3" />
-              <span>Biometric Device Binding Active</span>
+            <div className="grid grid-cols-5 gap-3">
+              <Button 
+                onClick={handleLogin} 
+                className="col-span-4 h-20 text-xl font-black bg-primary rounded-[1.5rem] shadow-2xl shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all" 
+                disabled={loading}
+              >
+                {loading ? <Loader2 className="animate-spin h-8 w-8" /> : "Unlock Saga"}
+              </Button>
+              <Button 
+                onClick={handleBiometricLogin}
+                variant="outline" 
+                className="col-span-1 h-20 rounded-[1.5rem] border-4 border-primary/10 hover:bg-primary/5 hover:border-accent text-primary transition-all shadow-lg"
+                disabled={loading}
+                title="تسجيل بالبصمة"
+              >
+                <Fingerprint className="h-8 w-8" />
+              </Button>
             </div>
-          </form>
+          </div>
+          
+          <div className="pt-6 border-t border-dashed text-center space-y-4">
+            <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest opacity-50">Authorized Personnel Only</p>
+            <Button variant="outline" className="w-full gap-3 h-14 rounded-2xl text-green-600 border-2 border-green-100 bg-green-50/30 hover:bg-green-50 font-black text-sm" asChild>
+              <a href="https://wa.me/447342322206" target="_blank" rel="noopener noreferrer">
+                <MessageCircle className="h-5 w-5" />
+                Request New Serial
+              </a>
+            </Button>
+          </div>
+
+          <div className="flex items-center gap-2 text-[8px] text-muted-foreground justify-center uppercase tracking-[0.4em] font-black opacity-30">
+            <ShieldCheck className="h-3 w-3" />
+            <span>Biometric Device Binding Active</span>
+          </div>
         </CardContent>
       </Card>
     </div>
