@@ -44,6 +44,18 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "code", "plan", "isActive", "createdAt"]
+    },
+    "AdminUser": {
+      "title": "AdminUser",
+      "type": "object",
+      "description": "Administrator profiles.",
+      "properties": {
+        "id": { "type": "string" },
+        "role": { "type": "string" },
+        "name": { "type": "string" },
+        "lastActive": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "role"]
     }
   },
   "auth": {
@@ -61,6 +73,10 @@
     "/accessCodes/{codeId}": {
       "schema": { "$ref": "#/entities/AccessCode" },
       "description": "Collection of valid access codes."
+    },
+    "/adminUsers/{userId}": {
+      "schema": { "$ref": "#/entities/AdminUser" },
+      "description": "Root admin profiles."
     }
   }
 }

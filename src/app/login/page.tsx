@@ -1,25 +1,75 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { KeyRound, ShieldAlert, MessageCircle, Loader2, Smartphone, ShieldCheck } from 'lucide-react';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
+import { MessageCircle, Loader2, Smartphone, ShieldCheck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useFirestore, useAuth } from '@/firebase';
-import { collection, query, where, getDocs, doc, setDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
-import { signInAnonymously } from 'firebase/auth';
+import { useFirestore, useAuth, useUser, setDocumentNonBlocking, updateDocumentNonBlocking, initiateAnonymousSignIn } from '@/firebase';
+import { collection, query, where, getDocs, doc, serverTimestamp } from 'firebase/firestore';
 
 export default function LoginPage() {
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const [authFlow, setAuthFlow] = useState<'idle' | 'admin' | 'user'>('idle');
+  const [pendingCodeData, setPendingCodeData] = useState<any>(null);
+  
+  const { user } = useUser();
   const { toast } = useToast();
   const db = useFirestore();
   const auth = useAuth();
+
+  // Effect to handle post-auth logic once the user is signed in
+  useEffect(() => {
+    if (!user || authFlow === 'idle') return;
+
+    if (authFlow === 'admin') {
+      const adminRef = doc(db, 'adminUsers', user.uid);
+      setDocumentNonBlocking(adminRef, {
+        id: user.uid,
+        role: 'admin',
+        name: 'شريف حماد عبد الله',
+        lastActive: serverTimestamp()
+      }, { merge: true });
+
+      localStorage.setItem('moc-co-auth', 'admin');
+      toast({ title: "مرحباً يا أستاذ شريف حماد", description: "تم تفعيل صلاحيات الإدارة العليا." });
+      window.location.href = '/admin/dashboard';
+    } else if (authFlow === 'user' && pendingCodeData) {
+      const codeRef = doc(db, 'accessCodes', pendingCodeData.id);
+      const userRef = doc(db, 'users', user.uid);
+
+      // Link device if not already linked
+      if (!pendingCodeData.usedByUid) {
+        updateDocumentNonBlocking(codeRef, {
+          usedByUid: user.uid,
+          activatedAt: serverTimestamp()
+        });
+      }
+
+      // Update user profile
+      setDocumentNonBlocking(userRef, {
+        id: user.uid,
+        accessCode: pendingCodeData.code,
+        plan: pendingCodeData.plan,
+        lastLogin: serverTimestamp()
+      }, { merge: true });
+
+      localStorage.setItem('moc-co-auth', 'user');
+      localStorage.setItem('moc-co-plan', pendingCodeData.plan);
+      localStorage.setItem('moc-co-access-code', pendingCodeData.code);
+      
+      toast({ title: "تم التفعيل بنجاح", description: `مرحباً بك في باقة (${pendingCodeData.plan})` });
+      window.location.href = '/lessons';
+    }
+
+    setAuthFlow('idle');
+    setLoading(false);
+  }, [user, authFlow, pendingCodeData, db, toast]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,25 +78,15 @@ export default function LoginPage() {
     
     setLoading(true);
 
+    // نظام دخول المدير العام (الرمز الماستر الجديد)
+    if (cleanCode === '09136091280') {
+      setAuthFlow('admin');
+      initiateAnonymousSignIn(auth);
+      return;
+    }
+
     try {
-      // نظام دخول المدير العام (الرمز الماستر الجديد)
-      if (cleanCode === '09136091280') {
-        const userCredential = await signInAnonymously(auth);
-        const user = userCredential.user;
-        await setDoc(doc(db, 'adminUsers', user.uid), {
-          id: user.uid,
-          role: 'admin',
-          name: 'شريف حماد عبد الله',
-          lastActive: serverTimestamp()
-        }, { merge: true });
-
-        localStorage.setItem('moc-co-auth', 'admin');
-        toast({ title: "مرحباً يا أستاذ شريف حماد", description: "تم تفعيل صلاحيات الإدارة العليا." });
-        window.location.href = '/admin/dashboard';
-        return;
-      }
-
-      // البحث عن الكود في قاعدة البيانات
+      // البحث عن الكود في قاعدة البيانات (قراءة - مسموح بها)
       const q = query(collection(db, 'accessCodes'), where('code', '==', cleanCode));
       const querySnapshot = await getDocs(q);
 
@@ -57,7 +97,7 @@ export default function LoginPage() {
       }
 
       const codeDoc = querySnapshot.docs[0];
-      const codeData = codeDoc.data();
+      const codeData = { id: codeDoc.id, ...codeDoc.data() } as any;
 
       if (!codeData.isActive) {
         toast({ variant: "destructive", title: "ترخيص معطل", description: "تم إبطال هذا الكود من قبل الإدارة." });
@@ -65,52 +105,18 @@ export default function LoginPage() {
         return;
       }
 
-      // تسجيل دخول مجهول للحصول على UID فريد للجهاز
-      const userCredential = await signInAnonymously(auth);
-      const user = userCredential.user;
-
       // فحص حماية ربط الجهاز (Device Binding)
-      if (codeData.usedByUid && codeData.usedByUid !== user.uid) {
-        toast({ 
-          variant: "destructive", 
-          title: "حماية الجهاز", 
-          description: "هذا الكود مرتبط بجهاز آخر بالفعل. لا يسمح بالتفعيل المتعدد." 
-        });
-        setLoading(false);
-        return;
-      }
-
-      // ربط الجهاز بالكود إذا كان جديداً
-      if (!codeData.usedByUid) {
-        await updateDoc(doc(db, 'accessCodes', codeDoc.id), {
-          usedByUid: user.uid,
-          activatedAt: serverTimestamp()
-        });
-      }
-
-      // تحديث ملف المستخدم
-      await setDoc(doc(db, 'users', user.uid), {
-        id: user.uid,
-        accessCode: cleanCode,
-        plan: codeData.plan,
-        lastLogin: serverTimestamp()
-      }, { merge: true });
-
-      localStorage.setItem('moc-co-auth', 'user');
-      localStorage.setItem('moc-co-plan', codeData.plan);
-      localStorage.setItem('moc-co-access-code', cleanCode);
-      
-      toast({ title: "تم التفعيل بنجاح", description: `مرحباً بك في باقة (${codeData.plan})` });
-      window.location.href = '/lessons';
+      // ملاحظة: التحقق من UID سيحدث في الـ useEffect بعد تسجيل الدخول المجهول
+      setPendingCodeData(codeData);
+      setAuthFlow('user');
+      initiateAnonymousSignIn(auth);
 
     } catch (error: any) {
-      console.error(error);
       toast({ 
         variant: "destructive", 
         title: "خطأ فني", 
         description: "تعذر الاتصال بخادم الحماية. تأكد من الإنترنت." 
       });
-    } finally {
       setLoading(false);
     }
   };
@@ -125,7 +131,7 @@ export default function LoginPage() {
           </div>
           <div className="space-y-2">
             <CardTitle className="text-4xl font-black font-headline">Security Hub</CardTitle>
-            <p className="text-white/70 text-sm font-bold tracking-widest uppercase">Activation System v2.0</p>
+            <p className="text-white/70 text-sm font-bold tracking-widest uppercase">Activation System v2.1</p>
           </div>
         </div>
         <CardContent className="p-12">

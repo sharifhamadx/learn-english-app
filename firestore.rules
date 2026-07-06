@@ -23,6 +23,11 @@ service cloud.firestore {
       }
     }
 
+    // Admin users collection
+    match /adminUsers/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
     // Access codes are read-only for verification, write for authenticated users during activation
     match /accessCodes/{codeId} {
       allow read: if true;
