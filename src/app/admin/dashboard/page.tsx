@@ -14,6 +14,7 @@ import Link from 'next/link';
 import { addDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 export default function AdminDashboard() {
   const [newNote, setNewNote] = useState('');
@@ -189,7 +190,7 @@ export default function AdminDashboard() {
                         "font-black py-0.5 px-2 rounded-lg uppercase text-[8px] tracking-widest",
                         c.plan === 'vip' ? 'bg-amber-500 text-white' : ''
                       )}>
-                        {c.plan.toUpperCase()}
+                        {c.plan?.toUpperCase() || '---'}
                       </Badge>
                     </TableCell>
                     <TableCell className="font-bold text-[11px] text-slate-600 max-w-[100px] truncate">{c.note || '---'}</TableCell>
@@ -218,8 +219,4 @@ export default function AdminDashboard() {
       </div>
     </div>
   );
-}
-
-function cn(...classes: string[]) {
-  return classes.filter(Boolean).join(' ');
 }
