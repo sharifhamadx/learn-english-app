@@ -27,7 +27,7 @@ export default function AdminDashboard() {
   const { user, isUserLoading } = useUser();
   const { toast } = useToast();
 
-  // التحقق من صلاحيات المدير في قاعدة البيانات وإصلاحها إذا لزم الأمر
+  // التحقق من صلاحيات المدير وتثبيتها
   const adminDocRef = useMemoFirebase(() => {
     if (!user) return null;
     return doc(db, 'adminUsers', user.uid);
@@ -36,7 +36,6 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (user && !adminRecord && localStorage.getItem('moc-co-auth') === 'admin') {
-       // إصلاح سجل المدير إذا فقد لضمان عمل الحذف
        setDocumentNonBlocking(doc(db, 'adminUsers', user.uid), {
          id: user.uid,
          role: 'admin',
@@ -52,7 +51,7 @@ export default function AdminDashboard() {
   }, [db]);
   const { data: codes, isLoading: isLoadingCodes } = useCollection(codesQuery);
 
-  // استعلام المستخدمين المسجلين
+  // استعلام المستخدمين
   const usersQuery = useMemoFirebase(() => {
     return query(collection(db, 'users'));
   }, [db]);
@@ -103,27 +102,31 @@ export default function AdminDashboard() {
     toast({ title: "تم النسخ", description: "الرمز جاهز للمشاركة." });
   };
 
+  // أمر تأكيد الحذف للأكواد
   const handleDeleteCode = (id: string, usedByUid: string | null) => {
-    if (!confirm('هل تريد حذف هذا الترخيص نهائياً؟ سيتم منعه من الدخول فوراً ومسح ملفه.')) return;
+    const confirmMsg = 'تنبيه أمني هام: هل أنت متأكد من حذف هذا الترخيص نهائياً؟\n\n- سيتم منع أي مستخدم مرتبط به من الدخول فوراً.\n- سيتم مسح سجل المستخدم بالكامل.';
+    if (!confirm(confirmMsg)) return;
 
     // 1. حذف رمز التفعيل
     deleteDocumentNonBlocking(doc(db, 'accessCodes', id));
 
-    // 2. إذا كان مرتبط بمستخدم يتم حذف ملف المستخدم لقطع الوصول فوراً
+    // 2. إذا كان الكود مستخدماً، نحذف ملف المستخدم فوراً لطرده
     if (usedByUid) {
       deleteDocumentNonBlocking(doc(db, 'users', usedByUid));
     }
 
-    toast({ title: "تم التطهير بنجاح", description: "تم مسح كافة البيانات المرتبطة بهذا الرمز." });
+    toast({ title: "تم التطهير بنجاح", description: "تم مسح كافة البيانات المرتبطة بهذا الرمز وقطع الوصول." });
   };
 
+  // أمر تأكيد الحذف للمستخدمين (للتخلص من أمثال عمر)
   const handleForceDeleteUser = (userId: string, accessCode: string) => {
-    if (!confirm(`هل أنت متأكد من حذف هذا المستخدم نهائياً؟ سيتم مسح ملفه وإبطال كود التفعيل (${accessCode || 'مجهول'}) فوراً.`)) return;
+    const confirmMsg = `أمر طرد نهائي: هل أنت متأكد من حذف الطالب (${accessCode || 'بدون كود'})؟\n\n- سيتم مسح ملفه الشخصي XP و Streak.\n- سيتم إبطال كود التفعيل المرتبط به لمنع عودته.`;
+    if (!confirm(confirmMsg)) return;
 
-    // 1. حذف ملف المستخدم
+    // 1. حذف ملف المستخدم (المفتاح الأساسي للطرد)
     deleteDocumentNonBlocking(doc(db, 'users', userId));
 
-    // 2. البحث عن الكود وحذفه لتنظيف المجموعة
+    // 2. البحث عن الكود وحذفه لتنظيف السحابة تماماً
     if (accessCode) {
       const codeToFind = codes?.find(c => c.code === accessCode);
       if (codeToFind) {
@@ -131,7 +134,7 @@ export default function AdminDashboard() {
       }
     }
 
-    toast({ title: "تم الطرد الفوري", description: "تم حذف المستخدم وإلغاء صلاحية جهازه." });
+    toast({ title: "تم الطرد بنجاح", description: "تم مسح المستخدم وإلغاء صلاحية جهازه نهائياً." });
   };
 
   const filteredUsers = allUsers?.filter(u => 
@@ -186,7 +189,7 @@ export default function AdminDashboard() {
             <div className="space-y-2">
               <label className="text-[10px] font-black text-primary uppercase tracking-widest opacity-60">ملاحظة/اسم</label>
               <Input 
-                placeholder="مثلاً: عمر، مدرسة..." 
+                placeholder="مثلاً: مدرسة مكة..." 
                 value={newNote}
                 onChange={(e) => setNewNote(e.target.value)}
                 className="rounded-2xl h-14 text-right border-2 font-bold"
@@ -231,7 +234,7 @@ export default function AdminDashboard() {
                       {isLoadingCodes ? (
                         <TableRow><TableCell colSpan={5} className="text-center py-20"><Loader2 className="animate-spin mx-auto text-primary" /></TableCell></TableRow>
                       ) : codes?.length === 0 ? (
-                        <TableRow><TableCell colSpan={5} className="text-center py-20 text-muted-foreground font-bold">لا توجد تراخيص مصدرة حالياً.</TableCell></TableRow>
+                        <TableRow><TableCell colSpan={5} className="text-center py-20 text-muted-foreground font-bold">لا توجد تراخيص حالياً.</TableCell></TableRow>
                       ) : codes?.map((c) => (
                         <TableRow key={c.id}>
                           <TableCell className="font-mono font-black text-primary">
@@ -274,7 +277,7 @@ export default function AdminDashboard() {
                   <div className="relative">
                     <Search className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input 
-                      placeholder="ابحث عن اسم المستخدم أو الكود (مثل عمر أو 123)..." 
+                      placeholder="ابحث عن اسم المستخدم أو الكود (مثلاً: عمر)..." 
                       className="pr-12 h-12 rounded-xl border-none bg-white font-bold text-right"
                       value={userSearch}
                       onChange={(e) => setUserSearch(e.target.value)}
@@ -295,12 +298,12 @@ export default function AdminDashboard() {
                       {isLoadingUsers ? (
                         <TableRow><TableCell colSpan={4} className="text-center py-20"><Loader2 className="animate-spin mx-auto text-primary" /></TableCell></TableRow>
                       ) : filteredUsers?.length === 0 ? (
-                        <TableRow><TableCell colSpan={4} className="text-center py-20 text-muted-foreground font-bold">لا يوجد مستخدمون مطابقون لبحثك.</TableCell></TableRow>
+                        <TableRow><TableCell colSpan={4} className="text-center py-20 text-muted-foreground font-bold">لا يوجد مستخدمون حالياً.</TableCell></TableRow>
                       ) : filteredUsers?.map((u) => (
                         <TableRow key={u.id}>
                           <TableCell>
                             <div className="flex flex-col">
-                              <span className="font-black text-sm text-primary">{u.username || 'طالب مجهول'}</span>
+                              <span className="font-black text-sm text-primary">{u.username || 'طالب جديد'}</span>
                               <span className="text-[9px] font-mono text-muted-foreground">{u.id}</span>
                             </div>
                           </TableCell>
