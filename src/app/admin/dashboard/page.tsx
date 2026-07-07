@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -6,7 +5,7 @@ import { useFirestore, useMemoFirebase, useCollection, useUser, useDoc } from '@
 import { collection, serverTimestamp, doc, query, orderBy } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Trash2, ArrowLeft, Loader2, Key, ShieldAlert, Copy, Check, UserMinus, Users, Search, ShieldCheck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -110,7 +109,7 @@ export default function AdminDashboard() {
     // 1. حذف رمز التفعيل
     deleteDocumentNonBlocking(doc(db, 'accessCodes', id));
 
-    // 2. إذا كان مرتبط بمستخدم (مثل عمر)، يتم حذف ملف المستخدم لقطع الوصول فوراً
+    // 2. إذا كان مرتبط بمستخدم يتم حذف ملف المستخدم لقطع الوصول فوراً
     if (usedByUid) {
       deleteDocumentNonBlocking(doc(db, 'users', usedByUid));
     }
@@ -276,7 +275,7 @@ export default function AdminDashboard() {
                     <Search className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input 
                       placeholder="ابحث عن اسم المستخدم أو الكود (مثل عمر أو 123)..." 
-                      className="pr-12 h-12 rounded-xl border-none bg-white font-bold"
+                      className="pr-12 h-12 rounded-xl border-none bg-white font-bold text-right"
                       value={userSearch}
                       onChange={(e) => setUserSearch(e.target.value)}
                     />
