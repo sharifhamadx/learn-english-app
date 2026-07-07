@@ -50,18 +50,19 @@ export default function LoginPage() {
         });
       }
 
+      // Safeguard: Ensure no undefined values are passed to Firestore
       setDocumentNonBlocking(userRef, {
         id: user.uid,
-        accessCode: pendingCodeData.code,
-        plan: pendingCodeData.plan,
+        accessCode: pendingCodeData.code || "",
+        plan: pendingCodeData.plan || "free",
         lastLogin: serverTimestamp()
       }, { merge: true });
 
       localStorage.setItem('moc-co-auth', 'user');
-      localStorage.setItem('moc-co-plan', pendingCodeData.plan);
-      localStorage.setItem('moc-co-access-code', pendingCodeData.code);
+      localStorage.setItem('moc-co-plan', pendingCodeData.plan || "free");
+      localStorage.setItem('moc-co-access-code', pendingCodeData.code || "");
       
-      toast({ title: "تم التفعيل بنجاح", description: `مرحباً بك في باقة (${pendingCodeData.plan})` });
+      toast({ title: "تم التفعيل بنجاح", description: `مرحباً بك في باقة (${pendingCodeData.plan || "free"})` });
       window.location.href = '/lessons';
     }
 
