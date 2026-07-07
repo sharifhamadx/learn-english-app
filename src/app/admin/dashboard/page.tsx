@@ -3,12 +3,12 @@
 
 import { useState } from 'react';
 import { useFirestore, useMemoFirebase, useCollection, useUser } from '@/firebase';
-import { collection, serverTimestamp, doc, query, orderBy, getDocs, where } from 'firebase/firestore';
+import { collection, serverTimestamp, doc, query, orderBy } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Trash2, UserPlus, ArrowLeft, Loader2, Key, ShieldAlert, Copy, Check } from 'lucide-react';
+import { Trash2, ArrowLeft, Loader2, Key, ShieldAlert, Copy, Check, UserMinus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { addDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
@@ -32,9 +32,8 @@ export default function AdminDashboard() {
 
   const { data: codes, isLoading } = useCollection(codesQuery);
 
-  // وظيفة توليد كود عشوائي فائق الأمان
   const generateSecureCode = () => {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // استبعاد الحروف المتشابهة مثل 0 و O
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     const prefix = selectedPlan.toUpperCase().substring(0, 3);
     let result = `${prefix}-`;
     for (let i = 0; i < 8; i++) {
@@ -50,7 +49,6 @@ export default function AdminDashboard() {
 
     try {
       const finalCode = generateSecureCode();
-      
       const codesRef = collection(db, 'accessCodes');
       const data = {
         code: finalCode,
@@ -63,11 +61,10 @@ export default function AdminDashboard() {
       };
 
       addDocumentNonBlocking(codesRef, data);
-      
       setNewNote('');
-      toast({ title: "تم توليد الرمز", description: `الرمز الجديد آمن ومشفر: ${finalCode}` });
+      toast({ title: "تم التوليد بنجاح", description: `الرمز الجديد: ${finalCode}` });
     } catch (e) {
-      toast({ variant: "destructive", title: "خطأ", description: "فشل في توليد الرمز الأمني." });
+      toast({ variant: "destructive", title: "خطأ", description: "فشل في توليد الرمز." });
     } finally {
       setIsGenerating(false);
     }
@@ -77,14 +74,27 @@ export default function AdminDashboard() {
     navigator.clipboard.writeText(text);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
-    toast({ title: "تم النسخ", description: "تم نسخ الرمز إلى الحافظة." });
+    toast({ title: "تم النسخ", description: "الرمز جاهز للمشاركة." });
   };
 
-  const handleDeleteCode = (id: string) => {
-    if (!confirm('هل أنت متأكد من إبطال هذا الترخيص نهائياً؟')) return;
-    const docRef = doc(db, 'accessCodes', id);
-    deleteDocumentNonBlocking(docRef);
-    toast({ title: "تم الإبطال", description: "تم إلغاء صلاحية الرمز بنجاح." });
+  const handleDeleteCode = (id: string, usedByUid: string | null) => {
+    const msg = usedByUid 
+      ? 'هذا الرمز مرتبط بمستخدم نشط. هل تريد حزفه وإلغاء وصول المستخدم فوراً؟' 
+      : 'هل أنت متأكد من حذف هذا الرمز؟';
+
+    if (!confirm(msg)) return;
+
+    // 1. حذف رمز التفعيل
+    const codeRef = doc(db, 'accessCodes', id);
+    deleteDocumentNonBlocking(codeRef);
+
+    // 2. إذا كان مرتبط بمستخدم، يتم حذف ملف المستخدم لقطع الوصول فوراً
+    if (usedByUid) {
+      const userRef = doc(db, 'users', usedByUid);
+      deleteDocumentNonBlocking(userRef);
+    }
+
+    toast({ title: "تم الحذف الفوري", description: "تم تطهير السجلات وإلغاء الوصول بنجاح." });
   };
 
   if (isUserLoading) return <div className="flex h-screen items-center justify-center"><Loader2 className="animate-spin text-primary" /></div>;
@@ -97,8 +107,8 @@ export default function AdminDashboard() {
             <Link href="/"><ArrowLeft className="h-5 w-5" /></Link>
           </Button>
           <div className="space-y-1">
-            <h1 className="text-3xl font-black font-headline text-primary tracking-tighter">نظام إدارة التراخيص المشفرة</h1>
-            <p className="text-muted-foreground text-sm font-bold">المدير العام: شريف حماد | مستوى الحماية: عالي</p>
+            <h1 className="text-3xl font-black font-headline text-primary tracking-tighter">مركز التحكم الإداري المحصن</h1>
+            <p className="text-muted-foreground text-sm font-bold">المدير العام: شريف حماد | نظام الحماية المتكامل</p>
           </div>
         </div>
       </div>
@@ -108,13 +118,13 @@ export default function AdminDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-primary font-black">
               <ShieldAlert className="h-5 w-5 text-accent" />
-              إصدار ترخيص آمن
+              توليد ترخيص جديد
             </CardTitle>
-            <CardDescription className="text-xs font-bold">سيولد النظام رمزاً عشوائياً يصعب تخمينه.</CardDescription>
+            <CardDescription className="text-xs font-bold">الأكواد المولدة مشفرة ولا يمكن تخمينها.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-primary uppercase tracking-widest opacity-60">نوع الباقة</label>
+              <label className="text-[10px] font-black text-primary uppercase tracking-widest opacity-60">نوع الباقة الاستراتيجية</label>
               <Select value={selectedPlan} onValueChange={(v: any) => setSelectedPlan(v)}>
                 <SelectTrigger className="rounded-2xl h-14 border-2 focus:ring-primary shadow-sm bg-muted/30 font-bold">
                   <SelectValue />
@@ -129,9 +139,9 @@ export default function AdminDashboard() {
             </div>
             
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-primary uppercase tracking-widest opacity-60">اسم الطالب / ملاحظة</label>
+              <label className="text-[10px] font-black text-primary uppercase tracking-widest opacity-60">بيانات الطالب</label>
               <Input 
-                placeholder="مثال: عمر محمد - الخرطوم" 
+                placeholder="اسم الطالب أو ملاحظة..." 
                 value={newNote}
                 onChange={(e) => setNewNote(e.target.value)}
                 className="rounded-2xl h-14 text-right border-2 focus:ring-primary shadow-sm bg-muted/30 font-bold"
@@ -143,7 +153,7 @@ export default function AdminDashboard() {
               className="w-full h-16 rounded-2xl bg-primary text-lg font-black shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all"
               disabled={isGenerating}
             >
-              {isGenerating ? <Loader2 className="animate-spin" /> : "توليد الرمز المشفر"}
+              {isGenerating ? <Loader2 className="animate-spin" /> : "توليد الرمز الآن"}
             </Button>
           </CardContent>
         </Card>
@@ -152,16 +162,16 @@ export default function AdminDashboard() {
           <CardHeader className="bg-primary/5 p-6">
             <CardTitle className="text-lg flex items-center gap-2 text-primary font-black">
               <Key className="h-5 w-5 text-accent" />
-              سجل التراخيص النشطة
+              سجل التراخيص والرقابة
             </CardTitle>
           </CardHeader>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader className="bg-muted/50">
                 <TableRow>
-                  <TableHead className="text-right font-black text-[10px] uppercase tracking-widest">الرمز</TableHead>
+                  <TableHead className="text-right font-black text-[10px] uppercase tracking-widest">الرمز المشفر</TableHead>
                   <TableHead className="text-right font-black text-[10px] uppercase tracking-widest">الباقة</TableHead>
-                  <TableHead className="text-right font-black text-[10px] uppercase tracking-widest">المستفيد</TableHead>
+                  <TableHead className="text-right font-black text-[10px] uppercase tracking-widest">الطالب</TableHead>
                   <TableHead className="text-right font-black text-[10px] uppercase tracking-widest">الحالة</TableHead>
                   <TableHead className="text-center font-black text-[10px] uppercase tracking-widest">إجراء</TableHead>
                 </TableRow>
@@ -173,7 +183,7 @@ export default function AdminDashboard() {
                   </TableRow>
                 ) : codes?.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-20 text-muted-foreground font-bold">لا توجد تراخيص مصدرة.</TableCell>
+                    <TableCell colSpan={5} className="text-center py-20 text-muted-foreground font-bold">لا توجد تراخيص نشطة حالياً.</TableCell>
                   </TableRow>
                 ) : codes?.map((c) => (
                   <TableRow key={c.id} className="hover:bg-primary/5 transition-colors border-b-primary/5">
@@ -190,14 +200,14 @@ export default function AdminDashboard() {
                         "font-black py-0.5 px-2 rounded-lg uppercase text-[8px] tracking-widest",
                         c.plan === 'vip' ? 'bg-amber-500 text-white' : ''
                       )}>
-                        {c.plan?.toUpperCase() || '---'}
+                        {c.plan?.toUpperCase() || 'FREE'}
                       </Badge>
                     </TableCell>
                     <TableCell className="font-bold text-[11px] text-slate-600 max-w-[100px] truncate">{c.note || '---'}</TableCell>
                     <TableCell>
                       {c.usedByUid ? (
                         <span className="inline-flex items-center gap-1 text-[9px] bg-red-50 text-red-600 px-2 py-0.5 rounded-full font-black border border-red-100">
-                          مقيد
+                          <UserMinus className="h-2 w-2" /> مقيد بجهاز
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 text-[9px] bg-green-50 text-green-600 px-2 py-0.5 rounded-full font-black border border-green-100">
@@ -206,7 +216,13 @@ export default function AdminDashboard() {
                       )}
                     </TableCell>
                     <TableCell className="text-center">
-                      <Button variant="ghost" size="icon" onClick={() => handleDeleteCode(c.id)} className="text-destructive hover:bg-red-50 rounded-xl h-8 w-8">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => handleDeleteCode(c.id, c.usedByUid)} 
+                        className="text-destructive hover:bg-red-50 rounded-xl h-8 w-8"
+                        title={c.usedByUid ? "حذف المستخدم فوراً" : "حذف الرمز"}
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </TableCell>

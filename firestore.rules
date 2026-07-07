@@ -12,32 +12,43 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid));
+    }
+
     // --- COLLECTION RULES ---
 
-    // Users can only read and write their own profile and progress
+    // Users: Owners can manage their data, Admins have full control
     match /users/{userId} {
-      allow read, write: if isOwner(userId);
+      allow read, write: if isOwner(userId) || isAdmin();
       
       match /lessonProgress/{lessonId} {
-        allow read, write: if isOwner(userId);
+        allow read, write: if isOwner(userId) || isAdmin();
       }
     }
 
-    // Admin users collection
+    // Admin users collection: Only the admin themselves or other admins can access
     match /adminUsers/{userId} {
-      allow read, write: if isOwner(userId);
+      allow read, write: if isOwner(userId) || isAdmin();
     }
 
-    // Access codes are read-only for verification, write for authenticated users during activation
+    // Access codes: 
+    // - Anyone can read (to check validity during login)
+    // - Only admins can CREATE or DELETE
+    // - Logged in users can only UPDATE to activate the code (mark as used)
     match /accessCodes/{codeId} {
       allow read: if true;
-      allow write: if isSignedIn();
+      allow create, delete: if isAdmin();
+      allow update: if isSignedIn() && (
+        isAdmin() || 
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['usedByUid', 'activatedAt']))
+      );
     }
 
-    // Lessons are globally readable, only admin (system) can write
+    // Lessons: Globally readable, only admin can modify
     match /lessons/{lessonId} {
       allow read: if true;
-      allow write: if false; 
+      allow write: if isAdmin(); 
     }
   }
 }
