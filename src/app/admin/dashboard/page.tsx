@@ -1,17 +1,17 @@
 
 "use client";
 
-import { useState } from 'react';
-import { useFirestore, useMemoFirebase, useCollection, useUser } from '@/firebase';
+import { useState, useEffect } from 'react';
+import { useFirestore, useMemoFirebase, useCollection, useUser, useDoc } from '@/firebase';
 import { collection, serverTimestamp, doc, query, orderBy } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Trash2, ArrowLeft, Loader2, Key, ShieldAlert, Copy, Check, UserMinus, Users, Search } from 'lucide-react';
+import { Trash2, ArrowLeft, Loader2, Key, ShieldAlert, Copy, Check, UserMinus, Users, Search, ShieldCheck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
-import { addDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { addDocumentNonBlocking, deleteDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -28,13 +28,32 @@ export default function AdminDashboard() {
   const { user, isUserLoading } = useUser();
   const { toast } = useToast();
 
+  // التحقق من صلاحيات المدير في قاعدة البيانات وإصلاحها إذا لزم الأمر
+  const adminDocRef = useMemoFirebase(() => {
+    if (!user) return null;
+    return doc(db, 'adminUsers', user.uid);
+  }, [user, db]);
+  const { data: adminRecord } = useDoc(adminDocRef);
+
+  useEffect(() => {
+    if (user && !adminRecord && localStorage.getItem('moc-co-auth') === 'admin') {
+       // إصلاح سجل المدير إذا فقد لضمان عمل الحذف
+       setDocumentNonBlocking(doc(db, 'adminUsers', user.uid), {
+         id: user.uid,
+         role: 'admin',
+         name: 'شريف حماد عبد الله',
+         lastActive: serverTimestamp()
+       }, { merge: true });
+    }
+  }, [user, adminRecord, db]);
+
   // استعلام الأكواد
   const codesQuery = useMemoFirebase(() => {
     return query(collection(db, 'accessCodes'), orderBy('createdAt', 'desc'));
   }, [db]);
   const { data: codes, isLoading: isLoadingCodes } = useCollection(codesQuery);
 
-  // استعلام المستخدمين المسجلين فعلياً
+  // استعلام المستخدمين المسجلين
   const usersQuery = useMemoFirebase(() => {
     return query(collection(db, 'users'));
   }, [db]);
@@ -86,31 +105,27 @@ export default function AdminDashboard() {
   };
 
   const handleDeleteCode = (id: string, usedByUid: string | null) => {
-    if (!confirm('هل تريد حذف هذا الترخيص نهائياً؟ إذا كان هناك مستخدم مرتبط به (مثل عمر) فسيتم منعه من الدخول فوراً.')) return;
+    if (!confirm('هل تريد حذف هذا الترخيص نهائياً؟ سيتم منعه من الدخول فوراً ومسح ملفه.')) return;
 
     // 1. حذف رمز التفعيل
-    const codeRef = doc(db, 'accessCodes', id);
-    deleteDocumentNonBlocking(codeRef);
+    deleteDocumentNonBlocking(doc(db, 'accessCodes', id));
 
-    // 2. إذا كان مرتبط بمستخدم، يتم حذف ملف المستخدم لقطع الوصول فوراً
+    // 2. إذا كان مرتبط بمستخدم (مثل عمر)، يتم حذف ملف المستخدم لقطع الوصول فوراً
     if (usedByUid) {
-      const userRef = doc(db, 'users', usedByUid);
-      deleteDocumentNonBlocking(userRef);
+      deleteDocumentNonBlocking(doc(db, 'users', usedByUid));
     }
 
     toast({ title: "تم التطهير بنجاح", description: "تم مسح كافة البيانات المرتبطة بهذا الرمز." });
   };
 
   const handleForceDeleteUser = (userId: string, accessCode: string) => {
-    if (!confirm(`هل أنت متأكد من حذف هذا المستخدم نهائياً؟ سيتم مسح ملفه وإبطال كود التفعيل (${accessCode}) فوراً.`)) return;
+    if (!confirm(`هل أنت متأكد من حذف هذا المستخدم نهائياً؟ سيتم مسح ملفه وإبطال كود التفعيل (${accessCode || 'مجهول'}) فوراً.`)) return;
 
     // 1. حذف ملف المستخدم
-    const userRef = doc(db, 'users', userId);
-    deleteDocumentNonBlocking(userRef);
+    deleteDocumentNonBlocking(doc(db, 'users', userId));
 
     // 2. البحث عن الكود وحذفه لتنظيف المجموعة
     if (accessCode) {
-      // ملاحظة: سنبحث عن الكود في جدول الأكواد ونحذفه يدوياً إذا وجدناه
       const codeToFind = codes?.find(c => c.code === accessCode);
       if (codeToFind) {
         deleteDocumentNonBlocking(doc(db, 'accessCodes', codeToFind.id));
@@ -130,14 +145,17 @@ export default function AdminDashboard() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-8 pb-20 px-4" dir="rtl">
-      <div className="flex items-center justify-between mt-8">
+      <div className="flex flex-col md:flex-row items-center justify-between mt-8 gap-4">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild className="rounded-full">
             <Link href="/"><ArrowLeft className="h-5 w-5" /></Link>
           </Button>
           <div className="space-y-1">
             <h1 className="text-3xl font-black font-headline text-primary tracking-tighter">القيادة المركزية | Moko</h1>
-            <p className="text-muted-foreground text-sm font-bold">المدير العام: شريف حماد | الرقابة والأمان</p>
+            <p className="text-muted-foreground text-sm font-bold flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4 text-green-500" />
+              المدير العام: شريف حماد | الرقابة والأمان
+            </p>
           </div>
         </div>
       </div>
@@ -169,7 +187,7 @@ export default function AdminDashboard() {
             <div className="space-y-2">
               <label className="text-[10px] font-black text-primary uppercase tracking-widest opacity-60">ملاحظة/اسم</label>
               <Input 
-                placeholder="عمر، مدرسة خالد..." 
+                placeholder="مثلاً: عمر، مدرسة..." 
                 value={newNote}
                 onChange={(e) => setNewNote(e.target.value)}
                 className="rounded-2xl h-14 text-right border-2 font-bold"
@@ -193,7 +211,7 @@ export default function AdminDashboard() {
                 <Key className="h-4 w-4" /> سجل التراخيص
               </TabsTrigger>
               <TabsTrigger value="users" className="rounded-xl font-black gap-2 data-[state=active]:bg-primary data-[state=active]:text-white">
-                <Users className="h-4 w-4" /> إدارة المستخدمين
+                <Users className="h-4 w-4" /> إدارة الطلاب
               </TabsTrigger>
             </TabsList>
 
@@ -213,18 +231,22 @@ export default function AdminDashboard() {
                     <TableBody>
                       {isLoadingCodes ? (
                         <TableRow><TableCell colSpan={5} className="text-center py-20"><Loader2 className="animate-spin mx-auto text-primary" /></TableCell></TableRow>
+                      ) : codes?.length === 0 ? (
+                        <TableRow><TableCell colSpan={5} className="text-center py-20 text-muted-foreground font-bold">لا توجد تراخيص مصدرة حالياً.</TableCell></TableRow>
                       ) : codes?.map((c) => (
                         <TableRow key={c.id}>
                           <TableCell className="font-mono font-black text-primary">
                             <div className="flex items-center gap-2">
                               <span>{c.code}</span>
-                              <button onClick={() => handleCopy(c.code, c.id)} className="text-muted-foreground">
+                              <button onClick={() => handleCopy(c.code, c.id)} className="text-muted-foreground hover:text-primary">
                                 {copiedId === c.id ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
                               </button>
                             </div>
                           </TableCell>
                           <TableCell>
-                            <Badge variant="outline" className="font-black text-[8px] uppercase">{c.plan?.toUpperCase() || 'FREE'}</Badge>
+                            <Badge variant="outline" className={cn("font-black text-[8px] uppercase", c.plan === 'vip' ? 'bg-amber-100 text-amber-700 border-amber-200' : '')}>
+                              {c.plan?.toUpperCase() || 'FREE'}
+                            </Badge>
                           </TableCell>
                           <TableCell className="font-bold text-[11px] max-w-[100px] truncate">{c.note || '---'}</TableCell>
                           <TableCell>
@@ -253,8 +275,8 @@ export default function AdminDashboard() {
                   <div className="relative">
                     <Search className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input 
-                      placeholder="ابحث عن (عمر) أو أي مستخدم بالاسم أو الكود..." 
-                      className="pr-12 h-12 rounded-xl border-none bg-white"
+                      placeholder="ابحث عن اسم المستخدم أو الكود (مثل عمر أو 123)..." 
+                      className="pr-12 h-12 rounded-xl border-none bg-white font-bold"
                       value={userSearch}
                       onChange={(e) => setUserSearch(e.target.value)}
                     />
@@ -267,14 +289,14 @@ export default function AdminDashboard() {
                         <TableHead className="text-right font-black text-[10px]">المستخدم</TableHead>
                         <TableHead className="text-right font-black text-[10px]">الكود المستخدم</TableHead>
                         <TableHead className="text-right font-black text-[10px]">التقدم</TableHead>
-                        <TableHead className="text-center font-black text-[10px]">طرد وحذف</TableHead>
+                        <TableHead className="text-center font-black text-[10px]">الإجراء</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {isLoadingUsers ? (
                         <TableRow><TableCell colSpan={4} className="text-center py-20"><Loader2 className="animate-spin mx-auto text-primary" /></TableCell></TableRow>
                       ) : filteredUsers?.length === 0 ? (
-                        <TableRow><TableCell colSpan={4} className="text-center py-20 text-muted-foreground font-bold">لا يوجد مستخدمون مطابقون للبحث.</TableCell></TableRow>
+                        <TableRow><TableCell colSpan={4} className="text-center py-20 text-muted-foreground font-bold">لا يوجد مستخدمون مطابقون لبحثك.</TableCell></TableRow>
                       ) : filteredUsers?.map((u) => (
                         <TableRow key={u.id}>
                           <TableCell>
@@ -283,7 +305,7 @@ export default function AdminDashboard() {
                               <span className="text-[9px] font-mono text-muted-foreground">{u.id}</span>
                             </div>
                           </TableCell>
-                          <TableCell className="font-mono font-bold text-xs">{u.accessCode || 'بدون كود'}</TableCell>
+                          <TableCell className="font-mono font-bold text-xs text-blue-600">{u.accessCode || '---'}</TableCell>
                           <TableCell>
                             <div className="flex gap-2 items-center">
                               <Badge className="bg-blue-500 text-white text-[8px]">{u.xp || 0} XP</Badge>
@@ -291,8 +313,8 @@ export default function AdminDashboard() {
                             </div>
                           </TableCell>
                           <TableCell className="text-center">
-                            <Button variant="destructive" size="sm" onClick={() => handleForceDeleteUser(u.id, u.accessCode)} className="rounded-xl font-black text-[10px] gap-1 h-10 px-4">
-                              <UserMinus className="h-3 w-3" /> طرد فوري
+                            <Button variant="destructive" size="sm" onClick={() => handleForceDeleteUser(u.id, u.accessCode)} className="rounded-xl font-black text-[10px] gap-1 h-9 px-4">
+                              <UserMinus className="h-3 w-3" /> طرد وحذف
                             </Button>
                           </TableCell>
                         </TableRow>

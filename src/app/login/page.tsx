@@ -23,12 +23,14 @@ export default function LoginPage() {
   const { toast } = useToast();
   const db = useFirestore();
   const auth = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
     if (!user || authFlow === 'idle') return;
 
     if (authFlow === 'admin') {
       const adminRef = doc(db, 'adminUsers', user.uid);
+      // التأكد من كتابة سجل المدير العام فوراً
       setDocumentNonBlocking(adminRef, {
         id: user.uid,
         role: 'admin',
@@ -38,7 +40,9 @@ export default function LoginPage() {
 
       localStorage.setItem('moc-co-auth', 'admin');
       toast({ title: "مرحباً يا أستاذ شريف حماد", description: "تم تفعيل صلاحيات الإدارة العليا بنجاح." });
-      window.location.href = '/admin/dashboard';
+      
+      // استخدام router.push بدلاً من window.location لضمان استقرار الجلسة
+      router.push('/admin/dashboard');
     } else if (authFlow === 'user' && pendingCodeData) {
       const codeRef = doc(db, 'accessCodes', pendingCodeData.id);
       const userRef = doc(db, 'users', user.uid);
@@ -50,9 +54,9 @@ export default function LoginPage() {
         });
       }
 
-      // Safeguard: Ensure no undefined values are passed to Firestore
       setDocumentNonBlocking(userRef, {
         id: user.uid,
+        username: pendingCodeData.note || "طالب جديد",
         accessCode: pendingCodeData.code || "",
         plan: pendingCodeData.plan || "free",
         lastLogin: serverTimestamp()
@@ -63,12 +67,12 @@ export default function LoginPage() {
       localStorage.setItem('moc-co-access-code', pendingCodeData.code || "");
       
       toast({ title: "تم التفعيل بنجاح", description: `مرحباً بك في باقة (${pendingCodeData.plan || "free"})` });
-      window.location.href = '/lessons';
+      router.push('/lessons');
     }
 
     setAuthFlow('idle');
     setLoading(false);
-  }, [user, authFlow, pendingCodeData, db, toast]);
+  }, [user, authFlow, pendingCodeData, db, toast, router]);
 
   const handleLogin = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -80,7 +84,7 @@ export default function LoginPage() {
     
     setLoading(true);
 
-    // كود المدير العام (فائق الأمان)
+    // كود المدير العام السري
     if (cleanCode === 'Hamed1@moko122a@') {
       setAuthFlow('admin');
       initiateAnonymousSignIn(auth);
@@ -92,7 +96,7 @@ export default function LoginPage() {
       const querySnapshot = await getDocs(q);
 
       if (querySnapshot.empty) {
-        toast({ variant: "destructive", title: "رمز خاطئ", description: "عذراً، رمز التفعيل هذا غير صحيح أو غير مسجل." });
+        toast({ variant: "destructive", title: "رمز خاطئ", description: "عذراً، رمز التفعيل هذا غير صحيح." });
         setLoading(false);
         return;
       }
@@ -130,7 +134,7 @@ export default function LoginPage() {
           </div>
         </div>
         <CardContent className="p-10 space-y-8">
-          <div className="space-y-6">
+          <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-3">
               <Label htmlFor="code" className="text-right block font-black text-primary text-[10px] uppercase tracking-widest opacity-60">Activation Serial Code</Label>
               <div className="relative">
@@ -142,8 +146,10 @@ export default function LoginPage() {
                   onChange={(e) => setCode(e.target.value)}
                   className="text-center h-20 text-2xl font-black rounded-[1.5rem] border-4 focus:border-accent transition-all bg-muted/30 tracking-[0.2em]"
                   disabled={loading}
+                  autoComplete="off"
                 />
                 <button 
+                  type="button"
                   onClick={() => setShowCode(!showCode)}
                   className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40 hover:text-primary transition-colors"
                 >
@@ -153,13 +159,13 @@ export default function LoginPage() {
             </div>
 
             <Button 
-              onClick={(e) => handleLogin(e)} 
+              type="submit"
               className="w-full h-20 text-xl font-black bg-primary rounded-[1.5rem] shadow-2xl shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all" 
               disabled={loading}
             >
               {loading ? <Loader2 className="animate-spin h-8 w-8" /> : "Unlock Saga"}
             </Button>
-          </div>
+          </form>
           
           <div className="pt-6 border-t border-dashed text-center space-y-4">
             <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest opacity-50">Authorized Personnel Only</p>
