@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -41,8 +42,10 @@ export function Navigation() {
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-card md:top-0 md:bottom-auto md:border-t-0 md:border-b shadow-2xl transition-colors duration-300">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-3 md:px-6 h-16">
         <Link href="/" className="flex items-center gap-1.5 md:gap-2 font-headline text-lg md:text-xl font-black text-primary hover:opacity-80 transition-opacity shrink-0">
-          <BookOpen className="h-5 w-5 md:h-6 md:w-6 text-accent shrink-0" />
-          <span className="inline whitespace-nowrap">Moc-co</span>
+          <div className="bg-primary/10 p-1.5 rounded-xl">
+             <BookOpen className="h-5 w-5 md:h-6 md:w-6 text-accent shrink-0" />
+          </div>
+          <span className="inline whitespace-nowrap">{language === 'en' ? 'Al-Mugran' : 'المُقرن'}</span>
         </Link>
         
         <div className="flex items-center gap-3 sm:gap-4 md:gap-6 overflow-x-auto no-scrollbar px-2 flex-1 justify-end md:justify-center">

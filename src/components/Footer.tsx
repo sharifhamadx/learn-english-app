@@ -5,13 +5,13 @@ import { useLanguage } from '@/components/LanguageProvider';
 import Link from 'next/link';
 
 export function Footer() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   return (
     <footer className="bg-card border-t py-16 px-6 mt-20">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
         <div className="md:col-span-2 space-y-6 text-left rtl:text-right">
-          <h3 className="font-headline text-3xl font-black text-primary">Moc-co</h3>
+          <h3 className="font-headline text-3xl font-black text-primary">{language === 'en' ? 'Al-Mugran' : 'المُقرن'}</h3>
           <p className="text-lg text-muted-foreground leading-relaxed">
             {t.footer.desc}
           </p>

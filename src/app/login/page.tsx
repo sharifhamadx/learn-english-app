@@ -7,11 +7,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
-import { MessageCircle, Loader2, ShieldCheck, Eye, EyeOff, LockKeyhole, Mail, UserPlus, UserCircle } from 'lucide-react';
+import { MessageCircle, Loader2, ShieldCheck, Eye, EyeOff, LockKeyhole, Mail, UserPlus, UserCircle, BookOpen } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore, useAuth, useUser, setDocumentNonBlocking, initiateEmailSignIn, initiateEmailSignUp } from '@/firebase';
 import { doc, serverTimestamp } from 'firebase/firestore';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/components/LanguageProvider';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -23,6 +24,7 @@ export default function LoginPage() {
   
   const { user } = useUser();
   const { toast } = useToast();
+  const { language } = useLanguage();
   const db = useFirestore();
   const auth = useAuth();
   const router = useRouter();
@@ -95,10 +97,12 @@ export default function LoginPage() {
         <div className="bg-primary p-10 text-center text-white space-y-6 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl" />
           <div className="mx-auto w-20 h-20 bg-white/20 rounded-[2.5rem] flex items-center justify-center backdrop-blur-md shadow-inner">
-            {mode === 'signup' ? <UserPlus className="h-10 w-10 text-accent" /> : <LockKeyhole className="h-10 w-10 text-accent" />}
+            <BookOpen className="h-10 w-10 text-accent" />
           </div>
           <div className="space-y-2">
-            <CardTitle className="text-4xl font-black font-headline tracking-tighter">Moc-co</CardTitle>
+            <CardTitle className="text-4xl font-black font-headline tracking-tighter">
+              {language === 'en' ? 'Al-Mugran' : 'المُقرن'}
+            </CardTitle>
             <p className="text-white/70 text-[10px] font-black tracking-widest uppercase">
               {mode === 'signup' ? 'Create Your Account' : 'Welcome Back'}
             </p>

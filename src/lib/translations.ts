@@ -20,7 +20,7 @@ export const translations = {
       viewStats: "My Achievements"
     },
     features: {
-      title: "Why Learn with the Saga?",
+      title: "Why Learn with Al-Mugran?",
       subtitle: "A unique methodology that turns learning into an emotional adventure.",
       f1_title: "300 Chapters",
       f1_desc: "A massive library of real-life stories covering all levels from beginner to advanced.",
@@ -97,7 +97,7 @@ export const translations = {
       academic: "Academic Path",
       academic_desc: "Graduate of SUST, Sudan. Currently studying at UoPeople, USA. Passionate about coding and humanitarian education.",
       philosophy: "The Vision",
-      philosophy_desc: "Moc-co is a bridge between struggle and success, offered freely to the world."
+      philosophy_desc: "Al-Mugran is a bridge between struggle and success, offered freely to the world."
     }
   },
   ar: {
@@ -120,7 +120,7 @@ export const translations = {
       viewStats: "إنجازاتي"
     },
     features: {
-      title: "لماذا تتعلم عبر الملحمة؟",
+      title: "لماذا تتعلم عبر المُقرن؟",
       subtitle: "منهجية فريدة تحول التعلم إلى مغامرة عاطفية لا تُنسى.",
       f1_title: "300 فصل",
       f1_desc: "مكتبة ضخمة من القصص الواقعية تغطي كافة المستويات من المبتدئ إلى المتقدم.",
@@ -197,7 +197,7 @@ export const translations = {
       academic: "المسيرة التعليمية",
       academic_desc: "خريج جامعة السودان للعلوم والتكنولوجيا. طالب بجامعة الناس الأمريكية. مبرمج يسخر التقنية للعمل الإنساني.",
       philosophy: "الرؤية",
-      philosophy_desc: "مو-كو هي الجسر بين المعاناة والنجاح، مقدمة مجاناً لكل طموح."
+      philosophy_desc: "المُقرن هو الجسر بين المعاناة والنجاح، مقدمة مجاناً لكل طموح."
     }
   }
 };

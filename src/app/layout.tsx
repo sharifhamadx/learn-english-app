@@ -8,8 +8,8 @@ import { FirebaseClientProvider } from '@/firebase';
 import { LanguageProvider } from '@/components/LanguageProvider';
 
 export const metadata: Metadata = {
-  title: 'Moc-co | Master English through The Sharif Saga',
-  description: 'A revolutionary educational experience combining human drama with modern English learning. 300 chapters of resilience and success.',
+  title: 'المُقرن | Al-Mugran - English Through The Sharif Saga',
+  description: 'A revolutionary educational experience combining human drama with modern English learning. 300 chapters of resilience and success as a charity for Aisha.',
 };
 
 export default function RootLayout({
