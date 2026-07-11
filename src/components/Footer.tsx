@@ -15,6 +15,9 @@ export function Footer() {
           <p className="text-lg text-muted-foreground leading-relaxed">
             {t.footer.desc}
           </p>
+          <div className="pt-4 border-t border-dashed">
+             <p className="text-accent font-black text-xl italic">"صدقة لاختي عائشة رحمة الله عليها"</p>
+          </div>
         </div>
         
         <div className="space-y-6 text-left rtl:text-right">
@@ -31,7 +34,7 @@ export function Footer() {
           <h4 className="font-bold text-xl text-foreground">{t.footer.contact_title}</h4>
           <div className="text-muted-foreground space-y-3">
             <p className="font-mono" dir="ltr">+44 7342 322206</p>
-            <p className="text-sm">sharifhamadmoko@gmail.com</p>
+            <p className="text-sm font-bold text-primary">sharifhamadmoko@gmail.com</p>
           </div>
         </div>
       </div>
