@@ -31,6 +31,7 @@ export function LessonCard({ lesson }: { lesson: Lesson }) {
             alt={lesson.title}
             fill
             className="object-cover transition-transform group-hover:scale-110 duration-1000"
+            data-ai-hint="Sudanese students"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent" />
           <div className="absolute bottom-6 left-6 flex gap-2">

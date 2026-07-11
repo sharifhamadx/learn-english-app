@@ -39,6 +39,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 
 export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   const [activeTab, setActiveTab] = useState('story');
@@ -66,7 +67,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   const nextLessonId = `lesson-${lessonNumber + 1}`;
   const isLastLesson = lessonNumber >= 300;
 
-  const storyWords = useMemo(() => lesson.story.split(' '), [lesson.story]);
+  const storyWords = useMemo(() => lesson.story.split(/\s+/), [lesson.story]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -81,7 +82,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
 
     const handleTimeUpdate = () => {
       setCurrentTime(audio.currentTime);
-      if (audio.duration) {
+      if (audio.duration && audio.duration > 0) {
         const progress = audio.currentTime / audio.duration;
         const index = Math.floor(progress * storyWords.length);
         setActiveWordIndex(index);
@@ -92,13 +93,20 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
       setDuration(audio.duration);
     };
 
+    const handleEnded = () => {
+      setIsPlaying(false);
+      setActiveWordIndex(null);
+    };
+
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+    audio.addEventListener('ended', handleEnded);
     audio.playbackRate = playbackRate;
 
     return () => {
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      audio.removeEventListener('ended', handleEnded);
     };
   }, [audioUrl, storyWords.length, playbackRate]);
 
@@ -106,7 +114,6 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
     if (!user || !db) return;
     
     try {
-      // 1. Save Lesson Progress
       const progressRef = doc(db, 'users', user.uid, 'lessonProgress', lesson.id);
       setDoc(progressRef, {
         lessonId: lesson.id,
@@ -116,11 +123,10 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
         completedAt: serverTimestamp(),
       }, { merge: true });
 
-      // 2. Update User Gamification Data
       const userRef = doc(db, 'users', user.uid);
       const userSnap = await getDoc(userRef);
       
-      const xpEarned = (finalScore * 50) + 100; // Base 100 + 50 per correct answer
+      const xpEarned = (finalScore * 50) + 100;
       const today = new Date().toISOString().split('T')[0];
 
       if (userSnap.exists()) {
@@ -132,12 +138,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
           const yesterday = new Date();
           yesterday.setDate(yesterday.getDate() - 1);
           const yesterdayStr = yesterday.toISOString().split('T')[0];
-
-          if (lastActive === yesterdayStr) {
-            newStreak += 1;
-          } else {
-            newStreak = 1;
-          }
+          newStreak = lastActive === yesterdayStr ? newStreak + 1 : 1;
         }
 
         updateDoc(userRef, {
@@ -146,16 +147,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
           lastActiveDate: today,
           lastLogin: serverTimestamp()
         });
-      } else {
-        // Initial setup for new user doc if missing
-        setDoc(userRef, {
-          xp: xpEarned,
-          streak: 1,
-          lastActiveDate: today,
-          lastLogin: serverTimestamp()
-        }, { merge: true });
       }
-
     } catch (e) {
       console.error("Error saving progress", e);
     }
@@ -207,17 +199,6 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
     }
   };
 
-  const handleDownloadAudio = () => {
-    if (!audioUrl) return;
-    const link = document.createElement('a');
-    link.href = audioUrl;
-    link.download = `${lesson.title}.wav`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    toast({ title: "Audio Downloaded", description: "The lesson audio has been saved to your device." });
-  };
-
   const handleTranslate = async (word: string) => {
     const cleanWord = word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "");
     setTranslation(null);
@@ -263,12 +244,12 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 md:space-y-10 pb-24 px-4">
-      {/* Persistent Audio Header */}
-      <div className="sticky top-16 z-30 bg-background/95 backdrop-blur-2xl py-3 border-b-2 border-primary/10 transition-all duration-300">
-        <div className="space-y-3">
+    <div className="max-w-4xl mx-auto space-y-6 md:space-y-10 pb-24 px-4 relative">
+      {/* Persistent Sticky Audio Header */}
+      <div className="sticky top-16 z-[45] bg-background/95 backdrop-blur-2xl py-4 border-b-2 border-primary/10 shadow-sm transition-all duration-300 -mx-4 px-4">
+        <div className="space-y-4">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-            <div className="space-y-0.5">
+            <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-primary border-primary bg-primary/5 font-black uppercase text-[9px] tracking-widest">{lesson.difficulty}</Badge>
                 <span className="text-muted-foreground text-[9px] font-black flex items-center gap-1 bg-muted/50 px-2 py-0.5 rounded-full uppercase tracking-tighter">
@@ -278,27 +259,27 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
               <h1 className="text-lg md:text-xl font-black text-primary font-headline tracking-tight truncate max-w-sm">{lesson.title}</h1>
             </div>
             
-            <div className="flex items-center gap-2 bg-white/40 dark:bg-black/20 p-1.5 rounded-xl border border-white/50 shadow-sm">
-              <Button variant="ghost" size="icon" onClick={handleStopAudio} disabled={!audioUrl} className="rounded-lg h-9 w-9 hover:bg-destructive/10 text-destructive">
+            <div className="flex items-center gap-2 bg-white/40 dark:bg-black/20 p-2 rounded-2xl border border-white/50 shadow-md">
+              <Button variant="ghost" size="icon" onClick={handleStopAudio} disabled={!audioUrl} className="rounded-xl h-10 w-10 hover:bg-destructive/10 text-destructive transition-all">
                 <RotateCcw className="h-4 w-4" />
               </Button>
 
-              <div className="h-6 w-px bg-border/50 mx-1" />
+              <div className="h-8 w-px bg-border/50 mx-1" />
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-9 px-2 rounded-lg font-black text-[10px] gap-1 hover:bg-primary/10">
-                    <FastForward className="h-3.5 w-3.5 text-primary" />
+                  <Button variant="ghost" size="sm" className="h-10 px-3 rounded-xl font-black text-[10px] gap-1 hover:bg-primary/10">
+                    <FastForward className="h-4 w-4 text-primary" />
                     {playbackRate}x
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="rounded-xl border-none shadow-2xl p-2 bg-white/90 backdrop-blur-xl">
+                <DropdownMenuContent align="end" className="rounded-2xl border-none shadow-2xl p-2 bg-white/90 backdrop-blur-xl">
                   {[0.5, 0.75, 1, 1.25, 1.5, 2].map((rate) => (
                     <DropdownMenuItem 
                       key={rate} 
                       onClick={() => setPlaybackRate(rate)}
                       className={cn(
-                        "rounded-lg font-black text-xs px-4 py-2 cursor-pointer transition-colors",
+                        "rounded-xl font-black text-xs px-4 py-2 cursor-pointer transition-colors",
                         playbackRate === rate ? "bg-primary text-white" : "hover:bg-primary/5"
                       )}
                     >
@@ -311,24 +292,21 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
               <Button 
                 onClick={handleTogglePlay} 
                 disabled={isAudioLoading}
-                className="rounded-lg bg-primary text-white font-black hover:bg-primary/90 px-4 h-9 shadow-lg shadow-primary/20 transition-all active:scale-95 text-[10px] gap-2"
+                className="rounded-xl bg-primary text-white font-black hover:bg-primary/90 px-6 h-10 shadow-xl shadow-primary/20 transition-all active:scale-95 text-xs gap-2"
               >
-                {isAudioLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : isPlaying ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
-                {isAudioLoading ? '...' : isPlaying ? 'Pause' : 'Play'}
+                {isAudioLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                {isAudioLoading ? 'جاري التحميل...' : isPlaying ? 'إيقاف' : 'تشغيل القصة'}
               </Button>
 
-              <div className="h-6 w-px bg-border/50 mx-1" />
+              <div className="h-8 w-px bg-border/50 mx-1" />
 
-              <Button variant="outline" onClick={handleDownloadAudio} disabled={!audioUrl} size="icon" className="rounded-lg h-9 w-9 border-2 hover:bg-accent/10 hover:text-accent border-accent/20">
-                <Volume2 className="h-3.5 w-3.5" />
-              </Button>
-              <Button variant="outline" onClick={handleDownloadPDF} size="icon" className="rounded-lg h-9 w-9 border-2 border-primary/20">
-                <FileDown className="h-3.5 w-3.5 text-primary" />
+              <Button variant="outline" onClick={handleDownloadPDF} size="icon" className="rounded-xl h-10 w-10 border-2 border-primary/20 hover:bg-primary/5">
+                <FileDown className="h-4 w-4 text-primary" />
               </Button>
             </div>
           </div>
 
-          <div className="space-y-0.5 px-1">
+          <div className="space-y-1.5 px-2">
             <Slider
               value={[currentTime]}
               max={duration || 100}
@@ -336,7 +314,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
               onValueChange={handleSeek}
               className="py-1 cursor-pointer"
             />
-            <div className="flex justify-between text-[8px] font-black text-muted-foreground/60 uppercase tracking-widest font-mono">
+            <div className="flex justify-between text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest font-mono">
               <span>{formatAudioTime(currentTime)}</span>
               <span>{formatAudioTime(duration)}</span>
             </div>
@@ -344,28 +322,28 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
         </div>
       </div>
 
-      <audio ref={audioRef} src={audioUrl || undefined} onEnded={() => setIsPlaying(false)} className="hidden" />
+      <audio ref={audioRef} src={audioUrl || undefined} className="hidden" />
 
       {isCompleted && (
-        <Card className="border-none bg-gradient-to-br from-primary to-blue-600 text-white animate-in zoom-in-95 duration-500 rounded-[2rem] overflow-hidden shadow-xl shadow-primary/30">
-          <CardContent className="p-8 text-center space-y-4">
-            <div className="mx-auto w-16 h-16 bg-white/20 rounded-full flex items-center justify-center shadow-inner backdrop-blur-md">
-              <Trophy className="h-8 w-8 text-accent" />
+        <Card className="border-none bg-gradient-to-br from-primary to-blue-600 text-white animate-in zoom-in-95 duration-500 rounded-[2.5rem] overflow-hidden shadow-2xl shadow-primary/30">
+          <CardContent className="p-10 text-center space-y-6">
+            <div className="mx-auto w-20 h-20 bg-white/20 rounded-full flex items-center justify-center shadow-inner backdrop-blur-md">
+              <Trophy className="h-10 w-10 text-accent" />
             </div>
-            <div className="space-y-1">
-              <h2 className="text-2xl font-black">Success!</h2>
-              <p className="text-white/80 text-lg">Score: <span className="font-black text-accent">{score}</span> / {lesson.questions.length}</p>
+            <div className="space-y-2">
+              <h2 className="text-3xl font-black">أحسنت يا بطل!</h2>
+              <p className="text-white/80 text-xl font-medium">لقد أتممت الفصل بنجاح بنتيجة: <span className="font-black text-accent">{score}</span> من {lesson.questions.length}</p>
             </div>
-            <div className="flex flex-col sm:flex-row justify-center gap-3 pt-2">
+            <div className="flex flex-col sm:flex-row justify-center gap-4 pt-2">
               {!isLastLesson && (
-                <Button asChild size="lg" className="bg-accent text-primary font-black h-12 px-8 rounded-xl shadow-xl hover:bg-white transition-all hover:scale-105">
+                <Button asChild size="lg" className="bg-accent text-primary font-black h-14 px-10 rounded-2xl shadow-2xl hover:bg-white transition-all hover:scale-105">
                   <Link href={`/lessons/${nextLessonId}`}>
-                    Continue Journey <ArrowRight className="ml-2 h-4 w-4" />
+                    الفصل التالي <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
               )}
-              <Button variant="outline" size="lg" className="h-12 rounded-xl border-white/30 bg-white/10 hover:bg-white/20 text-white" asChild>
-                <Link href="/lessons">Catalog</Link>
+              <Button variant="outline" size="lg" className="h-14 px-10 rounded-2xl border-white/30 bg-white/10 hover:bg-white/20 text-white font-bold" asChild>
+                <Link href="/lessons">قائمة الفصول</Link>
               </Button>
             </div>
           </CardContent>
@@ -373,47 +351,55 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
       )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3 h-14 p-1 bg-muted/50 backdrop-blur-md rounded-2xl border border-white">
-          <TabsTrigger value="story" className="rounded-xl font-black text-base data-[state=active]:shadow-md">Story</TabsTrigger>
-          <TabsTrigger value="quiz" className="rounded-xl font-black text-base data-[state=active]:shadow-md">Quiz</TabsTrigger>
-          <TabsTrigger value="grammar" className="rounded-xl font-black text-base data-[state=active]:shadow-md">Grammar</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 h-16 p-1.5 bg-muted/50 backdrop-blur-md rounded-[2rem] border-2 border-white shadow-inner">
+          <TabsTrigger value="story" className="rounded-2xl font-black text-lg data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-xl transition-all">القصة</TabsTrigger>
+          <TabsTrigger value="quiz" className="rounded-2xl font-black text-lg data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-xl transition-all">اختبار</TabsTrigger>
+          <TabsTrigger value="grammar" className="rounded-2xl font-black text-lg data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-xl transition-all">القواعد</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="story" className="mt-6">
-          <Card className="border-none shadow-xl rounded-[2.5rem] overflow-hidden bg-white/80 dark:bg-card/50 backdrop-blur-sm border border-white">
-            <div className="h-64 md:h-80 relative group overflow-hidden">
-              <img src={`https://picsum.photos/seed/${lesson.imageSeed}/1200/600`} alt="Illustration" className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-105" />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent" />
-              <div className="absolute bottom-4 left-6 flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-accent animate-pulse" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-primary bg-white/80 px-2 py-0.5 rounded-full">Interactive Narrative</span>
+        <TabsContent value="story" className="mt-8">
+          <Card className="border-none shadow-2xl rounded-[3rem] overflow-hidden bg-white/90 dark:bg-card/50 backdrop-blur-sm border border-white">
+            <div className="h-72 md:h-[450px] relative group overflow-hidden">
+              <Image 
+                src={`https://picsum.photos/seed/${lesson.imageSeed}/1200/800`} 
+                alt="Sudanese Students Learning" 
+                fill
+                className="object-cover transition-transform duration-[2000ms] group-hover:scale-110" 
+                data-ai-hint="Sudanese students"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-transparent to-transparent" />
+              <div className="absolute bottom-6 left-8 flex items-center gap-3">
+                <div className="bg-white/90 p-2 rounded-xl shadow-lg animate-pulse">
+                  <Sparkles className="h-5 w-5 text-accent" />
+                </div>
+                <span className="text-xs font-black uppercase tracking-widest text-primary bg-white/90 px-4 py-1.5 rounded-full shadow-lg">رواية تفاعلية</span>
               </div>
             </div>
-            <CardContent className="p-8 md:p-12">
-              <div className="flex flex-wrap gap-x-1.5 gap-y-3 leading-relaxed text-lg md:text-xl text-foreground/90 font-medium">
+            <CardContent className="p-10 md:p-16">
+              <div className="flex flex-wrap gap-x-2 gap-y-5 leading-relaxed text-xl md:text-2xl text-foreground/90 font-medium select-none" dir="ltr">
                 {storyWords.map((word, i) => (
                   <Popover key={i} onOpenChange={(open) => open && handleTranslate(word)}>
                     <PopoverTrigger asChild>
                       <span className={cn(
-                        "cursor-help transition-all duration-300 px-1 rounded-lg underline-offset-4 decoration-1",
+                        "cursor-help transition-all duration-300 px-1.5 py-0.5 rounded-xl underline-offset-8 decoration-2",
                         activeWordIndex === i 
-                          ? "bg-primary text-white scale-105 shadow-md shadow-primary/30 underline decoration-white" 
+                          ? "bg-primary text-white scale-110 shadow-2xl shadow-primary/40 underline decoration-accent font-bold" 
                           : "hover:text-primary hover:bg-primary/5 hover:underline decoration-primary/30"
                       )}>
                         {word}
                       </span>
                     </PopoverTrigger>
-                    <PopoverContent className="w-56 p-4 text-center rounded-2xl shadow-2xl border-none bg-primary text-primary-foreground">
-                      <div className="space-y-3">
-                        <div className="space-y-0.5">
-                          <p className="text-[8px] opacity-70 font-black uppercase tracking-widest">Meaning</p>
-                          <p className="text-lg font-black">{word.replace(/[^a-zA-Z]/g, '')}</p>
+                    <PopoverContent className="w-64 p-6 text-center rounded-[2rem] shadow-2xl border-none bg-primary text-primary-foreground animate-in slide-in-from-top-2">
+                      <div className="space-y-4">
+                        <div className="space-y-1">
+                          <p className="text-[10px] opacity-70 font-black uppercase tracking-widest">المعنى بالعربي</p>
+                          <p className="text-xl font-bold">{word.replace(/[^a-zA-Z]/g, '')}</p>
                         </div>
-                        <div className="h-0.5 bg-white/20 w-8 mx-auto rounded-full" />
+                        <div className="h-1 bg-white/20 w-12 mx-auto rounded-full" />
                         {translation ? (
-                          <p className="text-xl font-black text-accent font-arabic" dir="rtl">{translation}</p>
+                          <p className="text-2xl font-black text-accent font-arabic leading-tight" dir="rtl">{translation}</p>
                         ) : (
-                          <div className="flex justify-center py-1"><Loader2 className="h-4 w-4 animate-spin" /></div>
+                          <div className="flex justify-center py-2"><Loader2 className="h-6 w-6 animate-spin text-accent" /></div>
                         )}
                       </div>
                     </PopoverContent>
@@ -424,34 +410,34 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
           </Card>
         </TabsContent>
 
-        <TabsContent value="quiz" className="mt-6 space-y-6">
-          <div className="grid grid-cols-1 gap-6">
+        <TabsContent value="quiz" className="mt-8 space-y-8">
+          <div className="grid grid-cols-1 gap-8">
             {lesson.questions.map((q, idx) => (
-              <Card key={q.id} className="border-none shadow-lg rounded-[2rem] overflow-hidden transition-all">
-                <CardContent className="p-8 space-y-6">
+              <Card key={q.id} className="border-none shadow-xl rounded-[2.5rem] overflow-hidden transition-all hover:shadow-2xl bg-white/80">
+                <CardContent className="p-10 space-y-8">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center font-black text-lg shadow-lg shadow-primary/20">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-2xl bg-primary text-white flex items-center justify-center font-black text-xl shadow-xl shadow-primary/20">
                         {idx + 1}
                       </div>
-                      <span className="text-base font-black text-primary uppercase tracking-widest">Question</span>
+                      <span className="text-lg font-black text-primary uppercase tracking-widest">السؤال</span>
                     </div>
                     {feedback[q.id] && (
-                      <Badge className={cn("px-3 py-1 rounded-full text-xs font-bold border-none", feedback[q.id].correct ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700")}>
-                        {feedback[q.id].correct ? 'CORRECT' : 'INCORRECT'}
+                      <Badge className={cn("px-4 py-1.5 rounded-full text-[10px] font-black border-none shadow-md", feedback[q.id].correct ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700")}>
+                        {feedback[q.id].correct ? 'إجابة صحيحة' : 'إجابة خاطئة'}
                       </Badge>
                     )}
                   </div>
                   
-                  <p className="text-xl font-bold leading-tight text-slate-800 dark:text-slate-100">{q.text}</p>
+                  <p className="text-2xl font-bold leading-tight text-slate-800 dark:text-slate-100" dir="ltr">{q.text}</p>
                   
                   {q.type === 'multiple-choice' ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4" dir="ltr">
                       {q.options?.map(opt => (
                         <Button
                           key={opt}
                           variant={answers[q.id] === opt ? "default" : "outline"}
-                          className={cn("h-16 text-lg rounded-xl border-2 transition-all font-bold", answers[q.id] === opt && "border-primary bg-primary text-white shadow-md", feedback[q.id] && opt === q.correctAnswer && "border-green-500 bg-green-50 text-green-700")}
+                          className={cn("h-16 text-lg rounded-2xl border-2 transition-all font-bold shadow-sm", answers[q.id] === opt && "border-primary bg-primary text-white shadow-xl", feedback[q.id] && opt === q.correctAnswer && "border-green-500 bg-green-50 text-green-700")}
                           onClick={() => setAnswers(prev => ({ ...prev, [q.id]: opt }))}
                           disabled={!!feedback[q.id]}
                         >
@@ -460,16 +446,16 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
                       ))}
                     </div>
                   ) : (
-                    <Input placeholder="Answer in English..." value={answers[q.id] || ''} onChange={(e) => setAnswers(prev => ({ ...prev, [q.id]: e.target.value }))} className="h-16 text-center text-xl rounded-xl border-2 focus:border-primary font-bold" disabled={!!feedback[q.id]} />
+                    <Input placeholder="اكتب الإجابة هنا بالإنجليزية..." value={answers[q.id] || ''} onChange={(e) => setAnswers(prev => ({ ...prev, [q.id]: e.target.value }))} className="h-16 text-center text-xl rounded-2xl border-4 focus:border-accent font-black transition-all bg-muted/20" disabled={!!feedback[q.id]} dir="ltr" />
                   )}
 
                   {!feedback[q.id] && (
-                    <Button onClick={() => handleQuizSubmit(q.id, answers[q.id]?.toLowerCase().trim() === q.correctAnswer.toLowerCase().trim())} disabled={!answers[q.id]} className="w-full h-14 rounded-xl bg-primary text-white font-black text-lg shadow-lg hover:scale-[1.01] active:scale-95 transition-all">Verify</Button>
+                    <Button onClick={() => handleQuizSubmit(q.id, answers[q.id]?.toLowerCase().trim() === q.correctAnswer.toLowerCase().trim())} disabled={!answers[q.id]} className="w-full h-16 rounded-2xl bg-primary text-white font-black text-xl shadow-2xl shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all">تحقق من الإجابة</Button>
                   )}
 
                   {feedback[q.id] && (
-                    <div className={cn("p-4 rounded-xl flex items-center justify-center gap-3 font-black text-base border-2", feedback[q.id].correct ? "bg-green-50 border-green-200 text-green-700" : "bg-red-50 border-red-200 text-red-700")}>
-                      {feedback[q.id].correct ? <CheckCircle2 className="h-5 w-5" /> : <XCircle className="h-5 w-5" />}
+                    <div className={cn("p-6 rounded-2xl flex items-center justify-center gap-4 font-black text-lg border-2 shadow-inner", feedback[q.id].correct ? "bg-green-50 border-green-200 text-green-700" : "bg-red-50 border-red-200 text-red-700")}>
+                      {feedback[q.id].correct ? <CheckCircle2 className="h-6 w-6" /> : <XCircle className="h-6 w-6" />}
                       {feedback[q.id].message}
                     </div>
                   )}
@@ -479,23 +465,23 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
           </div>
         </TabsContent>
 
-        <TabsContent value="grammar" className="mt-6">
-          <Card className="border-none shadow-xl rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-white to-slate-50 dark:from-card dark:to-background border border-white">
-            <div className="p-8 md:p-12 space-y-6">
-              <div className="flex items-center gap-3">
-                <div className="p-3 bg-accent/20 rounded-2xl shadow-inner">
-                  <Sparkles className="h-8 w-8 text-primary" />
+        <TabsContent value="grammar" className="mt-8">
+          <Card className="border-none shadow-2xl rounded-[3rem] overflow-hidden bg-gradient-to-br from-white to-slate-50 dark:from-card dark:to-background border border-white">
+            <div className="p-10 md:p-16 space-y-8">
+              <div className="flex items-center gap-5">
+                <div className="p-4 bg-accent/20 rounded-[2rem] shadow-inner">
+                  <Sparkles className="h-10 w-10 text-primary" />
                 </div>
-                <h2 className="text-3xl font-black text-primary tracking-tight">{lesson.grammarPoint}</h2>
+                <h2 className="text-4xl font-black text-primary tracking-tight">{lesson.grammarPoint}</h2>
               </div>
-              <p className="text-lg md:text-xl leading-relaxed text-muted-foreground font-medium italic border-l-4 border-primary/20 pl-6">
+              <p className="text-xl md:text-2xl leading-relaxed text-muted-foreground font-medium italic border-l-8 border-primary/20 pl-8">
                 {lesson.grammarExplanation}
               </p>
-              <div className="bg-primary/5 p-6 rounded-2xl border-2 border-dashed border-primary/20 space-y-3">
-                <div className="inline-flex items-center gap-2 bg-primary text-white px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest">
-                  Live Usage
+              <div className="bg-primary/5 p-8 rounded-[2.5rem] border-4 border-dashed border-primary/10 space-y-4">
+                <div className="inline-flex items-center gap-2 bg-primary text-white px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
+                  مثال حي من القصة
                 </div>
-                <p className="text-xl md:text-2xl font-black italic text-slate-800 dark:text-slate-100">"Sharif has never given up."</p>
+                <p className="text-2xl md:text-4xl font-black italic text-slate-800 dark:text-slate-100" dir="ltr">"Sharif has never given up."</p>
               </div>
             </div>
           </Card>

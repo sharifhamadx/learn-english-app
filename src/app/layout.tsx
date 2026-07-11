@@ -5,7 +5,6 @@ import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
 import { Toaster } from '@/components/ui/toaster';
 import { FirebaseClientProvider } from '@/firebase';
-import { FloatingWhatsApp } from '@/components/FloatingWhatsApp';
 import { LanguageProvider } from '@/components/LanguageProvider';
 
 export const metadata: Metadata = {
@@ -50,7 +49,6 @@ export default function RootLayout({
               {children}
             </main>
             
-            <FloatingWhatsApp />
             <Footer />
             <Toaster />
           </LanguageProvider>
