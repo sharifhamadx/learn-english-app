@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useFirestore, useMemoFirebase, useCollection, useUser, useDoc } from '@/firebase';
-import { collection, serverTimestamp, doc, query, orderBy } from 'firebase/firestore';
+import { collection, serverTimestamp, doc, query, orderBy, deleteDoc, writeBatch } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Trash2, ArrowLeft, Loader2, Key, ShieldAlert, Copy, Check, UserMinus, Users, Search, ShieldCheck } from 'lucide-react';
+import { Trash2, ArrowLeft, Loader2, Key, ShieldAlert, Copy, Check, UserMinus, Users, Search, ShieldCheck, BarChart3, TrendingUp, Award } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { addDocumentNonBlocking, deleteDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
@@ -27,7 +27,7 @@ export default function AdminDashboard() {
   const { user, isUserLoading } = useUser();
   const { toast } = useToast();
 
-  // التحقق من صلاحيات المدير وتثبيتها
+  // تأمين صلاحيات المدير
   const adminDocRef = useMemoFirebase(() => {
     if (!user) return null;
     return doc(db, 'adminUsers', user.uid);
@@ -45,17 +45,20 @@ export default function AdminDashboard() {
     }
   }, [user, adminRecord, db]);
 
-  // استعلام الأكواد
-  const codesQuery = useMemoFirebase(() => {
-    return query(collection(db, 'accessCodes'), orderBy('createdAt', 'desc'));
-  }, [db]);
+  // استعلامات البيانات
+  const codesQuery = useMemoFirebase(() => query(collection(db, 'accessCodes'), orderBy('createdAt', 'desc')), [db]);
   const { data: codes, isLoading: isLoadingCodes } = useCollection(codesQuery);
 
-  // استعلام المستخدمين
-  const usersQuery = useMemoFirebase(() => {
-    return query(collection(db, 'users'));
-  }, [db]);
+  const usersQuery = useMemoFirebase(() => query(collection(db, 'users')), [db]);
   const { data: allUsers, isLoading: isLoadingUsers } = useCollection(usersQuery);
+
+  // إحصائيات المنصة
+  const stats = useMemo(() => {
+    const totalUsers = allUsers?.length || 0;
+    const activeCodes = codes?.filter(c => c.usedByUid).length || 0;
+    const totalXP = allUsers?.reduce((acc, curr) => acc + (curr.xp || 0), 0) || 0;
+    return { totalUsers, activeCodes, totalXP };
+  }, [allUsers, codes]);
 
   const generateSecureCode = () => {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -71,11 +74,10 @@ export default function AdminDashboard() {
   const handleGenerateCode = async () => {
     if (!user) return;
     setIsGenerating(true);
-
+    const finalCode = generateSecureCode();
+    
     try {
-      const finalCode = generateSecureCode();
-      const codesRef = collection(db, 'accessCodes');
-      const data = {
+      addDocumentNonBlocking(collection(db, 'accessCodes'), {
         code: finalCode,
         plan: selectedPlan,
         note: newNote,
@@ -83,9 +85,7 @@ export default function AdminDashboard() {
         usedByUid: null,
         createdAt: serverTimestamp(),
         createdBy: user.uid
-      };
-
-      addDocumentNonBlocking(codesRef, data);
+      });
       setNewNote('');
       toast({ title: "تم التوليد بنجاح", description: `الرمز الجديد: ${finalCode}` });
     } catch (e) {
@@ -102,39 +102,28 @@ export default function AdminDashboard() {
     toast({ title: "تم النسخ", description: "الرمز جاهز للمشاركة." });
   };
 
-  // أمر تأكيد الحذف للأكواد
-  const handleDeleteCode = (id: string, usedByUid: string | null) => {
-    const confirmMsg = 'تنبيه أمني هام: هل أنت متأكد من حذف هذا الترخيص نهائياً؟\n\n- سيتم منع أي مستخدم مرتبط به من الدخول فوراً.\n- سيتم مسح سجل المستخدم بالكامل.';
+  // وظيفة الحذف النووي (تطهير شامل)
+  const handleNuclearDelete = async (type: 'user' | 'code', targetId: string, secondaryId?: string | null) => {
+    const confirmMsg = '⚠️ تأكيد الحذف النهائي:\n\nسيتم مسح كافة البيانات المرتبطة بهذا السجل فوراً ولن يتمكن المستخدم من العودة.';
     if (!confirm(confirmMsg)) return;
 
-    // 1. حذف رمز التفعيل
-    deleteDocumentNonBlocking(doc(db, 'accessCodes', id));
-
-    // 2. إذا كان الكود مستخدماً، نحذف ملف المستخدم فوراً لطرده
-    if (usedByUid) {
-      deleteDocumentNonBlocking(doc(db, 'users', usedByUid));
-    }
-
-    toast({ title: "تم التطهير بنجاح", description: "تم مسح كافة البيانات المرتبطة بهذا الرمز وقطع الوصول." });
-  };
-
-  // أمر تأكيد الحذف للمستخدمين (للتخلص من أمثال عمر)
-  const handleForceDeleteUser = (userId: string, accessCode: string) => {
-    const confirmMsg = `أمر طرد نهائي: هل أنت متأكد من حذف الطالب (${accessCode || 'بدون كود'})؟\n\n- سيتم مسح ملفه الشخصي XP و Streak.\n- سيتم إبطال كود التفعيل المرتبط به لمنع عودته.`;
-    if (!confirm(confirmMsg)) return;
-
-    // 1. حذف ملف المستخدم (المفتاح الأساسي للطرد)
-    deleteDocumentNonBlocking(doc(db, 'users', userId));
-
-    // 2. البحث عن الكود وحذفه لتنظيف السحابة تماماً
-    if (accessCode) {
-      const codeToFind = codes?.find(c => c.code === accessCode);
-      if (codeToFind) {
-        deleteDocumentNonBlocking(doc(db, 'accessCodes', codeToFind.id));
+    try {
+      if (type === 'code') {
+        await deleteDoc(doc(db, 'accessCodes', targetId));
+        if (secondaryId) {
+          await deleteDoc(doc(db, 'users', secondaryId));
+        }
+      } else {
+        await deleteDoc(doc(db, 'users', targetId));
+        if (secondaryId) {
+          const codeToFind = codes?.find(c => c.code === secondaryId);
+          if (codeToFind) await deleteDoc(doc(db, 'accessCodes', codeToFind.id));
+        }
       }
+      toast({ title: "تم التطهير بنجاح", description: "تم مسح كافة البيانات المختارة من السحابة." });
+    } catch (e) {
+      toast({ variant: "destructive", title: "خطأ في الصلاحيات", description: "تأكد أنك مسجل دخول كمدير عام." });
     }
-
-    toast({ title: "تم الطرد بنجاح", description: "تم مسح المستخدم وإلغاء صلاحية جهازه نهائياً." });
   };
 
   const filteredUsers = allUsers?.filter(u => 
@@ -143,30 +132,63 @@ export default function AdminDashboard() {
     u.id.toLowerCase().includes(userSearch.toLowerCase())
   );
 
-  if (isUserLoading) return <div className="flex h-screen items-center justify-center"><Loader2 className="animate-spin text-primary" /></div>;
+  if (isUserLoading) return <div className="flex h-screen items-center justify-center bg-background"><Loader2 className="animate-spin text-primary" /></div>;
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-20 px-4" dir="rtl">
+    <div className="max-w-7xl mx-auto space-y-8 pb-20 px-4" dir="rtl">
+      {/* Top Header */}
       <div className="flex flex-col md:flex-row items-center justify-between mt-8 gap-4">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild className="rounded-full">
+          <Button variant="ghost" size="icon" asChild className="rounded-full bg-white shadow-sm border">
             <Link href="/"><ArrowLeft className="h-5 w-5" /></Link>
           </Button>
           <div className="space-y-1">
             <h1 className="text-3xl font-black font-headline text-primary tracking-tighter">القيادة المركزية | Moko</h1>
-            <p className="text-muted-foreground text-sm font-bold flex items-center gap-2">
-              <ShieldCheck className="h-4 w-4 text-green-500" />
-              المدير العام: شريف حماد | الرقابة والأمان
+            <p className="text-muted-foreground text-xs font-bold flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4 text-accent" />
+              المدير العام: شريف حماد | تحليلات ورقابة
             </p>
           </div>
         </div>
       </div>
 
+      {/* Analytics Dashboard */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="border-none shadow-xl bg-primary text-white rounded-[2rem] overflow-hidden">
+          <CardContent className="p-6 flex items-center justify-between">
+            <div className="space-y-1">
+              <p className="text-[10px] font-black uppercase tracking-widest opacity-70">إجمالي الطلاب</p>
+              <h3 className="text-4xl font-black">{stats.totalUsers}</h3>
+            </div>
+            <div className="p-3 bg-white/10 rounded-2xl"><Users className="h-8 w-8 text-accent" /></div>
+          </CardContent>
+        </Card>
+        <Card className="border-none shadow-xl bg-white rounded-[2rem] overflow-hidden border border-slate-100">
+          <CardContent className="p-6 flex items-center justify-between">
+            <div className="space-y-1">
+              <p className="text-[10px] font-black text-primary uppercase tracking-widest opacity-70">تراخيص مفعلة</p>
+              <h3 className="text-4xl font-black text-primary">{stats.activeCodes}</h3>
+            </div>
+            <div className="p-3 bg-accent/10 rounded-2xl"><TrendingUp className="h-8 w-8 text-accent" /></div>
+          </CardContent>
+        </Card>
+        <Card className="border-none shadow-xl bg-white rounded-[2rem] overflow-hidden border border-slate-100">
+          <CardContent className="p-6 flex items-center justify-between">
+            <div className="space-y-1">
+              <p className="text-[10px] font-black text-primary uppercase tracking-widest opacity-70">مجموع XP المنصة</p>
+              <h3 className="text-4xl font-black text-primary">{stats.totalXP.toLocaleString()}</h3>
+            </div>
+            <div className="p-3 bg-primary/5 rounded-2xl"><Award className="h-8 w-8 text-primary" /></div>
+          </CardContent>
+        </Card>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        <Card className="lg:col-span-1 border-none shadow-2xl rounded-[2.5rem] bg-white/80 backdrop-blur-md border border-white h-fit">
+        {/* Code Generator Side */}
+        <Card className="lg:col-span-1 border-none shadow-2xl rounded-[2.5rem] bg-white border border-slate-100 h-fit">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-primary font-black">
-              <ShieldAlert className="h-5 w-5 text-accent" />
+              <Key className="h-5 w-5 text-accent" />
               توليد ترخيص
             </CardTitle>
           </CardHeader>
@@ -198,7 +220,7 @@ export default function AdminDashboard() {
 
             <Button 
               onClick={handleGenerateCode} 
-              className="w-full h-16 rounded-2xl bg-primary text-lg font-black shadow-xl"
+              className="w-full h-16 rounded-2xl bg-accent text-primary font-black shadow-xl shadow-accent/20 text-lg"
               disabled={isGenerating}
             >
               {isGenerating ? <Loader2 className="animate-spin" /> : "إصدار ترخيص جديد"}
@@ -206,22 +228,84 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
 
+        {/* Main Tabs Content */}
         <div className="lg:col-span-3 space-y-6">
-          <Tabs defaultValue="codes" className="w-full">
-            <TabsList className="bg-white/50 p-1 rounded-2xl border-2 mb-4 h-14 grid grid-cols-2">
-              <TabsTrigger value="codes" className="rounded-xl font-black gap-2 data-[state=active]:bg-primary data-[state=active]:text-white">
-                <Key className="h-4 w-4" /> سجل التراخيص
-              </TabsTrigger>
+          <Tabs defaultValue="users" className="w-full">
+            <TabsList className="bg-white p-1 rounded-2xl border-2 mb-4 h-14 grid grid-cols-2 shadow-sm">
               <TabsTrigger value="users" className="rounded-xl font-black gap-2 data-[state=active]:bg-primary data-[state=active]:text-white">
-                <Users className="h-4 w-4" /> إدارة الطلاب
+                <Users className="h-4 w-4" /> إدارة الطلاب ({stats.totalUsers})
+              </TabsTrigger>
+              <TabsTrigger value="codes" className="rounded-xl font-black gap-2 data-[state=active]:bg-primary data-[state=active]:text-white">
+                <Key className="h-4 w-4" /> سجل التراخيص ({codes?.length || 0})
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="codes" className="animate-in fade-in duration-500">
-              <Card className="border-none shadow-2xl rounded-[2.5rem] overflow-hidden bg-white/80">
+            <TabsContent value="users" className="animate-in fade-in duration-500">
+              <Card className="border-none shadow-2xl rounded-[2.5rem] overflow-hidden bg-white border border-slate-100">
+                <CardHeader className="bg-primary/5 p-6 border-b">
+                  <div className="relative">
+                    <Search className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input 
+                      placeholder="ابحث عن أي طالب (عمر، الكود، المعرف)..." 
+                      className="pr-12 h-12 rounded-xl border-none bg-white font-bold text-right shadow-inner"
+                      value={userSearch}
+                      onChange={(e) => setUserSearch(e.target.value)}
+                    />
+                  </div>
+                </CardHeader>
                 <div className="overflow-x-auto">
                   <Table>
-                    <TableHeader className="bg-muted/50">
+                    <TableHeader className="bg-muted/30">
+                      <TableRow>
+                        <TableHead className="text-right font-black text-[10px]">المستخدم</TableHead>
+                        <TableHead className="text-right font-black text-[10px]">الكود المستخدم</TableHead>
+                        <TableHead className="text-right font-black text-[10px]">التقدم</TableHead>
+                        <TableHead className="text-center font-black text-[10px]">الإجراء</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {isLoadingUsers ? (
+                        <TableRow><TableCell colSpan={4} className="text-center py-20"><Loader2 className="animate-spin mx-auto text-primary" /></TableCell></TableRow>
+                      ) : filteredUsers?.length === 0 ? (
+                        <TableRow><TableCell colSpan={4} className="text-center py-20 text-muted-foreground font-bold">لا يوجد مستخدمون يطابقون البحث.</TableCell></TableRow>
+                      ) : filteredUsers?.map((u) => (
+                        <TableRow key={u.id} className="hover:bg-slate-50 transition-colors">
+                          <TableCell>
+                            <div className="flex flex-col">
+                              <span className="font-black text-sm text-primary">{u.username || 'طالب جديد'}</span>
+                              <span className="text-[8px] font-mono text-muted-foreground opacity-50">{u.id}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="font-mono font-bold text-xs text-accent">{u.accessCode || '---'}</TableCell>
+                          <TableCell>
+                            <div className="flex gap-2 items-center">
+                              <Badge className="bg-primary/10 text-primary border-none text-[8px]">{u.xp || 0} XP</Badge>
+                              <Badge className="bg-accent/10 text-accent border-none text-[8px]">{u.streak || 0} 🔥</Badge>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Button 
+                              variant="destructive" 
+                              size="sm" 
+                              onClick={() => handleNuclearDelete('user', u.id, u.accessCode)} 
+                              className="rounded-xl font-black text-[10px] gap-1 h-9 px-4 shadow-lg shadow-destructive/10"
+                            >
+                              <UserMinus className="h-3 w-3" /> طرد وحذف
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="codes" className="animate-in fade-in duration-500">
+              <Card className="border-none shadow-2xl rounded-[2.5rem] overflow-hidden bg-white border border-slate-100">
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader className="bg-muted/30">
                       <TableRow>
                         <TableHead className="text-right font-black text-[10px]">الرمز</TableHead>
                         <TableHead className="text-right font-black text-[10px]">الباقة</TableHead>
@@ -236,87 +320,31 @@ export default function AdminDashboard() {
                       ) : codes?.length === 0 ? (
                         <TableRow><TableCell colSpan={5} className="text-center py-20 text-muted-foreground font-bold">لا توجد تراخيص حالياً.</TableCell></TableRow>
                       ) : codes?.map((c) => (
-                        <TableRow key={c.id}>
+                        <TableRow key={c.id} className="hover:bg-slate-50 transition-colors">
                           <TableCell className="font-mono font-black text-primary">
                             <div className="flex items-center gap-2">
                               <span>{c.code}</span>
-                              <button onClick={() => handleCopy(c.code, c.id)} className="text-muted-foreground hover:text-primary">
+                              <button onClick={() => handleCopy(c.code, c.id)} className="text-muted-foreground hover:text-accent">
                                 {copiedId === c.id ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
                               </button>
                             </div>
                           </TableCell>
                           <TableCell>
-                            <Badge variant="outline" className={cn("font-black text-[8px] uppercase", c.plan === 'vip' ? 'bg-amber-100 text-amber-700 border-amber-200' : '')}>
+                            <Badge variant="outline" className={cn("font-black text-[8px] uppercase", c.plan === 'vip' ? 'bg-accent/10 text-accent border-accent/20' : 'bg-primary/5 text-primary border-primary/10')}>
                               {c.plan?.toUpperCase() || 'FREE'}
                             </Badge>
                           </TableCell>
                           <TableCell className="font-bold text-[11px] max-w-[100px] truncate">{c.note || '---'}</TableCell>
                           <TableCell>
                             {c.usedByUid ? (
-                              <span className="bg-red-50 text-red-600 px-2 py-0.5 rounded-full text-[9px] font-black border border-red-100">نشط</span>
+                              <span className="bg-accent text-primary px-2 py-0.5 rounded-full text-[9px] font-black border border-accent/20 shadow-sm">نشط</span>
                             ) : (
                               <span className="bg-green-50 text-green-600 px-2 py-0.5 rounded-full text-[9px] font-black border border-green-100">متاح</span>
                             )}
                           </TableCell>
                           <TableCell className="text-center">
-                            <Button variant="ghost" size="icon" onClick={() => handleDeleteCode(c.id, c.usedByUid)} className="text-destructive hover:bg-red-50 rounded-xl">
+                            <Button variant="ghost" size="icon" onClick={() => handleNuclearDelete('code', c.id, c.usedByUid)} className="text-destructive hover:bg-red-50 rounded-xl">
                               <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="users" className="animate-in fade-in duration-500">
-              <Card className="border-none shadow-2xl rounded-[2.5rem] overflow-hidden bg-white/80">
-                <CardHeader className="bg-primary/5 p-6 border-b">
-                  <div className="relative">
-                    <Search className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input 
-                      placeholder="ابحث عن اسم المستخدم أو الكود (مثلاً: عمر)..." 
-                      className="pr-12 h-12 rounded-xl border-none bg-white font-bold text-right"
-                      value={userSearch}
-                      onChange={(e) => setUserSearch(e.target.value)}
-                    />
-                  </div>
-                </CardHeader>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader className="bg-muted/50">
-                      <TableRow>
-                        <TableHead className="text-right font-black text-[10px]">المستخدم</TableHead>
-                        <TableHead className="text-right font-black text-[10px]">الكود المستخدم</TableHead>
-                        <TableHead className="text-right font-black text-[10px]">التقدم</TableHead>
-                        <TableHead className="text-center font-black text-[10px]">الإجراء</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {isLoadingUsers ? (
-                        <TableRow><TableCell colSpan={4} className="text-center py-20"><Loader2 className="animate-spin mx-auto text-primary" /></TableCell></TableRow>
-                      ) : filteredUsers?.length === 0 ? (
-                        <TableRow><TableCell colSpan={4} className="text-center py-20 text-muted-foreground font-bold">لا يوجد مستخدمون حالياً.</TableCell></TableRow>
-                      ) : filteredUsers?.map((u) => (
-                        <TableRow key={u.id}>
-                          <TableCell>
-                            <div className="flex flex-col">
-                              <span className="font-black text-sm text-primary">{u.username || 'طالب جديد'}</span>
-                              <span className="text-[9px] font-mono text-muted-foreground">{u.id}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="font-mono font-bold text-xs text-blue-600">{u.accessCode || '---'}</TableCell>
-                          <TableCell>
-                            <div className="flex gap-2 items-center">
-                              <Badge className="bg-blue-500 text-white text-[8px]">{u.xp || 0} XP</Badge>
-                              <Badge className="bg-orange-500 text-white text-[8px]">{u.streak || 0} 🔥</Badge>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <Button variant="destructive" size="sm" onClick={() => handleForceDeleteUser(u.id, u.accessCode)} className="rounded-xl font-black text-[10px] gap-1 h-9 px-4">
-                              <UserMinus className="h-3 w-3" /> طرد وحذف
                             </Button>
                           </TableCell>
                         </TableRow>
