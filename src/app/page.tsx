@@ -92,8 +92,8 @@ export default function HomePage() {
       <section className="space-y-8 md:space-y-12 px-2">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-6 border-b border-primary/10 pb-6 md:pb-8 text-center md:text-left rtl:md:text-right">
           <div className="space-y-1 md:space-y-2">
-            <h2 className="text-2xl md:text-3xl font-black font-headline text-slate-900">{language === 'en' ? 'Chapter Highlights' : 'أبرز الفصول'}</h2>
-            <p className="text-muted-foreground text-base md:text-lg">{language === 'en' ? 'Experience the quality with our featured trial lessons.' : 'اختبر الجودة من خلال فصولنا التجريبية المختارة.'}</p>
+            <h2 className="text-2xl md:text-3xl font-black font-headline text-slate-900">{language === 'en' ? 'Level Highlights' : 'أبرز المستويات'}</h2>
+            <p className="text-muted-foreground text-base md:text-lg">{language === 'en' ? 'Experience the quality with our featured trial levels.' : 'اختبر الجودة من خلال مستوياتنا التجريبية المختارة.'}</p>
           </div>
           <Button variant="ghost" className="text-primary font-black group text-base md:text-lg hover:bg-primary/5 px-4 md:px-6 h-12 md:h-14 rounded-xl mx-auto md:mx-0" asChild>
             <Link href="/lessons" className="flex items-center gap-2">

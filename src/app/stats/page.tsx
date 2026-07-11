@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useMemo } from 'react';
@@ -104,7 +103,7 @@ export default function StatsPage() {
         <h1 className="text-2xl md:text-3xl font-black text-primary uppercase tracking-tighter">Access Denied</h1>
         <p className="text-muted-foreground text-base md:text-lg italic">Please activate your account to see your real progress.</p>
         <button className="bg-primary text-white px-8 py-3 rounded-2xl font-bold shadow-lg shadow-primary/20 w-full sm:w-auto" onClick={() => window.location.href = '/login'}>
-          Unlock with Code
+          Unlock Saga
         </button>
       </div>
     );
@@ -119,7 +118,7 @@ export default function StatsPage() {
             Performance Analytics
           </div>
           <h1 className="text-4xl md:text-5xl font-black font-headline text-primary tracking-tight">Achievement Board</h1>
-          <p className="text-muted-foreground text-lg md:text-xl italic font-medium">"Your future is being written chapter by chapter."</p>
+          <p className="text-muted-foreground text-lg md:text-xl italic font-medium">"Your future is being written level by level."</p>
         </div>
         
         <Card className="w-full lg:w-auto border-none shadow-2xl bg-white dark:bg-card/50 backdrop-blur-md rounded-[2rem] border border-white">
@@ -166,7 +165,7 @@ export default function StatsPage() {
             <div className="space-y-4">
               <Progress value={progressPercentage} className="h-3 bg-white/20" />
               <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
-                <span>{completedCount} / {totalLessons} Chapters</span>
+                <span>{completedCount} / {totalLessons} Levels</span>
                 <span className="text-accent">{Math.round(progressPercentage)}%</span>
               </div>
             </div>
@@ -195,7 +194,7 @@ export default function StatsPage() {
           <StatCard 
             icon={<BookOpen className="h-6 w-6 md:h-10 md:w-10 text-purple-500" />} 
             value={completedCount} 
-            label="Chapters" 
+            label="Levels" 
             bgColor="bg-purple-50" 
           />
         </div>

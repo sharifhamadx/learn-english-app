@@ -1,4 +1,3 @@
-
 export const translations = {
   en: {
     nav: {
@@ -22,7 +21,7 @@ export const translations = {
     features: {
       title: "Why Learn with Al-Mugran?",
       subtitle: "A unique methodology that turns learning into an emotional adventure.",
-      f1_title: "300 Chapters",
+      f1_title: "300 Levels",
       f1_desc: "A massive library of real-life stories covering all levels from beginner to advanced.",
       f2_title: "Global Reach",
       f2_desc: "Connect with the world through the power of English language skills.",
@@ -60,8 +59,8 @@ export const translations = {
     },
     lessons: {
       title: "The Library is Open",
-      subtitle: "300 chapters of resilience and success, now accessible for everyone for free.",
-      badge: "300 Chapters - Free Charity",
+      subtitle: "300 levels of resilience and success, now accessible for everyone for free.",
+      badge: "300 Levels - Free Charity",
       search_placeholder: "Search topics...",
       difficulty: "Difficulty",
       all_levels: "All Levels",
@@ -71,12 +70,12 @@ export const translations = {
       foundation_title: "Foundation",
       empowerment_title: "Empowerment",
       mastery_title: "Mastery",
-      lessons_range: "Lessons {{start}} - {{end}}",
+      lessons_range: "Levels {{start}} - {{end}}",
       no_results: "No results",
       try_different: "Try another keyword.",
       required_plan: "FREE ACCESS",
       upgrade_plan: "Start Learning",
-      license_required_msg: "This lesson is free for you."
+      license_required_msg: "This level is free for you."
     },
     footer: {
       desc: "Designed by Sharif Hamad Abdallah as a charity for his sister Aisha. Aiming to empower everyone through immersive real-life stories.",
@@ -84,7 +83,7 @@ export const translations = {
       contact_title: "Contact",
       story: "The Story",
       support: "Support",
-      browse: "Chapters",
+      browse: "Levels",
       activate: "Login",
       rights: "All rights reserved to Sharif Hamad Abdallah.",
       law: "Protected by Sudanese Copyright Act 1996.",
@@ -122,7 +121,7 @@ export const translations = {
     features: {
       title: "لماذا تتعلم عبر المُقرن؟",
       subtitle: "منهجية فريدة تحول التعلم إلى مغامرة عاطفية لا تُنسى.",
-      f1_title: "300 فصل",
+      f1_title: "300 مستوى",
       f1_desc: "مكتبة ضخمة من القصص الواقعية تغطي كافة المستويات من المبتدئ إلى المتقدم.",
       f2_title: "تواصل عالمي",
       f2_desc: "ارتبط بالعالم وافتح آفاقاً جديدة من خلال إتقان اللغة الإنجليزية.",
@@ -160,9 +159,9 @@ export const translations = {
     },
     lessons: {
       title: "المكتبة مفتوحة للجميع",
-      subtitle: "300 فصل من الصمود والنجاح، متاحة الآن مجاناً كعمل خيري.",
-      badge: "300 فصل - صدقة جارية",
-      search_placeholder: "ابحث عن الفصول...",
+      subtitle: "300 مستوى من الصمود والنجاح، متاحة الآن مجاناً كعمل خيري.",
+      badge: "300 مستوى - صدقة جارية",
+      search_placeholder: "ابحث عن المستويات...",
       difficulty: "المستوى",
       all_levels: "الكل",
       beginner: "مبتدئ",
@@ -171,12 +170,12 @@ export const translations = {
       foundation_title: "التأسيس",
       empowerment_title: "التمكين",
       mastery_title: "الاحتراف",
-      lessons_range: "الدروس {{start}} - {{end}}",
+      lessons_range: "المستويات {{start}} - {{end}}",
       no_results: "لا توجد نتائج",
       try_different: "حاول البحث بكلمة أخرى.",
       required_plan: "دخول مجاني",
       upgrade_plan: "ابدأ الآن",
-      license_required_msg: "هذا الفصل مفتوح ومجاني."
+      license_required_msg: "هذا المستوى مفتوح ومجاني."
     },
     footer: {
       desc: "صممه شريف حماد عبد الله كصدقة جارية عن أخته عائشة. يهدف لتمكين الجميع لغوياً من خلال قصص واقعية.",
@@ -184,7 +183,7 @@ export const translations = {
       contact_title: "اتصال",
       story: "القصة",
       support: "الدعم",
-      browse: "الفصول",
+      browse: "المستويات",
       activate: "دخول",
       rights: "جميع الحقوق محفوظة لشريف حماد عبد الله.",
       law: "محمي بقانون حق المؤلف السوداني لعام 1996.",
