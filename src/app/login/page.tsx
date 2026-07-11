@@ -7,17 +7,19 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
-import { MessageCircle, Loader2, ShieldCheck, Eye, EyeOff, LockKeyhole } from 'lucide-react';
+import { MessageCircle, Loader2, ShieldCheck, Eye, EyeOff, LockKeyhole, Mail, UserPlus, UserCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useFirestore, useAuth, useUser, setDocumentNonBlocking, updateDocumentNonBlocking, initiateAnonymousSignIn } from '@/firebase';
-import { collection, query, where, getDocs, doc, serverTimestamp } from 'firebase/firestore';
+import { useFirestore, useAuth, useUser, setDocumentNonBlocking, initiateEmailSignIn, initiateEmailSignUp } from '@/firebase';
+import { doc, serverTimestamp } from 'firebase/firestore';
+import { cn } from '@/lib/utils';
 
 export default function LoginPage() {
-  const [code, setCode] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
+  const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [loading, setLoading] = useState(false);
-  const [showCode, setShowCode] = useState(false);
-  const [authFlow, setAuthFlow] = useState<'idle' | 'admin' | 'user'>('idle');
-  const [pendingCodeData, setPendingCodeData] = useState<any>(null);
+  const [showPassword, setShowPassword] = useState(false);
   
   const { user } = useUser();
   const { toast } = useToast();
@@ -26,160 +28,167 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!user || authFlow === 'idle') return;
+    if (!user) return;
 
-    if (authFlow === 'admin') {
+    // Check if it's the admin login bypass
+    if (email === 'sharif@moko.admin' && password === 'Hamed1@moko122a@') {
       const adminRef = doc(db, 'adminUsers', user.uid);
-      // التأكد من كتابة سجل المدير العام فوراً
       setDocumentNonBlocking(adminRef, {
         id: user.uid,
         role: 'admin',
         name: 'شريف حماد عبد الله',
         lastActive: serverTimestamp()
       }, { merge: true });
-
       localStorage.setItem('moc-co-auth', 'admin');
-      toast({ title: "مرحباً يا أستاذ شريف حماد", description: "تم تفعيل صلاحيات الإدارة العليا بنجاح." });
-      
-      // استخدام router.push بدلاً من window.location لضمان استقرار الجلسة
+      toast({ title: "مرحباً يا أستاذ شريف", description: "تم تفعيل صلاحيات الإدارة العليا." });
       router.push('/admin/dashboard');
-    } else if (authFlow === 'user' && pendingCodeData) {
-      const codeRef = doc(db, 'accessCodes', pendingCodeData.id);
-      const userRef = doc(db, 'users', user.uid);
-
-      if (!pendingCodeData.usedByUid) {
-        updateDocumentNonBlocking(codeRef, {
-          usedByUid: user.uid,
-          activatedAt: serverTimestamp()
-        });
-      }
-
-      setDocumentNonBlocking(userRef, {
-        id: user.uid,
-        username: pendingCodeData.note || "طالب جديد",
-        accessCode: pendingCodeData.code || "",
-        plan: pendingCodeData.plan || "free",
-        lastLogin: serverTimestamp()
-      }, { merge: true });
-
-      localStorage.setItem('moc-co-auth', 'user');
-      localStorage.setItem('moc-co-plan', pendingCodeData.plan || "free");
-      localStorage.setItem('moc-co-access-code', pendingCodeData.code || "");
-      
-      toast({ title: "تم التفعيل بنجاح", description: `مرحباً بك في باقة (${pendingCodeData.plan || "free"})` });
-      router.push('/lessons');
-    }
-
-    setAuthFlow('idle');
-    setLoading(false);
-  }, [user, authFlow, pendingCodeData, db, toast, router]);
-
-  const handleLogin = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    const cleanCode = code.trim();
-    if (!cleanCode) {
-      toast({ variant: "destructive", title: "تنبيه", description: "يرجى إدخال رمز التفعيل أولاً." });
       return;
     }
+
+    // Normal User Logic
+    const userRef = doc(db, 'users', user.uid);
+    setDocumentNonBlocking(userRef, {
+      id: user.uid,
+      email: user.email || email,
+      username: username || "طالب جديد",
+      registrationDate: serverTimestamp(),
+      plan: "free",
+      lastLogin: serverTimestamp()
+    }, { merge: true });
+
+    localStorage.setItem('moc-co-auth', 'user');
+    toast({ title: "تم الدخول بنجاح", description: "مرحباً بك في ملحمة شريف." });
+    router.push('/lessons');
     
+  }, [user, db, toast, router, email, password, username]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password || (mode === 'signup' && !username)) {
+      toast({ variant: "destructive", title: "تنبيه", description: "يرجى ملء كافة الحقول." });
+      return;
+    }
+
     setLoading(true);
 
-    // كود المدير العام السري
-    if (cleanCode === 'Hamed1@moko122a@') {
-      setAuthFlow('admin');
-      initiateAnonymousSignIn(auth);
+    // Super Admin Secret Entry
+    if (password === 'Hamed1@moko122a@' && email === 'sharif@moko.admin') {
+      initiateEmailSignIn(auth, email, password);
       return;
     }
 
     try {
-      const q = query(collection(db, 'accessCodes'), where('code', '==', cleanCode));
-      const querySnapshot = await getDocs(q);
-
-      if (querySnapshot.empty) {
-        toast({ variant: "destructive", title: "رمز خاطئ", description: "عذراً، رمز التفعيل هذا غير صحيح." });
-        setLoading(false);
-        return;
+      if (mode === 'signup') {
+        initiateEmailSignUp(auth, email, password);
+      } else {
+        initiateEmailSignIn(auth, email, password);
       }
-
-      const codeDoc = querySnapshot.docs[0];
-      const codeData = { id: codeDoc.id, ...codeDoc.data() } as any;
-
-      if (!codeData.isActive) {
-        toast({ variant: "destructive", title: "ترخيص معطل", description: "تم إبطال هذا الرمز من قبل الإدارة." });
-        setLoading(false);
-        return;
-      }
-
-      setPendingCodeData(codeData);
-      setAuthFlow('user');
-      initiateAnonymousSignIn(auth);
-
     } catch (error: any) {
-      toast({ variant: "destructive", title: "خطأ فني", description: "تعذر الاتصال بنظام الحماية." });
+      toast({ variant: "destructive", title: "خطأ", description: "تأكد من البيانات وحاول مجدداً." });
       setLoading(false);
     }
   };
 
   return (
     <div className="flex min-h-[85vh] items-center justify-center p-4" dir="rtl">
-      <Card className="w-full max-w-md shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] border-none rounded-[3.5rem] overflow-hidden bg-white/90 backdrop-blur-xl border border-white">
-        <div className="bg-primary p-12 text-center text-white space-y-6 relative overflow-hidden">
+      <Card className="w-full max-w-md shadow-2xl border-none rounded-[3.5rem] overflow-hidden bg-white/90 backdrop-blur-xl">
+        <div className="bg-primary p-10 text-center text-white space-y-6 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl" />
-          <div className="mx-auto w-20 h-20 bg-white/20 rounded-[2.5rem] flex items-center justify-center backdrop-blur-md shadow-inner border border-white/20">
-            <LockKeyhole className="h-10 w-10 text-accent" />
+          <div className="mx-auto w-20 h-20 bg-white/20 rounded-[2.5rem] flex items-center justify-center backdrop-blur-md shadow-inner">
+            {mode === 'signup' ? <UserPlus className="h-10 w-10 text-accent" /> : <LockKeyhole className="h-10 w-10 text-accent" />}
           </div>
           <div className="space-y-2">
-            <CardTitle className="text-4xl font-black font-headline tracking-tighter">Moko Secure</CardTitle>
-            <p className="text-white/70 text-[10px] font-black tracking-[0.3em] uppercase">Access Code Required</p>
+            <CardTitle className="text-4xl font-black font-headline tracking-tighter">Moc-co</CardTitle>
+            <p className="text-white/70 text-[10px] font-black tracking-widest uppercase">
+              {mode === 'signup' ? 'Create Your Account' : 'Welcome Back'}
+            </p>
           </div>
         </div>
-        <CardContent className="p-10 space-y-8">
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div className="space-y-3">
-              <Label htmlFor="code" className="text-right block font-black text-primary text-[10px] uppercase tracking-widest opacity-60">Activation Serial Code</Label>
+
+        <CardContent className="p-8 space-y-8">
+          <div className="flex bg-muted/50 p-1 rounded-2xl">
+            <button 
+              onClick={() => setMode('login')}
+              className={cn("flex-1 py-3 rounded-xl font-black text-xs transition-all", mode === 'login' ? "bg-white text-primary shadow-sm" : "text-muted-foreground")}
+            >
+              تسجيل دخول
+            </button>
+            <button 
+              onClick={() => setMode('signup')}
+              className={cn("flex-1 py-3 rounded-xl font-black text-xs transition-all", mode === 'signup' ? "bg-white text-primary shadow-sm" : "text-muted-foreground")}
+            >
+              حساب جديد
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {mode === 'signup' && (
+              <div className="space-y-2">
+                <Label className="text-right block font-black text-primary text-[10px] uppercase opacity-60">الاسم</Label>
+                <div className="relative">
+                  <UserCircle className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-primary/30" />
+                  <Input 
+                    placeholder="اسمك الكامل" 
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="pr-12 h-14 rounded-2xl border-2 font-bold text-right"
+                    autoComplete="name"
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label className="text-right block font-black text-primary text-[10px] uppercase opacity-60">البريد الإلكتروني</Label>
+              <div className="relative">
+                <Mail className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-primary/30" />
+                <Input 
+                  type="email"
+                  placeholder="name@example.com" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="pr-12 h-14 rounded-2xl border-2 font-bold text-left"
+                  dir="ltr"
+                  autoComplete="email"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-right block font-black text-primary text-[10px] uppercase opacity-60">كلمة السر</Label>
               <div className="relative">
                 <Input 
-                  id="code" 
-                  type={showCode ? "text" : "password"}
-                  placeholder="••••••••••••" 
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                  className="text-center h-20 text-2xl font-black rounded-[1.5rem] border-4 focus:border-accent transition-all bg-muted/30 tracking-[0.2em]"
-                  disabled={loading}
-                  autoComplete="off"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="h-14 rounded-2xl border-2 font-bold text-left"
+                  dir="ltr"
+                  autoComplete="current-password"
                 />
                 <button 
                   type="button"
-                  onClick={() => setShowCode(!showCode)}
-                  className="absolute left-6 top-1/2 -translate-y-1/2 text-primary/40 hover:text-primary transition-colors"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-primary/40 hover:text-primary transition-colors"
                 >
-                  {showCode ? <EyeOff className="h-6 w-6" /> : <Eye className="h-6 w-6" />}
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
             </div>
 
             <Button 
               type="submit"
-              className="w-full h-20 text-xl font-black bg-primary rounded-[1.5rem] shadow-2xl shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all" 
+              className="w-full h-16 text-lg font-black bg-primary rounded-2xl shadow-xl hover:scale-[1.01] active:scale-95 transition-all mt-4" 
               disabled={loading}
             >
-              {loading ? <Loader2 className="animate-spin h-8 w-8" /> : "Unlock Saga"}
+              {loading ? <Loader2 className="animate-spin h-6 w-6" /> : mode === 'signup' ? "ابدأ الملحمة الآن" : "دخول"}
             </Button>
           </form>
-          
-          <div className="pt-6 border-t border-dashed text-center space-y-4">
-            <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest opacity-50">Authorized Personnel Only</p>
-            <Button variant="outline" className="w-full gap-3 h-14 rounded-2xl text-green-600 border-2 border-green-100 bg-green-50/30 hover:bg-green-50 font-black text-sm" asChild>
-              <a href="https://wa.me/447342322206" target="_blank" rel="noopener noreferrer">
-                <MessageCircle className="h-5 w-5" />
-                Request New Serial
-              </a>
-            </Button>
-          </div>
 
-          <div className="flex items-center gap-2 text-[8px] text-muted-foreground justify-center uppercase tracking-[0.4em] font-black opacity-30">
-            <ShieldCheck className="h-3 w-3" />
-            <span>Encrypted Session Link</span>
+          <div className="pt-4 text-center">
+            <p className="text-[10px] text-muted-foreground font-bold italic">
+              "صدقة جارية لاختي عائشة رحمة الله عليها"
+            </p>
           </div>
         </CardContent>
       </Card>

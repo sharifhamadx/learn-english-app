@@ -10,13 +10,12 @@
         "email": { "type": "string", "format": "email" },
         "username": { "type": "string" },
         "registrationDate": { "type": "string", "format": "date-time" },
-        "plan": { "type": "string", "enum": ["free", "silver", "bronze", "gold", "vip"] },
-        "accessCode": { "type": "string" },
+        "plan": { "type": "string", "default": "free" },
         "xp": { "type": "number", "description": "Total experience points earned." },
         "streak": { "type": "number", "description": "Current consecutive days active." },
         "lastActiveDate": { "type": "string", "format": "date", "description": "Last date the user completed a lesson (YYYY-MM-DD)." }
       },
-      "required": ["id"]
+      "required": ["id", "email"]
     },
     "LessonProgress": {
       "title": "LessonProgress",
@@ -30,20 +29,6 @@
         "completedAt": { "type": "string", "format": "date-time" }
       },
       "required": ["lessonId", "score", "completedAt"]
-    },
-    "AccessCode": {
-      "title": "AccessCode",
-      "type": "object",
-      "description": "A unique serial code to grant access.",
-      "properties": {
-        "id": { "type": "string" },
-        "code": { "type": "string" },
-        "plan": { "type": "string", "enum": ["silver", "bronze", "gold", "vip"] },
-        "isActive": { "type": "boolean" },
-        "usedByUid": { "type": "string" },
-        "createdAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["id", "code", "plan", "isActive", "createdAt"]
     },
     "AdminUser": {
       "title": "AdminUser",
@@ -59,7 +44,7 @@
     }
   },
   "auth": {
-    "providers": ["anonymous"]
+    "providers": ["email"]
   },
   "firestore": {
     "/users/{userId}": {
@@ -69,10 +54,6 @@
     "/users/{userId}/lessonProgress/{lessonId}": {
       "schema": { "$ref": "#/entities/LessonProgress" },
       "description": "Sub-collection for detailed lesson completion."
-    },
-    "/accessCodes/{codeId}": {
-      "schema": { "$ref": "#/entities/AccessCode" },
-      "description": "Collection of valid access codes."
     },
     "/adminUsers/{userId}": {
       "schema": { "$ref": "#/entities/AdminUser" },
