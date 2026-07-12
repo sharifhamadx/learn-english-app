@@ -19,8 +19,7 @@ import {
   ArrowRight, 
   RotateCcw, 
   FastForward, 
-  FileDown,
-  Volume2
+  FileDown
 } from 'lucide-react';
 import { textToSpeech } from '@/ai/flows/text-to-speech';
 import { translateWord } from '@/ai/flows/translate-word';
@@ -82,7 +81,6 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
     const handleTimeUpdate = () => {
       setCurrentTime(audio.currentTime);
       if (audio.duration && audio.duration > 0) {
-        // Heuristic mapping: linear distribution of words over duration
         const progress = audio.currentTime / audio.duration;
         const index = Math.floor(progress * storyWords.length);
         setActiveWordIndex(index);
@@ -239,7 +237,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
     if (Object.keys(newFeedback).length === lesson.questions.length) {
       setIsCompleted(true);
       saveProgress(newScore);
-      toast({ title: "Level Mastered!", description: "XP and Streak updated." });
+      toast({ title: "Story Mastered!", description: "XP and Streak updated." });
     }
   };
 
@@ -332,18 +330,18 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
             </div>
             <div className="space-y-3">
               <h2 className="text-4xl font-black">أحسنت يا بطل!</h2>
-              <p className="text-white/80 text-2xl font-medium">لقد أتممت المستوى بنجاح بنتيجة: <span className="font-black text-accent">{score}</span> من {lesson.questions.length}</p>
+              <p className="text-white/80 text-2xl font-medium">لقد أتممت القصة بنجاح بنتيجة: <span className="font-black text-accent">{score}</span> من {lesson.questions.length}</p>
             </div>
             <div className="flex flex-col sm:flex-row justify-center gap-4 pt-4">
               {!isLastLesson && (
                 <Button asChild size="lg" className="bg-accent text-primary font-black h-16 px-12 rounded-2xl shadow-2xl hover:bg-white transition-all hover:scale-105">
                   <Link href={`/lessons/${nextLessonId}`}>
-                    المستوى التالي <ArrowRight className="ml-2 h-6 w-6" />
+                    القصة التالية <ArrowRight className="ml-2 h-6 w-6" />
                   </Link>
                 </Button>
               )}
               <Button variant="outline" size="lg" className="h-16 px-12 rounded-2xl border-white/30 bg-white/10 hover:bg-white/20 text-white font-black" asChild>
-                <Link href="/lessons">قائمة المستويات</Link>
+                <Link href="/lessons">قائمة القصص</Link>
               </Button>
             </div>
           </CardContent>

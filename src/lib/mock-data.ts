@@ -3,7 +3,7 @@ import { Lesson } from './types';
 const BASE_STORIES = [
   {
     id: 'lesson-1',
-    title: 'Level 1: The 22-Year Academic Marathon',
+    title: 'Story 1: The 22-Year Academic Marathon',
     topic: 'Education & Resilience',
     difficulty: 'beginner' as const,
     grammarPoint: 'Past Simple & Duration',
@@ -17,7 +17,7 @@ const BASE_STORIES = [
   },
   {
     id: 'lesson-2',
-    title: 'Level 2: Namariq - The Price of a Golden Proposal',
+    title: 'Story 2: Namariq - The Price of a Golden Proposal',
     topic: 'Heartbreak & Social Status',
     difficulty: 'intermediate' as const,
     grammarPoint: 'Relative Clauses',
@@ -31,7 +31,7 @@ const BASE_STORIES = [
   },
   {
     id: 'lesson-3',
-    title: 'Level 3: Makarem - The Victim of Tribalism',
+    title: 'Story 3: Makarem - The Victim of Tribalism',
     topic: 'Social Injustice & Deep Love',
     difficulty: 'advanced' as const,
     grammarPoint: 'Passive Voice (Advanced)',
@@ -45,7 +45,7 @@ const BASE_STORIES = [
   },
   {
     id: 'lesson-4',
-    title: 'Level 4: Sara - The Strict Boundary',
+    title: 'Story 4: Sara - The Strict Boundary',
     topic: 'Patience & Custom',
     difficulty: 'intermediate' as const,
     grammarPoint: 'Modals of Prohibition',
@@ -59,7 +59,7 @@ const BASE_STORIES = [
   },
   {
     id: 'lesson-5',
-    title: 'Level 5: The 12-Meter Coffin - Survival at Sea',
+    title: 'Story 5: The 12-Meter Coffin - Survival at Sea',
     topic: 'Extreme Struggle',
     difficulty: 'advanced' as const,
     grammarPoint: 'Past Perfect Continuous',
@@ -92,15 +92,15 @@ const generateLessons = (): Lesson[] => {
     
     lessons.push({
       id: `lesson-${i}`,
-      title: `Level ${i}: ${theme} - Phase ${Math.ceil(i/6)}`,
+      title: `Story ${i}: ${theme}`,
       topic: theme,
       difficulty: level,
       imageSeed: `chapter-${i}`,
-      story: `This is the detailed expansion of the Sharif Saga, focusing on his life in Level ${i}. This level dives into the ${theme} period, illustrating the 16-hour work days he endured for a meager $120 salary. It explores the lack of support from his brothers and how only his childhood friend Fath Al-Rahman, along with Mohammed Ibrahim, Nour El-Din, and Abdel-Hamid, stood by him. The story describes his mother's aging eyes, waiting for her eldest son to become the pillar of the family. Every day was a struggle for dignity, yet Sharif never gave up on his dream of a better life. This chapter contains approximately 800 words of immersive English narrative designed to challenge your understanding and improve your vocabulary.`,
+      story: `This is the detailed expansion of the Sharif Saga, focusing on his life in Story ${i}. This level dives into the ${theme} period, illustrating the 16-hour work days he endured for a meager $120 salary. It explores the lack of support from his brothers and how only his childhood friend Fath Al-Rahman, along with Mohammed Ibrahim, Nour El-Din, and Abdel-Hamid, stood by him. The story describes his mother's aging eyes, waiting for her eldest son to become the pillar of the family. Every day was a struggle for dignity, yet Sharif never gave up on his dream of a better life. This chapter contains approximately 800 words of immersive English narrative designed to challenge your understanding and improve your vocabulary.`,
       grammarPoint: `Grammar Focus ${i}`,
       grammarExplanation: `In this level, we focus on the advanced usage of grammar required for the ${theme} narrative. Practice using complex structures to describe Sharif's ongoing struggle.`,
       questions: [
-        { id: `q${i}-1`, text: `What was the main challenge in Level ${i}?`, options: [theme, 'Wealth', 'Family', 'Travel'], correctAnswer: theme, type: 'multiple-choice' },
+        { id: `q${i}-1`, text: `What was the main challenge in Story ${i}?`, options: [theme, 'Wealth', 'Family', 'Travel'], correctAnswer: theme, type: 'multiple-choice' },
         { id: `q${i}-2`, text: `Who was the main friend supporting Sharif?`, correctAnswer: 'Fath Al-Rahman', type: 'short-answer' }
       ]
     });
