@@ -1,26 +1,25 @@
 name: Build Android APK
-
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout source
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '20'
 
       - name: Install Dependencies
         run: npm install
 
       - name: Create Web Asset Directory
-        run: mkdir -p public
+        run: npm run build || mkdir -p out
 
       - name: Sync Capacitor Android
         run: npx cap sync android
@@ -32,21 +31,28 @@ jobs:
           distribution: 'temurin'
 
       - name: Make gradlew executable
-        run: chmod +x ./android/gradlew
+        run: cd android && chmod +x gradlew
 
       - name: Build APK
-        run: cd android && ./gradlew assembleDebug --stacktrace
-        continue-on-error: true
+        run: |
+          cd android
+          ./gradlew assembleDebug --stacktrace > ../gradle-log.txt 2>&1
 
-      - name: Capture Gradle Logs
+      - name: Catch and Show Error
         if: failure()
         run: |
-          echo "Building failed. Logging Gradle logs:"
-          cat android/gradle.properties || echo "No gradle.properties"
-          find . -name "*.log" -exec cat {} + || echo "No log files found"
-          echo "Please check the full log output above in this Actions run."
+          echo "🚨🚨🚨 ROOT CAUSE DETECTED: 🚨🚨🚨"
+          grep -iE "caused by:|error:|exception|failed" gradle-log.txt | tail -n 30
+
+      - name: Upload Error Log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ERROR-LOG-READ-ME
+          path: gradle-log.txt
 
       - name: Upload APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: MokoLearnEnglish-APK
