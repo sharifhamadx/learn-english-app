@@ -18,8 +18,11 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Create Web Asset Directory
-        run: npm run build || mkdir -p out
+      - name: Create Web Asset Directories
+        run: |
+          npm run build || true
+          mkdir -p public
+          mkdir -p android/app/src/main/assets/public
 
       - name: Sync Capacitor Android
         run: npx cap sync android
