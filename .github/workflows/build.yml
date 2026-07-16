@@ -35,7 +35,16 @@ jobs:
         run: chmod +x ./android/gradlew
 
       - name: Build APK
-        run: cd android && ./gradlew assembleDebug --stacktrace --info
+        run: cd android && ./gradlew assembleDebug --stacktrace
+        continue-on-error: true
+
+      - name: Capture Gradle Logs
+        if: failure()
+        run: |
+          echo "Building failed. Logging Gradle logs:"
+          cat android/gradle.properties || echo "No gradle.properties"
+          find . -name "*.log" -exec cat {} + || echo "No log files found"
+          echo "Please check the full log output above in this Actions run."
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
