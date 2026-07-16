@@ -1,28 +1,24 @@
-
-"use client";
-
-import { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Lesson } from '@/lib/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { 
-  CheckCircle2, 
-  XCircle, 
-  Play, 
-  Pause, 
-  Loader2, 
-  Clock, 
-  Trophy, 
-  Sparkles, 
-  ArrowRight, 
-  RotateCcw, 
-  FastForward, 
+import {
+  CheckCircle2,
+  XCircle,
+  Play,
+  Pause,
+  Loader2,
+  Clock,
+  Trophy,
+  Sparkles,
+  ArrowRight,
+  RotateCcw,
+  FastForward,
   FileDown
 } from 'lucide-react';
-import { textToSpeech } from '@/ai/flows/text-to-speech';
 import { translateWord } from '@/ai/flows/translate-word';
 import { useToast } from '@/hooks/use-toast';
 import { jsPDF } from "jspdf";
@@ -30,11 +26,11 @@ import { useFirestore, useUser } from '@/firebase';
 import { doc, setDoc, serverTimestamp, getDoc, updateDoc, increment } from 'firebase/firestore';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Slider } from '@/components/ui/slider';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
@@ -45,18 +41,16 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [feedback, setFeedback] = useState<Record<string, { correct: boolean; message: string }>>({});
   const [score, setScore] = useState(0);
-  const [isAudioLoading, setIsAudioLoading] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [timeSpent, setTimeSpent] = useState(0);
   const [translation, setTranslation] = useState<string | null>(null);
   const [isCompleted, setIsCompleted] = useState(false);
   const [activeWordIndex, setActiveWordIndex] = useState<number | null>(null);
-  
+
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [playbackRate, setPlaybackRate] = useState(1);
-  
+
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { toast } = useToast();
   const db = useFirestore();
@@ -75,43 +69,9 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
     return () => clearInterval(interval);
   }, [activeTab, isCompleted]);
 
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const handleTimeUpdate = () => {
-      setCurrentTime(audio.currentTime);
-      if (audio.duration && audio.duration > 0) {
-        const progress = audio.currentTime / audio.duration;
-        const index = Math.floor(progress * storyWords.length);
-        setActiveWordIndex(index);
-      }
-    };
-
-    const handleLoadedMetadata = () => {
-      setDuration(audio.duration);
-    };
-
-    const handleEnded = () => {
-      setIsPlaying(false);
-      setActiveWordIndex(null);
-    };
-
-    audio.addEventListener('timeupdate', handleTimeUpdate);
-    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
-    audio.addEventListener('ended', handleEnded);
-    audio.playbackRate = playbackRate;
-
-    return () => {
-      audio.removeEventListener('timeupdate', handleTimeUpdate);
-      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
-      audio.removeEventListener('ended', handleEnded);
-    };
-  }, [audioUrl, storyWords.length, playbackRate]);
-
   const saveProgress = async (finalScore: number) => {
     if (!user || !db) return;
-    
+
     try {
       const progressRef = doc(db, 'users', user.uid, 'lessonProgress', lesson.id);
       setDoc(progressRef, {
@@ -124,7 +84,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
 
       const userRef = doc(db, 'users', user.uid);
       const userSnap = await getDoc(userRef);
-      
+
       const xpEarned = (finalScore * 50) + 100;
       const today = new Date().toISOString().split('T')[0];
 
@@ -152,43 +112,35 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
     }
   };
 
-  const handleTogglePlay = async () => {
-    if (audioUrl) {
-      if (isPlaying) {
-        audioRef.current?.pause();
-        setIsPlaying(false);
-      } else {
-        audioRef.current?.play();
-        setIsPlaying(true);
-      }
+  const handleTogglePlay = () => {
+    if (isPlaying) {
+      window.speechSynthesis.cancel();
+      setIsPlaying(false);
       return;
     }
-    
-    setIsAudioLoading(true);
-    try {
-      const result = await textToSpeech({ text: lesson.story });
-      setAudioUrl(result.audioUri);
-      setTimeout(() => {
-        if (audioRef.current) {
-          audioRef.current.playbackRate = playbackRate;
-          audioRef.current.play();
-          setIsPlaying(true);
-        }
-      }, 100);
-    } catch (error) {
-      toast({ variant: "destructive", title: "Audio Error", description: "Failed to generate speech." });
-    } finally {
-      setIsAudioLoading(false);
+
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(lesson.story);
+      utterance.lang = 'en-US';
+      utterance.rate = playbackRate;
+      utterance.pitch = 1.0;
+      
+      utterance.onend = () => {
+        setIsPlaying(false);
+      };
+
+      window.speechSynthesis.speak(utterance);
+      setIsPlaying(true);
+    } else {
+      toast({ variant: "destructive", title: "خطأ", description: "عذراً، محرك النطق غير مدعوم في هذا الجهاز." });
     }
   };
 
   const handleStopAudio = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      setIsPlaying(false);
-      setActiveWordIndex(null);
-    }
+    window.speechSynthesis.cancel();
+    setIsPlaying(false);
+    setActiveWordIndex(null);
   };
 
   const handleSeek = (value: number[]) => {
@@ -231,7 +183,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   const handleQuizSubmit = (qId: string, isCorrect: boolean) => {
     const newScore = isCorrect ? score + 1 : score;
     setScore(newScore);
-    
+
     const newFeedback = { ...feedback, [qId]: { correct: isCorrect, message: isCorrect ? 'Excellent!' : `Answer: ${lesson.questions.find(q => q.id === qId)?.correctAnswer}` } };
     setFeedback(newFeedback);
 
@@ -244,7 +196,6 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 md:space-y-10 pb-24 px-4 relative">
-      {/* Dynamic Persistent Audio Header */}
       <div className="sticky top-0 z-[100] bg-background/95 backdrop-blur-2xl py-6 border-b-4 border-primary/10 shadow-2xl -mx-4 px-6 transition-all duration-500 rounded-b-[2rem]">
         <div className="space-y-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -257,9 +208,9 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
               </div>
               <h1 className="text-xl md:text-2xl font-black text-primary font-headline tracking-tighter truncate max-w-sm">{lesson.title}</h1>
             </div>
-            
+
             <div className="flex items-center gap-2 bg-white dark:bg-black/30 p-2 rounded-2xl border-2 border-primary/5 shadow-xl">
-              <Button variant="ghost" size="icon" onClick={handleStopAudio} disabled={!audioUrl} className="rounded-xl h-12 w-12 hover:bg-destructive/10 text-destructive transition-all">
+              <Button variant="ghost" size="icon" onClick={handleStopAudio} className="rounded-xl h-12 w-12 hover:bg-destructive/10 text-destructive transition-all">
                 <RotateCcw className="h-5 w-5" />
               </Button>
 
@@ -274,8 +225,8 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="rounded-2xl border-none shadow-2xl p-2 bg-white/90 backdrop-blur-xl">
                   {[0.5, 0.75, 1, 1.25, 1.5, 2].map((rate) => (
-                    <DropdownMenuItem 
-                      key={rate} 
+                    <DropdownMenuItem
+                      key={rate}
                       onClick={() => setPlaybackRate(rate)}
                       className={cn(
                         "rounded-xl font-black text-xs px-4 py-2 cursor-pointer transition-colors",
@@ -288,13 +239,12 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <Button 
-                onClick={handleTogglePlay} 
-                disabled={isAudioLoading}
+              <Button
+                onClick={handleTogglePlay}
                 className="rounded-xl bg-primary text-white font-black hover:bg-primary/90 px-8 h-12 shadow-2xl shadow-primary/30 transition-all active:scale-95 text-sm gap-3"
               >
-                {isAudioLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
-                {isAudioLoading ? 'جاري التحميل...' : isPlaying ? 'إيقاف' : 'تشغيل القصة'}
+                {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+                {isPlaying ? 'إيقاف' : 'تشغيل القصة'}
               </Button>
 
               <div className="h-10 w-px bg-border/50 mx-1" />
@@ -304,24 +254,10 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
               </Button>
             </div>
           </div>
-
-          <div className="space-y-2 px-2">
-            <Slider
-              value={[currentTime]}
-              max={duration || 100}
-              step={0.1}
-              onValueChange={handleSeek}
-              className="py-1 cursor-pointer"
-            />
-            <div className="flex justify-between text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.2em] font-mono">
-              <span>{formatAudioTime(currentTime)}</span>
-              <span>{formatAudioTime(duration)}</span>
-            </div>
-          </div>
         </div>
       </div>
 
-      <audio ref={audioRef} src={audioUrl || undefined} className="hidden" />
+      <audio ref={audioRef} className="hidden" />
 
       {isCompleted && (
         <Card className="border-none bg-gradient-to-br from-primary to-blue-600 text-white animate-in zoom-in-95 duration-500 rounded-[2.5rem] overflow-hidden shadow-2xl">
@@ -359,19 +295,19 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
         <TabsContent value="story" className="mt-10">
           <Card className="border-none shadow-2xl rounded-[4rem] overflow-hidden bg-white/90 dark:bg-card/50 backdrop-blur-sm border border-white">
             <div className="h-[300px] md:h-[550px] relative group overflow-hidden">
-              <Image 
-                src={`https://picsum.photos/seed/${lesson.imageSeed}/1200/800`} 
-                alt="Sudanese Students Learning" 
+              <Image
+                src={`https://picsum.photos/seed/${lesson.imageSeed}/1200/800`}
+                alt="Lesson Image"
                 fill
-                className="object-cover transition-transform duration-[3000ms] group-hover:scale-110" 
+                className="object-cover transition-transform duration-[3000ms] group-hover:scale-110"
                 data-ai-hint="Sudanese students"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-transparent to-transparent" />
-              <div className="absolute bottom-10 left-10 flex items-center gap-4">
-                <div className="bg-white/90 p-3 rounded-2xl shadow-2xl animate-pulse">
+              <div className="absolute bottom-10 left-10 flex flex-wrap items-center gap-4">
+                <div className="bg-white/90 p-3 rounded-2xl shadow-2xl animate-pulse shrink-0">
                   <Sparkles className="h-6 w-6 text-accent" />
                 </div>
-                <span className="text-sm font-black uppercase tracking-[0.3em] text-primary bg-white/90 px-6 py-2 rounded-full shadow-2xl">رواية تفاعلية</span>
+                <span className="text-[10px] md:text-sm font-black uppercase tracking-[0.2em] md:tracking-[0.3em] text-primary bg-white/90 px-4 py-1.5 md:px-6 md:py-2 rounded-full shadow-2xl text-center break-words whitespace-normal max-w-[200px] md:max-w-none">رواية تفاعلية</span>
               </div>
             </div>
             <CardContent className="p-12 md:p-20">
@@ -381,8 +317,8 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
                     <PopoverTrigger asChild>
                       <span className={cn(
                         "cursor-help transition-all duration-300 px-2 py-1 rounded-2xl underline-offset-8 decoration-4",
-                        activeWordIndex === i 
-                          ? "bg-primary text-white scale-110 shadow-2xl shadow-primary/40 underline decoration-accent font-black" 
+                        activeWordIndex === i
+                          ? "bg-primary text-white scale-110 shadow-2xl shadow-primary/40 underline decoration-accent font-black"
                           : "hover:text-primary hover:bg-primary/5 hover:underline decoration-primary/30"
                       )}>
                         {word}
@@ -427,9 +363,9 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
                       </Badge>
                     )}
                   </div>
-                  
+
                   <p className="text-3xl font-bold leading-tight text-slate-900" dir="ltr">{q.text}</p>
-                  
+
                   {q.type === 'multiple-choice' ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5" dir="ltr">
                       {q.options?.map(opt => (
