@@ -15,4 +15,4 @@ export default async function LessonPage({ params }: { params: { id: string } })
       <LessonPlayer lesson={lesson} />
     </div>
   );
-}
+}export function generateStaticParams() { return [{id: '1'}, {id: '2'}, {id: '3'}, {id: '4'}]; }
